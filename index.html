@@ -1,0 +1,771 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Fresh Coast Lab — Practical AI for Small Business</title>
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bungee+Inline&family=Anton&family=DM+Sans:wght@400;500;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --cream: #F2E6CE;
+    --cream-deep: #E8D9B8;
+    --teal: #1E4D58;
+    --teal-deep: #143540;
+    --orange: #D55A2F;
+    --orange-bright: #E86E40;
+    --mustard: #E8B547;
+    --ink: #1A1F26;
+    --paper-shadow: rgba(26, 31, 38, 0.08);
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  html { scroll-behavior: smooth; color-scheme: light; }
+
+  body {
+    font-family: 'DM Sans', sans-serif;
+    background-color: var(--cream);
+    color: var(--ink);
+    overflow-x: hidden;
+    position: relative;
+  }
+
+  /* NAV */
+  nav {
+    position: relative;
+    z-index: 10;
+    padding: 12px 48px 10px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: var(--cream);
+    border-bottom: 2px solid var(--ink);
+  }
+
+  .brand-logo {
+    height: 72px;
+    width: auto;
+    display: block;
+  }
+  .brand-logo-footer {
+    height: 64px;
+    width: auto;
+    display: block;
+  }
+
+  .nav-links {
+    display: flex;
+    gap: 36px;
+    font-family: 'Anton', sans-serif;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    font-size: 14px;
+  }
+  .nav-links a {
+    color: var(--ink);
+    text-decoration: none;
+    position: relative;
+    padding-bottom: 4px;
+  }
+  .nav-links a::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 0;
+    height: 2px;
+    background: var(--orange);
+    transition: width 0.3s ease;
+  }
+  .nav-links a:hover::after { width: 100%; }
+
+  /* HERO */
+  .hero {
+    min-height: 88vh;
+    padding: 24px 48px 80px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    gap: 0;
+    position: relative;
+  }
+
+  .hero-logo {
+    width: 100%;
+    max-width: 440px;
+    height: auto;
+    display: block;
+    margin: 0 auto 12px;
+    opacity: 0;
+    animation: fadeUp 1s ease 0.1s forwards;
+  }
+
+  .est-tag {
+    font-family: 'Space Mono', monospace;
+    font-size: 12px;
+    letter-spacing: 4px;
+    color: var(--teal);
+    margin-bottom: 24px;
+    display: inline-flex;
+    align-items: center;
+    gap: 16px;
+    opacity: 0;
+    animation: fadeUp 0.8s ease 0.3s forwards;
+  }
+  .est-tag::before, .est-tag::after {
+    content: '';
+    height: 1px;
+    background: var(--teal);
+    flex: 0 0 40px;
+  }
+
+  .hero h1 {
+    font-family: 'Anton', sans-serif;
+    font-size: clamp(38px, 5.6vw, 76px);
+    line-height: 0.98;
+    letter-spacing: -1px;
+    color: var(--ink);
+    text-transform: uppercase;
+    margin-bottom: 22px;
+    max-width: 820px;
+    opacity: 0;
+    animation: fadeUp 0.8s ease 0.5s forwards;
+  }
+  .hero h1 .highlight {
+    color: var(--orange);
+    font-style: italic;
+    display: inline-block;
+    position: relative;
+  }
+  .hero h1 .highlight::after {
+    content: '';
+    position: absolute;
+    bottom: 8px;
+    left: 0;
+    right: 0;
+    height: 8px;
+    background: var(--mustard);
+    z-index: -1;
+    opacity: 0.6;
+  }
+
+  .hero-sub {
+    font-size: 19px;
+    line-height: 1.55;
+    max-width: 620px;
+    margin: 0 auto 40px;
+    color: var(--teal-deep);
+    opacity: 0;
+    animation: fadeUp 0.8s ease 0.7s forwards;
+  }
+
+  /* GOOGIE BUTTON */
+  .googie-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 16px;
+    padding: 22px 36px;
+    background: var(--teal);
+    color: var(--cream);
+    font-family: 'Anton', sans-serif;
+    text-transform: uppercase;
+    letter-spacing: 3px;
+    font-size: 16px;
+    text-decoration: none;
+    border: none;
+    cursor: pointer;
+    position: relative;
+    transform: skew(-8deg);
+    box-shadow: 6px 6px 0 var(--ink);
+    transition: all 0.2s ease;
+    opacity: 0;
+    animation: fadeUp 0.8s ease 0.9s forwards;
+  }
+  .googie-btn > * { transform: skew(8deg); }
+  .googie-btn:hover {
+    background: var(--orange);
+    transform: skew(-8deg) translate(-2px, -2px);
+    box-shadow: 8px 8px 0 var(--ink);
+  }
+  .googie-btn .arrow {
+    font-size: 22px;
+  }
+
+  /* HERO GRAPHIC */
+  .hero-graphic {
+    position: relative;
+    height: 480px;
+    opacity: 0;
+    animation: fadeIn 1.2s ease 0.8s forwards;
+  }
+
+  .atomic-svg {
+    position: absolute;
+    top: 0;
+    right: 0;
+    width: 100%;
+    height: 100%;
+  }
+
+  @keyframes orbit {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+  }
+  @keyframes orbitReverse {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(-360deg); }
+  }
+  .orbit-group {
+    transform-origin: center;
+    animation: orbit 24s linear infinite;
+  }
+  .orbit-group-2 {
+    transform-origin: center;
+    animation: orbitReverse 36s linear infinite;
+  }
+
+  /* SECTION DIVIDER */
+  .divider {
+    height: 60px;
+    background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 8' preserveAspectRatio='none'><path d='M0 4 Q 12.5 0, 25 4 T 50 4 T 75 4 T 100 4' fill='none' stroke='%231E4D58' stroke-width='1.5'/></svg>");
+    background-size: 80px 100%;
+    background-repeat: repeat-x;
+    background-position: center;
+    margin: 40px 48px;
+    opacity: 0.5;
+  }
+
+  /* SECTION HEADER STYLE */
+  .section-header {
+    text-align: center;
+    margin-bottom: 64px;
+  }
+  .section-eyebrow {
+    font-family: 'Space Mono', monospace;
+    font-size: 13px;
+    letter-spacing: 5px;
+    color: var(--orange);
+    margin-bottom: 16px;
+    display: inline-block;
+  }
+  .section-eyebrow::before { content: '✦  '; }
+  .section-eyebrow::after { content: '  ✦'; }
+  .section-title {
+    font-family: 'Anton', sans-serif;
+    font-size: clamp(40px, 5vw, 72px);
+    text-transform: uppercase;
+    color: var(--teal-deep);
+    letter-spacing: -1px;
+    line-height: 1;
+  }
+
+  /* THE LABORATORY */
+  .laboratory {
+    padding: 80px 48px;
+    position: relative;
+  }
+
+  .lab-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 28px;
+    max-width: 1300px;
+    margin: 0 auto;
+  }
+
+  .specimen-card {
+    background: var(--cream-deep);
+    border: 2px solid var(--ink);
+    padding: 32px 28px;
+    position: relative;
+    transition: all 0.3s ease;
+    box-shadow: 8px 8px 0 var(--teal);
+  }
+  .specimen-card:hover {
+    transform: translate(-4px, -4px);
+    box-shadow: 12px 12px 0 var(--teal);
+  }
+  .specimen-tag {
+    position: absolute;
+    top: -12px;
+    left: 24px;
+    background: var(--orange);
+    color: var(--cream);
+    font-family: 'Space Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 3px;
+    padding: 4px 12px;
+  }
+  .specimen-number {
+    font-family: 'Bungee Inline', cursive;
+    font-size: 56px;
+    color: var(--teal);
+    line-height: 1;
+    margin-bottom: 16px;
+    transform: skew(-6deg);
+    display: inline-block;
+  }
+  .specimen-title {
+    font-family: 'Anton', sans-serif;
+    font-size: 28px;
+    text-transform: uppercase;
+    color: var(--ink);
+    line-height: 1.05;
+    margin-bottom: 16px;
+    letter-spacing: 0.5px;
+  }
+  .specimen-desc {
+    font-size: 15px;
+    line-height: 1.5;
+    color: var(--teal-deep);
+    margin-bottom: 24px;
+  }
+  .specimen-link {
+    font-family: 'Anton', sans-serif;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    font-size: 13px;
+    color: var(--orange);
+    text-decoration: none;
+    border-bottom: 2px solid var(--orange);
+    padding-bottom: 2px;
+  }
+
+  /* HOW WE WORK */
+  .method {
+    padding: 100px 48px;
+    background: var(--teal-deep);
+    color: var(--cream);
+    position: relative;
+    overflow: hidden;
+  }
+  .method *,
+  .method .step,
+  .method .step-title,
+  .method .step-desc {
+    color: var(--cream);
+  }
+  .method::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background-image: radial-gradient(circle, rgba(242, 230, 206, 0.06) 1px, transparent 1px);
+    background-size: 36px 36px;
+    pointer-events: none;
+  }
+  .method-orbit {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: min(900px, 110%);
+    aspect-ratio: 1;
+    transform: translate(-50%, -50%);
+    pointer-events: none;
+    opacity: 0.35;
+    z-index: 0;
+  }
+  .method .section-header,
+  .method .steps { position: relative; z-index: 1; }
+  .method .section-title { color: var(--cream); }
+  .method .section-eyebrow { color: var(--mustard); }
+  .method .step-desc { color: rgba(242, 230, 206, 0.85); }
+
+  .steps {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 48px;
+    max-width: 1200px;
+    margin: 0 auto;
+    position: relative;
+  }
+
+  .step {
+    text-align: center;
+    position: relative;
+  }
+  .step-num {
+    width: 88px;
+    height: 88px;
+    border-radius: 50%;
+    background: var(--orange);
+    color: var(--cream);
+    font-family: 'Bungee Inline', cursive;
+    font-size: 42px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 24px;
+    border: 3px solid var(--cream);
+    box-shadow: 0 0 0 6px var(--teal-deep), 0 0 0 8px var(--orange);
+  }
+  .step-title {
+    font-family: 'Anton', sans-serif;
+    font-size: 32px;
+    text-transform: uppercase;
+    margin-bottom: 12px;
+    letter-spacing: 0.5px;
+  }
+  .step-desc {
+    color: rgba(242, 230, 206, 0.75);
+    line-height: 1.5;
+    max-width: 280px;
+    margin: 0 auto;
+  }
+
+  /* Connecting dotted line between steps */
+  .steps::before {
+    content: '';
+    position: absolute;
+    top: 44px;
+    left: 16.66%;
+    right: 16.66%;
+    height: 2px;
+    background-image: linear-gradient(90deg, var(--mustard) 50%, transparent 50%);
+    background-size: 12px 2px;
+    z-index: 0;
+    opacity: 0.4;
+  }
+  .step { z-index: 1; }
+
+  /* ABOUT */
+  .about {
+    padding: 100px 48px;
+    display: grid;
+    grid-template-columns: 0.8fr 1.2fr;
+    gap: 64px;
+    align-items: center;
+    max-width: 1200px;
+    margin: 0 auto;
+  }
+  .portrait-frame {
+    aspect-ratio: 600 / 840;
+    background: var(--orange);
+    border: 3px solid var(--ink);
+    position: relative;
+    box-shadow: 12px 12px 0 var(--teal-deep);
+    overflow: hidden;
+  }
+  .portrait-frame img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+  }
+  .portrait-frame::before {
+    content: '';
+    position: absolute;
+    inset: 12px;
+    border: 1px dashed rgba(242, 230, 206, 0.55);
+    pointer-events: none;
+    z-index: 2;
+  }
+  .about-content .section-eyebrow { display: block; text-align: left; margin-bottom: 16px; }
+  .about-content .section-eyebrow::before, .about-content .section-eyebrow::after { display: none; }
+  .about-content h2 {
+    font-family: 'Anton', sans-serif;
+    font-size: clamp(36px, 4vw, 56px);
+    text-transform: uppercase;
+    line-height: 1;
+    margin-bottom: 24px;
+    color: var(--teal-deep);
+    letter-spacing: -0.5px;
+  }
+  .about-content p {
+    font-size: 17px;
+    line-height: 1.6;
+    color: var(--ink);
+    margin-bottom: 16px;
+    max-width: 560px;
+  }
+  .credentials {
+    display: flex;
+    gap: 32px;
+    margin-top: 32px;
+    flex-wrap: wrap;
+  }
+  .cred {
+    padding: 12px 0;
+    border-top: 2px solid var(--ink);
+    flex: 1;
+    min-width: 140px;
+  }
+  .cred-num {
+    font-family: 'Bungee Inline', cursive;
+    font-size: 32px;
+    color: var(--orange);
+    transform: skew(-6deg);
+    display: inline-block;
+    line-height: 1;
+  }
+  .cred-label {
+    font-family: 'Space Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 2px;
+    color: var(--teal-deep);
+    margin-top: 8px;
+  }
+
+  /* CTA — Big Googie Sign */
+  .cta {
+    padding: 120px 48px;
+    text-align: center;
+    background: var(--cream);
+    position: relative;
+  }
+  .cta-sign {
+    display: inline-block;
+    position: relative;
+    padding: 56px 80px;
+    background: var(--orange);
+    color: var(--cream);
+    transform: skew(-8deg);
+    box-shadow: 12px 12px 0 var(--ink);
+    border: 4px solid var(--ink);
+  }
+  .cta-sign > * { transform: skew(8deg); }
+  .cta-sign h2 {
+    font-family: 'Bungee Inline', cursive;
+    font-size: clamp(40px, 6vw, 88px);
+    line-height: 0.95;
+    margin-bottom: 12px;
+    letter-spacing: 1px;
+  }
+  .cta-sign .cta-tag {
+    font-family: 'Space Mono', monospace;
+    font-size: 14px;
+    letter-spacing: 4px;
+    color: var(--cream);
+    opacity: 0.85;
+    margin-bottom: 32px;
+  }
+  .cta-sign a {
+    display: inline-block;
+    padding: 16px 32px;
+    background: var(--cream);
+    color: var(--ink);
+    text-decoration: none;
+    font-family: 'Anton', sans-serif;
+    text-transform: uppercase;
+    letter-spacing: 3px;
+    font-size: 16px;
+    border: 2px solid var(--ink);
+    transition: all 0.2s ease;
+  }
+  .cta-sign a:hover {
+    background: var(--mustard);
+  }
+
+  /* Atomic decoration around CTA */
+  .cta::before, .cta::after {
+    content: '';
+    position: absolute;
+    width: 80px;
+    height: 80px;
+    background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><g fill='none' stroke='%231E4D58' stroke-width='2'><ellipse cx='50' cy='50' rx='45' ry='15'/><ellipse cx='50' cy='50' rx='45' ry='15' transform='rotate(60 50 50)'/><ellipse cx='50' cy='50' rx='45' ry='15' transform='rotate(-60 50 50)'/></g><circle cx='50' cy='50' r='6' fill='%23D55A2F'/></svg>");
+    background-size: contain;
+    background-repeat: no-repeat;
+    opacity: 0.5;
+  }
+  .cta::before { top: 80px; left: 10%; }
+  .cta::after { bottom: 80px; right: 10%; }
+
+  /* FOOTER */
+  footer {
+    background: var(--ink);
+    color: var(--cream);
+    padding: 48px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 24px;
+  }
+  footer .brand-logo-footer { margin-right: auto; }
+  .footer-meta {
+    font-family: 'Space Mono', monospace;
+    font-size: 12px;
+    letter-spacing: 3px;
+    color: rgba(242, 230, 206, 0.6);
+  }
+
+  /* ANIMATIONS */
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  @keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+  }
+
+  /* RESPONSIVE */
+  @media (max-width: 900px) {
+    nav { padding: 8px 20px; justify-content: center; }
+    .brand-logo { height: 56px; }
+    .nav-links { display: none; }
+    .hero {
+      grid-template-columns: 1fr;
+      padding: 16px 24px 60px;
+      gap: 32px;
+    }
+    .hero-graphic { height: 280px; }
+    .lab-grid, .steps { grid-template-columns: 1fr; gap: 32px; }
+    .laboratory, .method, .cta { padding: 60px 24px; }
+    .about {
+      grid-template-columns: 1fr;
+      padding: 60px 24px;
+      gap: 40px;
+    }
+    .steps::before { display: none; }
+    .divider { margin: 24px; }
+    .cta-sign { padding: 36px 32px; }
+    footer { padding: 32px 24px; flex-direction: column; align-items: flex-start; }
+  }
+</style>
+</head>
+<body>
+
+<nav>
+  <img src="/logo.png" alt="Fresh Coast Lab" class="brand-logo">
+  <div class="nav-links">
+    <a href="#lab">The Lab</a>
+    <a href="#method">Method</a>
+    <a href="#about">About</a>
+    <a href="#contact">Contact</a>
+  </div>
+</nav>
+
+<section class="hero">
+  <img src="/logo.png" alt="Fresh Coast Lab" class="hero-logo">
+  <div class="est-tag">EST · MMXXVI · PRACTICAL AI</div>
+  <h1>The future of small business<br>is <span class="highlight">already here.</span></h1>
+  <p class="hero-sub">Fresh Coast Lab builds working AI automation for small businesses. Less busywork. More time on the work that actually matters.</p>
+  <a href="#contact" class="googie-btn">
+    <span>Start a Project</span>
+    <span class="arrow">→</span>
+  </a>
+</section>
+
+<div class="divider"></div>
+
+<section class="laboratory" id="lab">
+  <div class="section-header">
+    <span class="section-eyebrow">INSIDE THE LABORATORY</span>
+    <h2 class="section-title">Experiments in Progress</h2>
+  </div>
+  <div class="lab-grid">
+
+    <div class="specimen-card">
+      <span class="specimen-tag">SPECIMEN №001</span>
+      <div class="specimen-number">01</div>
+      <h3 class="specimen-title">The Front-Desk<br>Assistant</h3>
+      <p class="specimen-desc">A trained AI receptionist that handles intake, books appointments, and answers your top 50 questions. Live 24/7. Sounds like your staff.</p>
+      <a href="#" class="specimen-link">Try the Demo →</a>
+    </div>
+
+    <div class="specimen-card">
+      <span class="specimen-tag">SPECIMEN №002</span>
+      <div class="specimen-number">02</div>
+      <h3 class="specimen-title">The Quote<br>Generator</h3>
+      <p class="specimen-desc">Upload an inquiry — get a tailored, brand-matched quote in 30 seconds. Built for service businesses drowning in estimate requests.</p>
+      <a href="#" class="specimen-link">Try the Demo →</a>
+    </div>
+
+    <div class="specimen-card">
+      <span class="specimen-tag">SPECIMEN №003</span>
+      <div class="specimen-number">03</div>
+      <h3 class="specimen-title">The Inbox<br>Triage Engine</h3>
+      <p class="specimen-desc">Reads every email, classifies, drafts a reply, and routes the urgent ones. Cuts the inbox time of a small business owner in half.</p>
+      <a href="#" class="specimen-link">Try the Demo →</a>
+    </div>
+
+  </div>
+</section>
+
+<section class="method" id="method">
+  <svg class="method-orbit" viewBox="0 0 400 400" xmlns="http://www.w3.org/2000/svg">
+    <g class="orbit-group">
+      <ellipse cx="200" cy="200" rx="180" ry="60" fill="none" stroke="#F2E6CE" stroke-width="1.5"/>
+      <circle cx="380" cy="200" r="8" fill="#D55A2F"/>
+    </g>
+    <g class="orbit-group-2">
+      <ellipse cx="200" cy="200" rx="180" ry="60" fill="none" stroke="#F2E6CE" stroke-width="1.5" transform="rotate(60 200 200)"/>
+      <circle cx="290" cy="44" r="6" fill="#E8B547"/>
+    </g>
+    <g class="orbit-group" style="animation-duration: 14s;">
+      <ellipse cx="200" cy="200" rx="180" ry="60" fill="none" stroke="#F2E6CE" stroke-width="1.5" transform="rotate(-60 200 200)"/>
+      <circle cx="110" cy="44" r="5" fill="#E8B547"/>
+    </g>
+    <circle cx="200" cy="200" r="32" fill="#D55A2F"/>
+    <circle cx="200" cy="200" r="32" fill="none" stroke="#F2E6CE" stroke-width="2"/>
+    <path d="M200 180 L204 196 L220 200 L204 204 L200 220 L196 204 L180 200 L196 196 Z" fill="#F2E6CE"/>
+  </svg>
+  <div class="section-header">
+    <span class="section-eyebrow">OUR METHOD</span>
+    <h2 class="section-title">Three Steps. No Mystery.</h2>
+  </div>
+  <div class="steps">
+    <div class="step">
+      <div class="step-num">1</div>
+      <h3 class="step-title">Discover</h3>
+      <p class="step-desc">A two-hour audit. We find the three workflows costing you the most hours per week.</p>
+    </div>
+    <div class="step">
+      <div class="step-num">2</div>
+      <h3 class="step-title">Build</h3>
+      <p class="step-desc">A working prototype in two weeks. Not a slide deck — software you can use on Monday.</p>
+    </div>
+    <div class="step">
+      <div class="step-num">3</div>
+      <h3 class="step-title">Deploy</h3>
+      <p class="step-desc">We hand it off, train your team, and stay on call. You own it. Forever.</p>
+    </div>
+  </div>
+</section>
+
+<section class="about" id="about">
+  <div class="portrait-frame">
+    <img src="/headshot.jpg" alt="Jason Myers — Fresh Coast Lab">
+  </div>
+  <div class="about-content">
+    <span class="section-eyebrow">WHO'S BEHIND THE COUNTER</span>
+    <h2>Twenty years in tech.<br>Now putting it to work<br>for Main Street.</h2>
+    <p>I'm Jason Myers — a cybersecurity strategist, two-time founder, and former CPO. I've spent two decades watching enterprises spend millions on automation that small businesses could never afford.</p>
+    <p>AI changed that. Fresh Coast Lab exists to bring practical, working automation to the businesses who actually need it.</p>
+    <div class="credentials">
+      <div class="cred">
+        <div class="cred-num">20+</div>
+        <div class="cred-label">YEARS IN TECH</div>
+      </div>
+      <div class="cred">
+        <div class="cred-num">2×</div>
+        <div class="cred-label">FOUNDER</div>
+      </div>
+      <div class="cred">
+        <div class="cred-num">MS</div>
+        <div class="cred-label">COMPUTER SCIENCE</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="cta" id="contact">
+  <div class="cta-sign">
+    <div class="cta-tag">✦  NOW BOOKING  ✦</div>
+    <h2>Let's Build<br>Something.</h2>
+    <a href="mailto:hello@freshcoastlab.com">Book a Discovery Call →</a>
+  </div>
+</section>
+
+<footer>
+  <img src="/logo.png" alt="Fresh Coast Lab" class="brand-logo-footer">
+  <div class="footer-meta">© MMXXVI · ALL EXPERIMENTS RESERVED</div>
+</footer>
+
+</body>
+</html>
