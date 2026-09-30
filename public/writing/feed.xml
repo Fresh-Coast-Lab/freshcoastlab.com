@@ -6,7 +6,28 @@
   <atom:link href="https://freshcoastlab.com/writing/feed.xml" rel="self" type="application/rss+xml"/>
   <description>Short pieces with actual opinions on AI, security and the MSP of the future.</description>
   <language>en-us</language>
-  <lastBuildDate>Thu, 11 Jun 2026 12:00:00 +0000</lastBuildDate>
+  <lastBuildDate>Wed, 30 Sep 2026 12:00:00 +0000</lastBuildDate>
+  <item>
+    <title>The camera that went quiet for six days.</title>
+    <link>https://freshcoastlab.com/writing/the-camera-that-went-quiet/</link>
+    <guid isPermaLink="true">https://freshcoastlab.com/writing/the-camera-that-went-quiet/</guid>
+    <pubDate>Wed, 30 Sep 2026 12:00:00 +0000</pubDate>
+    <description><![CDATA[<p>My son walked up the driveway one night. The floodlight came on, exactly like it should. My phone stayed silent.</p>
+<p>That driveway alert is one of the few I actually care about, so I went looking. Every dashboard said healthy. The camera was online. The automation was on. The phone could receive alerts. The last motion event, though, was six days old.</p>
+<h2>What I checked, in order</h2>
+<p>First the obvious stuff. No schedule, no snooze, no do-not-disturb mode quietly eating alerts. The automation that sends the alert hadn’t fired in six days, so the phone wasn’t the problem. It never got asked.</p>
+<p>So the automation was fine too. It was waiting for a motion event from the camera, and the camera had stopped sending them.</p>
+<h2>The actual cause</h2>
+<p>Here’s the part I love, in a painful way. Home Assistant had been holding the camera’s live video stream open, so the camera would show up nicely in Apple Home. And that camera’s maker doesn’t create motion events while someone is watching the live view. From the camera’s point of view, somebody was always watching. So it never reported motion again.</p>
+<p>No error. No warning. Two systems, each doing exactly what it was designed to do, and together they made a silent failure.</p>
+<h2>The fix, and the real fix</h2>
+<p>The fix took about ten minutes. Stop holding the stream open, and give Apple Home a still image instead, so I didn’t lose the camera there. I walked outside, and my phone buzzed. Done.</p>
+<p>The real fix is making sure this class of problem can’t hide again. A watchdog now checks when every sensor last reported, on its own schedule, and tells me when something that should be chatty has gone quiet. The next step is pairing signals that should agree: if the floodlight saw motion and the camera didn’t, something is wrong, even if both say they’re fine.</p>
+<h2>Why a business should care</h2>
+<p>Swap “driveway camera” for “backup job,” “firewall log” or “the AI agent that answers your support inbox.” Same story. Most monitoring checks whether a thing is up. Very little checks whether it’s still doing its job.</p>
+<p>AI agents make this worse, not better. They’re great at looking busy. So here’s the lesson I took from a dark driveway: monitor agreement, not just uptime. If two systems should agree and they don’t, that’s your alarm.</p>
+<p>And test it the only way that counts. I didn’t trust the fix until I walked out there myself and got the alert.</p>]]></description>
+  </item>
   <item>
     <title>The differentiator isn&#x27;t the model. It&#x27;s the trust.</title>
     <link>https://freshcoastlab.com/writing/the-differentiator-is-trust/</link>

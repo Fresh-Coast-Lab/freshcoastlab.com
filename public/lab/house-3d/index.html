@@ -125,6 +125,7 @@ html.embed main{padding-bottom:2px}
 html.embed .chips{min-height:52px}
 html.embed #scen{margin-top:0;padding-top:2px}
 html.embed .stage{width:min(100%,var(--embed-maxw,100%));margin-inline:auto}
+html.embed.land .stage{aspect-ratio:16/9}
 html.embed #rooms{margin-top:8px}
 </style>
 <script>if (/[?&]embed=1(&|$)/.test(location.search)) document.documentElement.classList.add('embed')</script>
@@ -141,7 +142,7 @@ html.embed #rooms{margin-top:8px}
     
   </header>
   <div class="eyebrow">The house</div>
-  <h1>Watch the house think.</h1>
+  <h1>Watch my house think.</h1>
   <p class="sub">Dozens of sensors, switches and appliances, one local brain, and alerts that know the difference between &ldquo;the laundry&rsquo;s done&rdquo; and &ldquo;get out now.&rdquo; Drag to turn the house, pinch to zoom, tap a room to step inside.</p>
 
   <div class="chips" id="scen" role="group" aria-label="Scenarios"></div>
@@ -175,6 +176,17 @@ html.embed #rooms{margin-top:8px}
     <a href="/#house">The original 2D version</a>
   </div>
 </main>
-<script type="module" src="house3d.js"></script>
+<script type="module" src="house3d.js" onerror="window.__h3dFail&&window.__h3dFail()"></script>
+<script>
+  // if the 3D code never starts (a blocked or failed download), stop "loading" and hand back to the 2D house
+  window.__h3dFail = () => {
+    if (document.querySelector('.stage.ready')) return;
+    const box = document.getElementById('nogl'); if (!box || !box.hidden) return;
+    box.querySelector('p').textContent = 'The 3D house didn\u2019t finish loading. The 2D house is right here instead.';
+    box.hidden = false; const l = document.getElementById('loading'); if (l) l.style.display = 'none';
+    if (window.parent !== window) window.parent.postMessage({ type: 'h3d-fallback', reason: 'load-error' }, location.origin);
+  };
+  setTimeout(window.__h3dFail, 25000);
+</script>
 </body>
 </html>

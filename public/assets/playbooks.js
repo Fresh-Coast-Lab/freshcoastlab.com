@@ -67,6 +67,8 @@
       how: ['Python + Flask', 'A public ADP API'],
       biz: 'Proof that the fastest way to learn a tool is to build something you care about.' },
   ];
+  const HOOD = {"interview": "One system prompt drives a six-phase interview with hard rules: one question per turn, no advice before the last phase. The final turn emits a structured brief (current stack, pain points, opportunities with estimated hours and complexity, compliance notes) plus a ready-to-paste build prompt. It runs unchanged in any frontier model.", "cos": "A Flask app on Python and the Claude API. A local MCP server bridges Gmail and Google Calendar. Business cards go through vision extraction into the CRM. Decks are generated with pptxgenjs and briefings post through the Slack API. A memory store with a periodic cleanup pass keeps its context current.", "brief": "Deterministic checks first (Uptime Kuma heartbeats, calendar and reminder reads), then one scheduled agent that summarizes into a Home Assistant sensor, rendered as a markdown card. The rule is hard-coded: it drafts, it never sends. Replies wait as Gmail drafts for a human.", "textback": "A phone-system webhook on a missed call triggers an SMS. A language model with a narrow, allow-listed tool set answers the common questions and reads real calendar availability. Booking writes to the calendar. Anything off-script goes to a human with the full transcript, and every action is logged.", "strategist": "Python and the Claude API with a curated profile of voice, audience and context, plus a scheduled news pass each morning. Everything it produces is a draft for talk tracks and decks. Nothing publishes on its own.", "audit": "Two layers. Always-on checks in Home Assistant: sensors gone quiet, paired signals that should agree, integrations stuck in setup errors, alerts that should have fired by now. Then a weekly agent reviews every automation and template for dead references and reports only what changed. It never fixes anything itself, and an off-box dead-man’s switch covers the watcher dying.", "chaser": "Pull open invoices from the accounting API daily, apply tiered rules (before due, after due, escalate to the owner), draft each message with a language model for tone, require approval for anything firm, and stop the moment a payment posts.", "travel": "Gmail turns confirmations into Google Calendar events. A Gmail filter forwards them to the work account so the work calendar mirrors travel. TripIt and a shared Google Sheet cover the rest. No custom code, just the right plumbing.", "memory": "A private GitHub repo of plain markdown with an AGENTS.md every tool reads first. Each Mac’s Claude Code memory folder is a symlink into it. A launchd job syncs every two hours, and gitleaks blocks anything that looks like a secret, before every commit and again in CI.", "triage": "Claude reads every Apple Reminders list each morning using the native priorities and answers one question: what needs doing today? The one-time cleanup sorted 900 items into six lists with Kanban-style priorities.", "watch": "Uptime Kuma monitors with push heartbeats feed Home Assistant, which routes alerts into three tiers. Warnings are suppressed when their upstream host is already down, so one outage means one alert. Remote access runs over a private mesh VPN.", "edge": "A Flask app that pulls average draft position data from a public API, ranks it, and styles it in Honolulu blue and silver."};
+  const pref = { get: () => { try { return localStorage.getItem('explain') || 'plain'; } catch (e) { return 'plain'; } }, set: (v) => { try { localStorage.setItem('explain', v); } catch (e) {} document.dispatchEvent(new CustomEvent('explain', { detail: v })); } };
   const TONE = { run: 'var(--aurora)', built: 'var(--aqua)', wip: '#FFC061', plan: '#B7AEFF' };
   const grid = root.querySelector('.pb-grid');
   grid.innerHTML = P.map((p, i) => `<button type="button" class="pb-card" data-i="${i}" style="--tone:${TONE[p.s]}">
@@ -91,13 +93,21 @@
     const p = P[i]; lastFocus = document.activeElement;
     body.innerHTML = `<span class="pb-st mono" style="--tone:${TONE[p.s]}"><i></i>${STATUS[p.s]}</span>
       <h3 id="pb-h"></h3><p class="pb-one"></p>
-      <div class="pb-sec"><span class="mono">WHAT IT DOES</span><p class="w"></p></div>
+      <div class="explain" role="group" aria-label="How to explain it"><button type="button" data-x="plain">Plain English</button><button type="button" data-x="hood">Under the hood</button></div>
+      <div class="pb-sec"><span class="mono pb-wl">WHAT IT DOES</span><p class="w"></p></div>
       <div class="pb-sec"><span class="mono">HOW IT'S BUILT</span><ul class="pb-tags">${p.how.map(() => '<li></li>').join('')}</ul></div>
       <div class="pb-sec pb-biz"><span class="mono">${p.s === 'plan' ? 'WHO IT’S FOR' : 'THE BUSINESS VERSION'}</span><p class="b"></p></div>
       ${p.demo ? demoHTML : ''}
       <div class="pb-cta"><a class="btn btn-glow" href="#contact">Build one for my business <span aria-hidden="true">&rarr;</span></a></div>`;
     body.querySelector('#pb-h').textContent = p.t; body.querySelector('.pb-one').textContent = p.one;
-    body.querySelector('.w').textContent = p.what; body.querySelector('.b').textContent = p.biz;
+    body.querySelector('.b').textContent = p.biz;
+    const paint = () => { const hood = pref.get() === 'hood'; const w = body.querySelector('.w');
+      w.textContent = hood ? HOOD[p.id] : p.what; w.classList.toggle('hood', hood);
+      body.querySelector('.pb-wl').textContent = hood ? 'UNDER THE HOOD' : 'WHAT IT DOES';
+      body.querySelectorAll('.explain button').forEach((b) => b.setAttribute('aria-pressed', b.dataset.x === (hood ? 'hood' : 'plain') ? 'true' : 'false'));
+      if (window.defineTerms) window.defineTerms(body); };
+    body.querySelectorAll('.explain button').forEach((b) => b.addEventListener('click', () => { pref.set(b.dataset.x); paint(); }));
+    paint();
     body.querySelectorAll('.pb-tags li').forEach((li, k) => { li.textContent = p.how[k]; });
     body.querySelector('.pb-cta a').addEventListener('click', close);
     if (p.demo) wireDemo();

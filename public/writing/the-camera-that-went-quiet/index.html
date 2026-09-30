@@ -3,15 +3,15 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Start by building something for yourself. | Jason Myers</title>
-<meta name="description" content="I built my own AI channel strategist. The learning was in the doing.">
+<title>The camera that went quiet for six days. | Jason Myers</title>
+<meta name="description" content="Every dashboard said healthy. Nothing was. What it took to find, and what I changed so it can’t hide again.">
 <meta name="theme-color" content="#060A12">
 <script>document.documentElement.classList.add('js')</script>
-<link rel="canonical" href="https://freshcoastlab.com/writing/start-by-building-something-for-yourself/">
+<link rel="canonical" href="https://freshcoastlab.com/writing/the-camera-that-went-quiet/">
 <meta property="og:type" content="article">
-<meta property="og:url" content="https://freshcoastlab.com/writing/start-by-building-something-for-yourself/">
-<meta property="og:title" content="Start by building something for yourself. | Jason Myers">
-<meta property="og:description" content="I built my own AI channel strategist. The learning was in the doing.">
+<meta property="og:url" content="https://freshcoastlab.com/writing/the-camera-that-went-quiet/">
+<meta property="og:title" content="The camera that went quiet for six days. | Jason Myers">
+<meta property="og:description" content="Every dashboard said healthy. Nothing was. What it took to find, and what I changed so it can’t hide again.">
 <meta property="og:image" content="https://freshcoastlab.com/assets/jason-myers.jpg">
 <meta name="twitter:card" content="summary_large_image">
 <link rel="icon" href="/favicon.svg" type="image/svg+xml">
@@ -20,7 +20,7 @@
 <link rel="preload" href="/assets/fonts/space-grotesk-latin-a57c94.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="stylesheet" href="/assets/site.css">
 <script type="application/ld+json">{"@context":"https://schema.org","@type":"Person","name":"Jason Myers","url":"https://freshcoastlab.com/","image":"https://freshcoastlab.com/assets/jason-myers.jpg","jobTitle":"Channel Chief & Cybersecurity Strategist, MSP Partnerships","worksFor":{"@type":"Organization","name":"OpenText Cybersecurity"},"address":{"@type":"PostalAddress","addressLocality":"Traverse City","addressRegion":"MI","addressCountry":"US"},"email":"mailto:jason@freshcoastlab.com","sameAs":["https://www.linkedin.com/in/jasonmyers/"],"award":["Best Stage Presentation, ChannelPro Defend Chicago 2026","CRN 100 People You Don't Know But Should, 2025"],"knowsAbout":["AI strategy","Cybersecurity","MSP partnerships","Home automation","Home Assistant","Zero Trust","AI agents"]}</script>
-<script type="application/ld+json">{"@context":"https://schema.org","@type":"BlogPosting","headline":"Start by building something for yourself.","datePublished":"2026-04-06","author":{"@type":"Person","name":"Jason Myers","url":"https://freshcoastlab.com/"}}</script>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"BlogPosting","headline":"The camera that went quiet for six days.","datePublished":"2026-09-30","author":{"@type":"Person","name":"Jason Myers","url":"https://freshcoastlab.com/"}}</script>
 </head>
 <body data-here="WRITING">
 <a class="skip" href="#main">Skip to content</a>
@@ -45,21 +45,28 @@
 <main id="main">
   <article class="wrap essay">
     <a class="back" href="/writing/"><span aria-hidden="true">&larr;</span> WRITING</a>
-    <div class="meta mono"><time datetime="2026-04-06">April 6, 2026</time><span>Building</span></div>
-    <h1>Start by building something for yourself.</h1>
-    <p class="dek">I built my own AI channel strategist. The learning was in the doing.</p>
+    <div class="meta mono"><time datetime="2026-09-30">September 30, 2026</time><span>Case study</span></div>
+    <h1>The camera that went quiet for six days.</h1>
+    <p class="dek">Every dashboard said healthy. Nothing was. What it took to find, and what I changed so it can’t hide again.</p>
     <div class="prose">
-<p>I wrote the first version of this from a dentist's chair, remotely checking in on an AI agent I'd built over a few weeks of late nights.</p>
-<p>It knows my voice, my audience and what's happening in cybersecurity this week. It drafts presentations, writes talk tracks that actually sound like me, and briefs me on MSP news every morning. No off-the-shelf tool. Just Python, the Claude API, and a lot of trial and error.</p>
-<h2>Why build it yourself</h2>
-<p>MSPs ask me the same question at almost every event: where do we start with AI? My answer is always the same. Start by building something for yourself.</p>
-<p>Not a product. Not a pilot for a client. Something that solves your own annoying problem. You'll learn more in two weekends of building than in two months of webinars, because you'll hit the real problems: where the model is confidently wrong, what it should never be allowed to touch, and how much context it actually needs to be useful.</p>
-<h2>What it taught me</h2>
-<p>The model is the easy part. The hard part is memory, guardrails and knowing when it's quietly failing. That's why everything I run now shares one memory across machines, gets scanned for secrets before it's saved, and gets checked by something other than itself. This whole site was built the same way, with Claude Code doing the heavy lifting and me approving every change.</p>
-<p>You can't advise customers on AI you've never built with. Go build something.</p>
+<p>My son walked up the driveway one night. The floodlight came on, exactly like it should. My phone stayed silent.</p>
+<p>That driveway alert is one of the few I actually care about, so I went looking. Every dashboard said healthy. The camera was online. The automation was on. The phone could receive alerts. The last motion event, though, was six days old.</p>
+<h2>What I checked, in order</h2>
+<p>First the obvious stuff. No schedule, no snooze, no do-not-disturb mode quietly eating alerts. The automation that sends the alert hadn’t fired in six days, so the phone wasn’t the problem. It never got asked.</p>
+<p>So the automation was fine too. It was waiting for a motion event from the camera, and the camera had stopped sending them.</p>
+<h2>The actual cause</h2>
+<p>Here’s the part I love, in a painful way. Home Assistant had been holding the camera’s live video stream open, so the camera would show up nicely in Apple Home. And that camera’s maker doesn’t create motion events while someone is watching the live view. From the camera’s point of view, somebody was always watching. So it never reported motion again.</p>
+<p>No error. No warning. Two systems, each doing exactly what it was designed to do, and together they made a silent failure.</p>
+<h2>The fix, and the real fix</h2>
+<p>The fix took about ten minutes. Stop holding the stream open, and give Apple Home a still image instead, so I didn’t lose the camera there. I walked outside, and my phone buzzed. Done.</p>
+<p>The real fix is making sure this class of problem can’t hide again. A watchdog now checks when every sensor last reported, on its own schedule, and tells me when something that should be chatty has gone quiet. The next step is pairing signals that should agree: if the floodlight saw motion and the camera didn’t, something is wrong, even if both say they’re fine.</p>
+<h2>Why a business should care</h2>
+<p>Swap “driveway camera” for “backup job,” “firewall log” or “the AI agent that answers your support inbox.” Same story. Most monitoring checks whether a thing is up. Very little checks whether it’s still doing its job.</p>
+<p>AI agents make this worse, not better. They’re great at looking busy. So here’s the lesson I took from a dark driveway: monitor agreement, not just uptime. If two systems should agree and they don’t, that’s your alarm.</p>
+<p>And test it the only way that counts. I didn’t trust the fix until I walked out there myself and got the alert.</p>
 </div>
-    <p class="orig mono">Started as a <a href="https://www.linkedin.com/feed/update/urn:li:activity:7447013062378950656/" target="_blank" rel="noopener">LinkedIn post</a>. Rewritten for here.</p>
-    <a class="next-post" href="/writing/your-customers-already-have-ai-agents/"><span class="mono">NEXT</span><b>Your customers already have AI agents. That&#x27;s your opening.</b><span aria-hidden="true">&rarr;</span></a>
+    <p class="orig mono">Written for this site.</p>
+    <a class="next-post" href="/writing/the-differentiator-is-trust/"><span class="mono">NEXT</span><b>The differentiator isn&#x27;t the model. It&#x27;s the trust.</b><span aria-hidden="true">&rarr;</span></a>
   </article>
 </main>
 

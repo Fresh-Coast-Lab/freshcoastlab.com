@@ -1,4 +1,4 @@
-// "Watch the house think" - an isometric cutaway of a smart home, generated in SVG,
+// "Watch my house think" - an isometric cutaway of a smart home, generated in SVG,
 // replaying real automation patterns: sensor -> hub -> action -> verified -> alert.
 // Time of day, lamplight, a car that drives, and "presence" figures that trip sensors.
 // Layout and security-device details are illustrative on purpose.

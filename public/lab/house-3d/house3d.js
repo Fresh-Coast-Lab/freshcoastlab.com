@@ -1,4 +1,4 @@
-// "Watch the house think", in 3D. A baked-light dollhouse of the same house as
+// "Watch my house think", in 3D. A baked-light dollhouse of the same house as
 // /assets/house.js, replaying the same eleven automation patterns:
 // sensor -> hub -> action -> verified -> alert.
 // Static geometry is lit by lightmaps baked in Blender (sun/moon, sky, and one
@@ -56,8 +56,12 @@ if (EMBED) {
   // so on wide screens cap it against the parent's window instead
   const capToParent = () => {
     try {
-      const vh = window.top.innerHeight;
-      document.documentElement.style.setProperty('--embed-maxw', innerWidth >= 821 ? `${Math.round(Math.max(480, vh - 150) * 16 / 9)}px` : '100%');
+      const vh = window.top.innerHeight, vw = window.top.innerWidth;
+      const land = vw > vh && vh < 600; // a phone on its side
+      document.documentElement.classList.toggle('land', land);
+      const room = Math.max(200, vh - (land ? 120 : 150)); // leave space for the chips
+      const ratio = innerWidth >= 821 || land ? 16 / 9 : 4 / 5;
+      document.documentElement.style.setProperty('--embed-maxw', `${Math.round(room * ratio)}px`);
     } catch { /* cross-origin parent: no cap */ }
   };
   capToParent();
@@ -196,11 +200,12 @@ async function main() {
     if (bmpLoader) bmpLoader.load(name, (bmp) => res(finish(new THREE.Texture(bmp))), undefined, rej);
     else texLoader.load(name, (t) => res(finish(t)), undefined, rej);
   });
-  const [gltf, meta, ...tex] = await Promise.all([
+  const giveUp = new Promise((_, rej) => setTimeout(() => rej(new Error('load timed out after 20 s')), 20000));
+  const [gltf, meta, ...tex] = await Promise.race([giveUp, Promise.all([
     loader.loadAsync('house.glb'),
     fetch('meta.json').then((r) => r.json()),
     ...['house_env', 'house_lamps0', 'house_lamps1', 'house_lamps2', 'lot_env', 'lot_lamps0', 'lot_lamps1', 'lot_lamps2'].map((n) => loadTex(TEXDIR + n + '.webp')),
-  ]);
+  ])]);
   const TEX = { house: tex.slice(0, 4), lot: tex.slice(4, 8) };
   // decoded GPU memory of the lightmaps: w x h x 4 bytes, plus a third for mipmaps
   const texMiB = tex.reduce((sum, t) => sum + t.image.width * t.image.height * 4 * 1.333, 0) / 1048576;
@@ -1190,7 +1195,7 @@ async function main() {
   let fellBack = false, ctxLost = false;
   const visible = () => inView && !document.hidden && !fellBack && !ctxLost;
   function isAnimating() {
-    if ((busy && !hold) || camT < 1 || ptrs.size || pulses.length || tweens.length || people.length || smokeOn) return true;
+    if ((busy && !hold) || camT < 1 || ptrs.size || pulses.length || tweens.length || people.length || (smokeOn && busy)) return true;
     if (autoplayOn()) return true;
     for (const g of GROUPS) if (Math.abs(goal[g] - lvl[g]) > 0.002) return true;
     return Math.abs(headGoal - headOn) > 0.002 || Math.abs(tailGoal - tailOn) > 0.002 || Math.abs(tvGoal - tvLvl) > 0.002;
@@ -1247,7 +1252,7 @@ async function main() {
   // Modelled on drei's PerformanceMonitor: 250 ms windows, the last 10 kept, act when 8 of 10 agree.
   // A steady 30 fps (iOS Low Power Mode caps rAF there) is fine and never counts against us.
   const mon = { lowest: startLevel, t0: 0, acc: 0, n: 0, win: [], flips: 0, lastDir: 0, locked: false, okSent: false, events: [] };
-  const setVerdict = (v) => { store.set('h3d-verdict', JSON.stringify({ v, ts: Date.now() })); toParent({ type: 'h3d-verdict', v }); };
+  const setVerdict = (v) => { if (FORCE_FPS) { toParent({ type: 'h3d-verdict', v }); return; } store.set('h3d-verdict', JSON.stringify({ v, ts: Date.now() })); toParent({ type: 'h3d-verdict', v }); };
   function applyLevel(i, why) {
     level = i; dpr = LEVELS[i].dpr; glowsOn = LEVELS[i].glows;
     mon.events.push(`${why} -> level ${i} (dpr ${dpr}, glows ${glowsOn ? 'on' : 'off'})`);
@@ -1320,6 +1325,7 @@ async function main() {
   try { if (renderer.compileAsync) await renderer.compileAsync(scene, camera); } catch { /* fall through to a normal first frame */ }
   frame(0, performance.now());
   stage.classList.add('ready');
+  toParent({ type: 'h3d-ready' });
   const hint = $('#hint');
   if (!REDUCE) { hint.classList.add('show'); setTimeout(() => hint.classList.remove('show'), 2400); }
   wake();

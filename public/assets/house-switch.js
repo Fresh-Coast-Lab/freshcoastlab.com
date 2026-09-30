@@ -32,12 +32,12 @@
   const mem = navigator.deviceMemory || 8, cores = navigator.hardwareConcurrency || 8;
   let tier = verdict === 'low' ? 'low' : (mem < 4 || cores <= 4) ? 'mid' : 'high';
 
-  let frame = null;
+  let frame = null, readyTimer = 0;
   const mount = () => {
     if (frame) return;
     frame = document.createElement('iframe');
     frame.className = 'h3d-frame';
-    frame.title = 'Watch the house think: an interactive 3D model of a smart home';
+    frame.title = 'Watch my house think: an interactive 3D model of a smart home';
     frame.setAttribute('allow', 'fullscreen');
     const dbg = params.get('h3dfps') ? `&debug&forcefps=${encodeURIComponent(params.get('h3dfps'))}` : ''; // test hook: simulate a slow GPU
     frame.src = `/lab/house-3d/?embed=1&tier=${tier}${dbg}`;
@@ -48,9 +48,12 @@
     svgParts.forEach((el) => { el.hidden = true; });
     if (link) link.hidden = true;
     sec.classList.add('is-3d');
+    // belt and braces: if the 3D house hasn't shown its first frame in 30 s, bring the 2D house back (this visit only)
+    readyTimer = setTimeout(() => unmount('no first frame after 30 s'), 30000);
   };
   const unmount = (why) => {
     if (!frame) return;
+    clearTimeout(readyTimer);
     frame.closest('.h3d-wrap').remove(); frame = null;
     svgParts.forEach((el) => { el.hidden = false; });
     if (link) link.hidden = false;
@@ -61,6 +64,7 @@
   addEventListener('message', (e) => {
     if (e.origin !== location.origin || !frame || e.source !== frame.contentWindow) return;
     const d = e.data || {};
+    if (d.type === 'h3d-ready') clearTimeout(readyTimer);
     if (d.type === 'h3d-size' && d.h > 200) frame.style.height = Math.ceil(d.h) + 'px';
     if (d.type === 'h3d-fallback') { unmount(d.reason || 'slow'); if (link && d.reason === 'slow') link.hidden = true; } // the 3D page records its own verdict
   });

@@ -143,7 +143,7 @@
 
   <section id="house" class="wrap">
     <div class="eyebrow rv">The house</div>
-    <h2 class="sec-title rv">Watch the house think.</h2>
+    <h2 class="sec-title rv">Watch my house think.</h2>
     <p class="sec-sub rv">Dozens of sensors, switches and appliances, one local brain, and alerts that know the difference between &ldquo;the laundry&rsquo;s done&rdquo; and &ldquo;get out now.&rdquo; Pick a moment, tap any device, or just watch.</p>
     <div class="scen rv" id="house-scenarios" aria-label="Scenarios"></div>
     <div class="house rv">
@@ -205,8 +205,8 @@
   <section id="writing" class="wrap">
     <div class="eyebrow rv">Writing</div>
     <h2 class="sec-title rv">Short pieces. Actual opinions.</h2>
-    <div class="posts"><a class="post rv" href="/writing/the-differentiator-is-trust/"><span class="when mono">JUN 2026 &middot; ON STAGE</span><h3>The differentiator isn&#x27;t the model. It&#x27;s the trust.</h3><p>Thirty seconds on stage at Pax8 Beyond, expanded.</p><span class="go mono">READ <span aria-hidden="true">&rarr;</span></span></a><a class="post rv" href="/writing/the-ai-first-msp/"><span class="when mono">JUN 2026 &middot; MSP 3.0</span><h3>The AI-first MSP doesn&#x27;t bolt AI on.</h3><p>A theme from our roadshow at Microsoft&#x27;s Atlanta office.</p><span class="go mono">READ <span aria-hidden="true">&rarr;</span></span></a><a class="post rv" href="/writing/collaboration-over-competition/"><span class="when mono">MAY 2026 &middot; COMMUNITY</span><h3>Collaboration over competition.</h3><p>Why the best MSPs I know didn&#x27;t get there alone.</p><span class="go mono">READ <span aria-hidden="true">&rarr;</span></span></a></div>
-    <a class="btn btn-ghost more rv" href="/writing/">All 8 pieces <span aria-hidden="true">&rarr;</span></a>
+    <div class="posts"><a class="post rv" href="/writing/the-camera-that-went-quiet/"><span class="when mono">SEP 2026 &middot; CASE STUDY</span><h3>The camera that went quiet for six days.</h3><p>Every dashboard said healthy. Nothing was. What it took to find, and what I changed so it can’t hide again.</p><span class="go mono">READ <span aria-hidden="true">&rarr;</span></span></a><a class="post rv" href="/writing/the-differentiator-is-trust/"><span class="when mono">JUN 2026 &middot; ON STAGE</span><h3>The differentiator isn&#x27;t the model. It&#x27;s the trust.</h3><p>Thirty seconds on stage at Pax8 Beyond, expanded.</p><span class="go mono">READ <span aria-hidden="true">&rarr;</span></span></a><a class="post rv" href="/writing/the-ai-first-msp/"><span class="when mono">JUN 2026 &middot; MSP 3.0</span><h3>The AI-first MSP doesn&#x27;t bolt AI on.</h3><p>A theme from our roadshow at Microsoft&#x27;s Atlanta office.</p><span class="go mono">READ <span aria-hidden="true">&rarr;</span></span></a></div>
+    <a class="btn btn-ghost more rv" href="/writing/">All 9 pieces <span aria-hidden="true">&rarr;</span></a>
   </section>
 
   <section id="archive" class="wrap">
@@ -246,9 +246,24 @@
     <div class="rv">
       <div class="eyebrow">Off the clock</div>
       <h2 class="sec-title">Home is the fresh coast.</h2>
-      <p>Traverse City, Michigan, on Lake Michigan's fresh coast. A garden I'm still learning, and a house that doubles as my test lab. Father, tinkerer, and the family's unofficial archivist.</p>
+      <p>Traverse City, Michigan, on Lake Michigan&rsquo;s fresh coast. Dad of triplets, now all in college, so the house got quieter and the lab got louder. Lions and Michigan State fan, which builds character.</p>
+      <p>KEXP is my favorite radio station, so a work trip to Seattle means a stop at the studio. I tried surfing for the first time this summer in San Diego and did not stand up once. Banff is the most beautiful place I&rsquo;ve ever been. I can still hear the AOL dial-up sound.</p>
+      <p>A garden I&rsquo;m still learning, a house that doubles as my test lab, and the family&rsquo;s unofficial archivist.</p>
     </div>
   </section>
+
+  <section id="how" class="wrap" aria-labelledby="how-h">
+    <div class="eyebrow rv">How I work</div>
+    <h2 id="how-h" class="sec-title rv">Five rules I actually follow.</h2>
+    <ol class="rules rv">
+      <li><b>Verify, don&rsquo;t assume.</b><span>If a command can prove it, I run the command. Reasoning that only suggests something is true isn&rsquo;t done.</span></li>
+      <li><b>A human approves.</b><span>Agents draft. I decide. Nothing in my house or on this site ships without a yes.</span></li>
+      <li><b>Monitor agreement, not uptime.</b><span>Healthy-looking systems fail quietly. I watch for two signals that should agree and don&rsquo;t.</span></li>
+      <li><b>Build it before you advise on it.</b><span>I don&rsquo;t recommend AI I haven&rsquo;t run myself. The learning is in the doing.</span></li>
+      <li><b>Explain it so anyone can use it.</b><span>If the person who owns it can&rsquo;t explain it back to me, I&rsquo;m not finished.</span></li>
+    </ol>
+  </section>
+
 
   <section class="wrap" aria-labelledby="path-h">
     <div class="eyebrow rv">The path</div>
@@ -292,9 +307,10 @@
         if (!t.trim()) { frag.appendChild(document.createTextNode(t)); return; }
         const s = document.createElement('span'); s.className = 'w'; s.textContent = t;
         s.style.animationDelay = (0.15 + i++ * 0.07) + 's'; frag.appendChild(s);
+        s.addEventListener('animationend', () => { s.classList.remove('w'); s.style.animationDelay = ''; s.classList.add('wd'); }, { once: true });
       });
       c.replaceWith(frag);
-    } else if (c.nodeType === 1) { c.classList.add('w'); c.style.animationDelay = (0.15 + i++ * 0.07) + 's'; }
+    } else if (c.nodeType === 1) { c.classList.add('w'); c.style.animationDelay = (0.15 + i++ * 0.07) + 's'; c.addEventListener('animationend', () => { c.classList.remove('w'); c.style.animationDelay = ''; }, { once: true }); }
   }));
 
   // reveal on scroll
@@ -322,6 +338,12 @@
       "Family film reels, digitized and put on a private page (Cloudflare Workers and R2) where my mother names the faces. Her answers flow straight back into the Plex library. AI preserving what's real, not inventing what isn't.",
       '> real footage, real names, nothing generated'],
   };
+  const HOOD = {"watchdog": "Home Assistant was holding the camera’s live stream open so it would show in Apple Home, and the camera’s maker suppresses motion events during live view. Fix: give Apple Home a still image instead of the stream. Guard: a watchdog checks every sensor’s last-reported time on a schedule, and paired-signal checks (floodlight motion vs camera motion) are next.", "home": "Home Assistant on a dedicated Green hub. Zigbee2MQTT runs the Zigbee mesh on a channel picked to dodge the Wi-Fi, and talks to Home Assistant through an MQTT broker. ESP32 boards run ESPHome. Motion lighting uses multi-sensor groups plus a light-level check. Alerts reach the phone in three tiers, with iOS Critical Alerts for smoke and water.", "memory": "A private GitHub repo of plain markdown, with an AGENTS.md every tool reads first. Each Mac’s Claude Code memory folder is a symlink into the repo. A launchd job commits and syncs every two hours, and a gitleaks pre-commit hook, backed by a CI scan, blocks anything that looks like a secret.", "models": "The context lives in markdown and AGENTS.md, not in any vendor’s chat history, so any tool that reads files can use it. MCP servers give the assistant controlled access to Home Assistant, Gmail and Calendar, which means tools, not prompts, define what a model is allowed to touch.", "media": "ffmpeg with Apple’s hardware encoder stitched 1,247 clips and 61 reels into dated, chaptered episodes for Plex. A private page on Cloudflare Workers, with video in R2 and notes in KV, lets my mother name faces, and her answers feed back into the titles. Face matching uses ArcFace embeddings on local hardware."};
+  const LINK = {"watchdog": "/writing/the-camera-that-went-quiet/"};
+  // one preference for the whole site: plain English, or under the hood
+  const pref = { get: () => { try { return localStorage.getItem('explain') || 'plain'; } catch (e) { return 'plain'; } }, set: (v) => { try { localStorage.setItem('explain', v); } catch (e) {} document.dispatchEvent(new CustomEvent('explain', { detail: v })); } };
+  let lastK = 'watchdog';
+  document.addEventListener('explain', () => show(lastK));
   const card = document.getElementById('story');
   const nodes = [...document.querySelectorAll('.node')];
   const ORDER = ['watchdog', 'home', 'memory', 'media', 'models'];
@@ -331,11 +353,16 @@
   const coarse = matchMedia('(hover: none)').matches;
   nodes.forEach((n, i) => n.style.setProperty('--d', (i * 0.35) + 's'));
   const show = (k, user) => {
-    const [kk, t, p, f] = S[k];
+    const [kk, t, p, f] = S[k]; lastK = k;
+    const mode = pref.get();
     const w = document.createElement('div'); w.className = 'fade';
+    const tg = document.createElement('div'); tg.className = 'explain'; tg.setAttribute('role', 'group'); tg.setAttribute('aria-label', 'How to explain it');
+    [['plain', 'Plain English'], ['hood', 'Under the hood']].forEach(([v, label]) => {
+      const b = document.createElement('button'); b.type = 'button'; b.textContent = label; b.setAttribute('aria-pressed', mode === v ? 'true' : 'false');
+      b.addEventListener('click', () => pref.set(v)); tg.append(b); });
     const a = document.createElement('div'); a.className = 'k'; a.textContent = kk;
     const b = document.createElement('h3'); b.textContent = t;
-    const c = document.createElement('p'); c.textContent = p;
+    const c = document.createElement('p'); c.textContent = mode === 'hood' ? HOOD[k] : p; if (mode === 'hood') c.className = 'hood';
     const d = document.createElement('div'); d.className = 'fact'; d.textContent = f;
     const nx = ORDER[(ORDER.indexOf(k) + 1) % ORDER.length];
     const nav = document.createElement('div'); nav.className = 'nav2';
@@ -343,7 +370,9 @@
     const go = document.createElement('button'); go.type = 'button'; go.innerHTML = `Next: ${LABEL[nx]} <span aria-hidden="true">&rarr;</span>`;
     go.addEventListener('click', () => show(nx, true));
     nav.append(cnt, go);
-    w.append(a, b, c, d, nav); card.replaceChildren(w);
+    const more = LINK[k] ? Object.assign(document.createElement('a'), { className: 'story-more', href: LINK[k], innerHTML: 'Read the full story <span aria-hidden="true">&rarr;</span>' }) : null;
+    w.append(tg, a, b, c, d); if (more) w.append(more); w.append(nav); card.replaceChildren(w);
+    if (window.defineTerms) window.defineTerms(card);
     nodes.forEach((n) => n.setAttribute('aria-pressed', n.dataset.k === k ? 'true' : 'false'));
     if (user) { seen.add(k); nodes.forEach((n) => n.classList.toggle('seen', seen.has(n.dataset.k))); }
     hintT.innerHTML = seen.size === 0 ? (coarse ? 'TAP A NODE TO EXPLORE' : 'SELECT A NODE TO EXPLORE')
@@ -470,6 +499,7 @@ void main(){
 })();
 </script>
 <script src="/assets/nav.js" defer></script>
+<script src="/assets/terms.js" defer></script>
 <script src="/assets/house.js" defer></script>
 <script src="/assets/house-switch.js" defer></script>
 <script src="/assets/archive.js" defer></script>
