@@ -109,7 +109,7 @@
   // once per visit, after the sign has lit and flickered on
   let seen = false; try { seen = sessionStorage.getItem('ufo') === '1'; } catch (e) {}
   const heroVisible = () => hero.getBoundingClientRect().bottom > innerHeight * 0.4 && !document.hidden;
-  if (!seen) setTimeout(function go() { if (!heroVisible()) { setTimeout(go, 3000); return; } try { sessionStorage.setItem('ufo', '1'); } catch (e) {} play(); }, 9500);
+  if (!seen) setTimeout(function go() { if (!heroVisible()) { setTimeout(go, 3000); return; } try { sessionStorage.setItem('ufo', '1'); } catch (e) {} play(); }, 600);
   // tap the sign to see it again
   const sign = document.getElementById('neon');
   const orbit = sign && sign.closest('.orbit');
