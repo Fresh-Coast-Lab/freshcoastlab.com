@@ -519,7 +519,7 @@
     watchdog: { name: 'A sensor goes quiet', setup: { clock: 6 * 3600, amb: 0.15 }, run: async (w) => {
       cls('m_bench', 'stale'); lbl.m_bench.textContent = 'workbench motion: last heard 26 h ago'; log('watchdog: checking when every sensor last reported'); await w(900);
       await pulse('hub', 'm_bench', '#FFC061'); ring('m_bench', '#FFC061'); log('workbench motion: silent for 26 hours', 'warn'); await w(600);
-      notify('ts', 'Sensor gone quiet', 'Workbench motion stopped reporting. It still says "clear".'); log('→ alert sent: a healthy-looking sensor that stopped talking', 'ok'); } },
+      notify('ts', 'Sensor gone quiet', 'Workbench motion stopped reporting. It still says “clear.”'); log('→ alert sent: a healthy-looking sensor that stopped talking', 'ok'); } },
   };
 
   // ---------- UI ----------
