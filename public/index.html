@@ -34,7 +34,7 @@
 </div>
 <div class="menu" id="menu" role="dialog" aria-modal="true" aria-label="Menu">
   <div class="top"><a class="brand" href="#main"><svg width="22" height="22" viewBox="0 0 30 30" aria-hidden="true"><g stroke="#FF6A3D" stroke-width="2.4" stroke-linecap="round"><line x1="15" y1="2" x2="15" y2="28"/><line x1="2" y1="15" x2="28" y2="15"/><line x1="5.8" y1="5.8" x2="24.2" y2="24.2"/><line x1="24.2" y1="5.8" x2="5.8" y2="24.2"/></g></svg><span>FRESH COAST LAB</span></a><button class="x" type="button" aria-label="Close menu">&times;</button></div>
-  <ol><li style="transition-delay:0.04s"><a href="#house" data-s="house">House <small>watch it think</small></a></li><li style="transition-delay:0.08s"><a href="#lab" data-s="lab">Lab <small>the system map</small></a></li><li style="transition-delay:0.11s"><a href="#stage" data-s="stage">Stage <small>talks and awards</small></a></li><li style="transition-delay:0.15s"><a href="#playbooks" data-s="playbooks">Playbooks <small>work and life</small></a></li><li style="transition-delay:0.18s"><a href="#writing" data-s="writing">Writing <small>opinions</small></a></li><li style="transition-delay:0.22s"><a href="#archive" data-s="archive">Archive <small>ninety years</small></a></li><li style="transition-delay:0.25s"><a href="#stack" data-s="stack">Stack <small>the toolbox</small></a></li><li style="transition-delay:0.29s"><a href="#about" data-s="about">About <small>the human</small></a></li><li style="transition-delay:0.32s"><a href="#contact" data-s="contact">Contact <small>thirty minutes</small></a></li></ol>
+  <ol><li style="transition-delay:0.04s"><a href="#house" data-s="house">House <small>watch it think</small></a></li><li style="transition-delay:0.08s"><a href="#archive" data-s="archive">Archive <small>ninety years</small></a></li><li style="transition-delay:0.11s"><a href="#lab" data-s="lab">Lab <small>the system map</small></a></li><li style="transition-delay:0.15s"><a href="#stage" data-s="stage">Stage <small>talks and awards</small></a></li><li style="transition-delay:0.18s"><a href="#playbooks" data-s="playbooks">Playbooks <small>work and life</small></a></li><li style="transition-delay:0.22s"><a href="#writing" data-s="writing">Writing <small>opinions</small></a></li><li style="transition-delay:0.25s"><a href="#stack" data-s="stack">Stack <small>the toolbox</small></a></li><li style="transition-delay:0.29s"><a href="#about" data-s="about">About <small>the human</small></a></li><li style="transition-delay:0.32s"><a href="#contact" data-s="contact">Contact <small>thirty minutes</small></a></li></ol>
   <div class="reach">
     <a class="btn btn-glow" href="https://calendar.google.com/calendar/appointments/schedules/AcZssZ0U1brViZwrWHJzWAFDuYXFovXKUvNQaqh7NbSA3e3cjHAQlU3cZogHAp1v87UduzwFyRSjS0X6" target="_blank" rel="noopener">Book 30 minutes</a>
     <a class="btn btn-ghost" href="mailto:jason@freshcoastlab.com"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="M3.5 6.5l8.5 6.5 8.5-6.5"/></svg>Email</a>
@@ -132,31 +132,64 @@
     <p class="opsec rv">Layout and security hardware are illustrative on purpose. I don't publish my own attack surface.</p>
   </section>
 
+  <section id="archive" class="wrap">
+    <div class="eyebrow rv">The archive</div>
+    <h2 class="sec-title rv">Ninety years, one library.</h2>
+    <div class="arc-teaser rv">
+      <div class="arc-tv">
+        <canvas id="arc-canvas" aria-hidden="true"></canvas>
+        <div class="arc-seg" aria-hidden="true"><span><i></i></span><span><i></i></span><span><i></i></span><span><i></i></span><span><i></i></span><span><i></i></span><span><i></i></span><span><i></i></span><span><i></i></span></div>
+        <div class="arc-cap in" aria-live="polite"><span class="k" id="arc-cap-k">01 &middot; COMBINE</span><b id="arc-cap-t">Three accounts, one library.</b></div>
+        <ol hidden data-arc-caps><li data-k="01 &middot; COMBINE">Three accounts, one library.</li><li data-k="02 &middot; DEDUPLICATE">Keep the best copy. Lose the rest.</li><li data-k="03 &middot; SORT">Photos here. Home movies there.</li><li data-k="04 &middot; STITCH">One day, one episode.</li><li data-k="05 &middot; RESTORE">Film reels from the 1930s, finally dated.</li><li data-k="06 &middot; RECOGNIZE">A face engine that runs at home.</li><li data-k="07 &middot; PRESENT">Every video gets a title card.</li><li data-k="08 &middot; APPROVE">Nothing publishes without my yes.</li><li data-k="09 &middot; LIBRARY">A library that keeps learning.</li></ol>
+      </div>
+      <div class="arc-side">
+        <p>Decades of family photos, phone videos and 1930s film reels, scattered across three accounts and a box of reels. Agents merged, cleaned, dated, stitched and titled all of it, and nothing publishes without my yes. Every dot is a photo or a clip.</p>
+        <div class="arc-nums">
+          <span><b data-count="52221">0</b>photos, one library</span>
+          <span><b data-count="61">0</b>film reels restored</span>
+          <span><b data-count="7639">0</b>faces matched at home</span>
+          <span><b data-count="133">0</b>home videos, titled</span>
+        </div>
+        <a class="btn btn-ghost arc-go" href="/archive/">See how it was built <span aria-hidden="true">&rarr;</span></a>
+      </div>
+    </div>
+  </section>
+
   <section id="lab" class="wrap">
     <div class="eyebrow rv">The Lab</div>
     <h2 class="sec-title rv">A house that runs on agents.<br>And checks their work.</h2>
     <p class="sec-sub rv">This is the system I actually live with, not a demo. Pick a part to see what it taught me about AI in the real world.</p>
 
     <div class="lab-grid">
-      <div class="map rv" id="map">
-        <div class="map-hint" id="map-hint" aria-hidden="true"><i></i><span id="map-hint-t">TAP A NODE</span></div>
-        <svg viewBox="0 0 600 440" aria-hidden="true">
-          <path id="e1" class="edge" d="M300 220 C 230 180, 190 140, 120 110"/>
-          <path id="e2" class="edge" d="M300 220 C 230 260, 190 300, 120 330"/>
-          <path id="e3" class="edge" d="M300 220 C 370 180, 410 140, 480 110"/>
-          <path id="e4" class="edge" d="M300 220 C 370 260, 410 300, 480 330"/>
-          <path id="e5" class="edge" d="M120 110 C 80 180, 80 260, 120 330" stroke-dasharray="3 6"/>
-          <circle class="pulse" r="3"><animateMotion dur="3.2s" repeatCount="indefinite"><mpath href="#e1"/></animateMotion></circle>
-          <circle class="pulse" r="3"><animateMotion dur="4.1s" repeatCount="indefinite" keyPoints="1;0" keyTimes="0;1" calcMode="linear"><mpath href="#e2"/></animateMotion></circle>
-          <circle class="pulse" r="3"><animateMotion dur="3.7s" repeatCount="indefinite" keyPoints="1;0" keyTimes="0;1" calcMode="linear"><mpath href="#e3"/></animateMotion></circle>
-          <circle class="pulse" r="3"><animateMotion dur="2.9s" repeatCount="indefinite"><mpath href="#e4"/></animateMotion></circle>
-          <circle class="pulse" r="2.5" style="fill:#FF6A3D;filter:drop-shadow(0 0 4px #FF6A3D)"><animateMotion dur="5s" repeatCount="indefinite"><mpath href="#e5"/></animateMotion></circle>
+      <div class="map-wrap rv"><div class="map" id="map">
+        <svg viewBox="0 0 600 440" aria-hidden="true" class="lab-svg">
+          <defs>
+            <radialGradient id="pk"><stop offset="0" stop-color="#E9FFF6" stop-opacity=".95"/><stop offset=".3" stop-color="#3DF2B0" stop-opacity=".85"/><stop offset="1" stop-color="#3DF2B0" stop-opacity="0"/></radialGradient>
+            <radialGradient id="pkv"><stop offset="0" stop-color="#F1EEFF" stop-opacity=".95"/><stop offset=".3" stop-color="#9B8CFF" stop-opacity=".85"/><stop offset="1" stop-color="#9B8CFF" stop-opacity="0"/></radialGradient>
+            <radialGradient id="coreglow"><stop offset="0" stop-color="#9B8CFF" stop-opacity=".35"/><stop offset=".6" stop-color="#9B8CFF" stop-opacity=".08"/><stop offset="1" stop-color="#9B8CFF" stop-opacity="0"/></radialGradient>
+            <radialGradient id="dogglow"><stop offset="0" stop-color="#3DF2B0" stop-opacity=".22"/><stop offset="1" stop-color="#3DF2B0" stop-opacity="0"/></radialGradient>
+          </defs>
+          <g class="stars" fill="#CFE6F2"><circle cx="197" cy="72" r="0.6" opacity="0.18"/><circle cx="321" cy="163" r="0.6" opacity="0.51"/><circle cx="133" cy="44" r="1.2" opacity="0.18"/><circle cx="61" cy="188" r="0.6" opacity="0.53"/><circle cx="376" cy="255" r="0.6" opacity="0.38"/><circle cx="240" cy="422" r="0.6" opacity="0.37"/><circle cx="86" cy="186" r="0.6" opacity="0.38"/><circle cx="335" cy="297" r="0.6" opacity="0.38"/><circle cx="381" cy="166" r="0.6" opacity="0.38"/><circle cx="370" cy="218" r="1.2" opacity="0.46"/><circle cx="280" cy="400" r="1" opacity="0.27"/><circle cx="472" cy="304" r="0.8" opacity="0.18"/><circle cx="183" cy="218" r="1" opacity="0.44"/><circle cx="176" cy="424" r="0.6" opacity="0.35"/><circle cx="104" cy="153" r="1.2" opacity="0.32"/><circle cx="570" cy="41" r="1" opacity="0.29"/><circle cx="213" cy="219" r="1.2" opacity="0.18"/><circle cx="63" cy="122" r="0.6" opacity="0.17"/><circle cx="418" cy="282" r="1.2" opacity="0.26"/><circle cx="233" cy="292" r="0.6" opacity="0.53"/><circle cx="216" cy="267" r="1.2" opacity="0.17"/><circle cx="457" cy="63" r="0.8" opacity="0.31"/><circle cx="543" cy="219" r="0.8" opacity="0.33"/><circle cx="329" cy="383" r="1.2" opacity="0.50"/><circle cx="171" cy="184" r="1" opacity="0.42"/><circle cx="230" cy="106" r="0.6" opacity="0.22"/><circle cx="143" cy="107" r="1.2" opacity="0.48"/><circle cx="114" cy="128" r="0.8" opacity="0.32"/><circle cx="224" cy="248" r="0.8" opacity="0.43"/><circle cx="309" cy="270" r="0.6" opacity="0.33"/><circle cx="517" cy="412" r="1.2" opacity="0.31"/><circle cx="238" cy="212" r="1.2" opacity="0.17"/><circle cx="47" cy="97" r="0.8" opacity="0.19"/><circle cx="359" cy="51" r="0.8" opacity="0.36"/><circle cx="562" cy="268" r="0.6" opacity="0.50"/><circle cx="367" cy="71" r="1" opacity="0.53"/><circle cx="360" cy="209" r="0.6" opacity="0.49"/><circle cx="588" cy="206" r="1.2" opacity="0.27"/><circle cx="92" cy="326" r="1" opacity="0.34"/><circle cx="412" cy="227" r="0.8" opacity="0.53"/><circle cx="317" cy="70" r="0.6" opacity="0.45"/><circle cx="182" cy="281" r="0.6" opacity="0.43"/><circle cx="160" cy="163" r="0.8" opacity="0.29"/><circle cx="138" cy="238" r="1" opacity="0.40"/><circle cx="366" cy="342" r="0.8" opacity="0.47"/><circle cx="486" cy="322" r="0.8" opacity="0.23"/><circle cx="296" cy="318" r="0.6" opacity="0.47"/><circle cx="284" cy="90" r="1" opacity="0.33"/><circle cx="555" cy="427" r="1" opacity="0.18"/><circle cx="68" cy="207" r="1" opacity="0.23"/><circle cx="372" cy="390" r="0.6" opacity="0.34"/><circle cx="389" cy="347" r="0.6" opacity="0.48"/><circle cx="78" cy="173" r="0.8" opacity="0.34"/><circle cx="112" cy="343" r="1" opacity="0.18"/><circle cx="561" cy="314" r="1.2" opacity="0.31"/><circle cx="561" cy="315" r="0.8" opacity="0.55"/></g>
+          <circle cx="300" cy="220" r="150" fill="url(#coreglow)"/>
+          <circle cx="120" cy="330" r="120" fill="url(#dogglow)" class="dog-glow"/>
+          <g class="orbits">
+            <g class="orb o1"><ellipse cx="300" cy="220" rx="92" ry="34" transform="rotate(-18 300 220)"/><circle cx="385" cy="193" r="3" fill="#3DF2B0" stroke="none"/></g>
+            <g class="orb o2"><ellipse cx="300" cy="220" rx="84" ry="30" transform="rotate(28 300 220)"/><circle cx="228" cy="182" r="2.5" fill="#FF6A3D" stroke="none"/></g>
+            <circle class="orb o3" cx="300" cy="220" r="118" stroke-dasharray="2 9"/>
+          </g>
+          <g class="spokes"><path id="sp-home" class="spoke" d="M300 220 C 230 180, 190 140, 120 110"/><path class="flow" d="M300 220 C 230 180, 190 140, 120 110"/><path id="sp-watchdog" class="spoke" d="M300 220 C 230 260, 190 300, 120 330"/><path class="flow" d="M300 220 C 230 260, 190 300, 120 330"/><path id="sp-media" class="spoke" d="M300 220 C 370 180, 410 140, 480 110"/><path class="flow" d="M300 220 C 370 180, 410 140, 480 110"/><path id="sp-models" class="spoke" d="M300 220 C 370 260, 410 300, 480 330"/><path class="flow" d="M300 220 C 370 260, 410 300, 480 330"/></g>
+          <g class="audits"><path id="au-home" class="audit" data-k="home" d="M120 330 C 58 262, 58 178, 120 110"/><path id="au-memory" class="audit" data-k="memory" d="M120 330 C 190 318, 262 280, 300 220"/><path id="au-media" class="audit" data-k="media" d="M120 330 C 250 30, 380 20, 480 110"/><path id="au-models" class="audit" data-k="models" d="M120 330 C 240 410, 360 410, 480 330"/></g>
+          <g class="pkts"><g class="pkt"><circle r="9" fill="url(#pk)"/><circle r="1.8" fill="#fff"/><animateMotion dur="3.20s" begin="0.0s" repeatCount="indefinite"><mpath href="#sp-home"/></animateMotion></g><g class="pkt"><circle r="9" fill="url(#pkv)"/><circle r="1.8" fill="#fff"/><animateMotion dur="4.40s" begin="-1.3s" repeatCount="indefinite" keyPoints="1;0" keyTimes="0;1" calcMode="linear"><mpath href="#sp-home"/></animateMotion></g><g class="pkt"><circle r="9" fill="url(#pk)"/><circle r="1.8" fill="#fff"/><animateMotion dur="3.55s" begin="-0.7s" repeatCount="indefinite"><mpath href="#sp-watchdog"/></animateMotion></g><g class="pkt"><circle r="9" fill="url(#pkv)"/><circle r="1.8" fill="#fff"/><animateMotion dur="4.70s" begin="-2.0s" repeatCount="indefinite" keyPoints="1;0" keyTimes="0;1" calcMode="linear"><mpath href="#sp-watchdog"/></animateMotion></g><g class="pkt"><circle r="9" fill="url(#pk)"/><circle r="1.8" fill="#fff"/><animateMotion dur="3.90s" begin="-1.4s" repeatCount="indefinite"><mpath href="#sp-media"/></animateMotion></g><g class="pkt"><circle r="9" fill="url(#pkv)"/><circle r="1.8" fill="#fff"/><animateMotion dur="5.00s" begin="-2.7s" repeatCount="indefinite" keyPoints="1;0" keyTimes="0;1" calcMode="linear"><mpath href="#sp-media"/></animateMotion></g><g class="pkt"><circle r="9" fill="url(#pk)"/><circle r="1.8" fill="#fff"/><animateMotion dur="4.25s" begin="-2.1s" repeatCount="indefinite"><mpath href="#sp-models"/></animateMotion></g><g class="pkt"><circle r="9" fill="url(#pkv)"/><circle r="1.8" fill="#fff"/><animateMotion dur="5.30s" begin="-3.4s" repeatCount="indefinite" keyPoints="1;0" keyTimes="0;1" calcMode="linear"><mpath href="#sp-models"/></animateMotion></g></g>
         </svg>
-        <button class="node center" style="left:50%;top:50%" data-k="memory" aria-pressed="false"><span class="core"><svg viewBox="0 0 24 24" fill="none" stroke="#9B8CFF" stroke-width="1.6" stroke-linecap="round"><ellipse cx="12" cy="6" rx="7" ry="3"/><path d="M5 6v6c0 1.7 3.1 3 7 3s7-1.3 7-3V6"/><path d="M5 12v6c0 1.7 3.1 3 7 3s7-1.3 7-3v-6"/></svg></span><span class="nm">MEMORY</span></button>
-        <button class="node" style="left:20%;top:25%" data-k="home" aria-pressed="false"><span class="core"><svg viewBox="0 0 24 24" fill="none" stroke="#7CD3E0" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11l9-7 9 7"/><path d="M5 10v10h14V10"/></svg></span><span class="nm">HOME</span></button>
-        <button class="node" style="left:20%;top:75%" data-k="watchdog" aria-pressed="true"><span class="core"><svg viewBox="0 0 24 24" fill="none" stroke="#3DF2B0" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12h4l2-5 4 10 2-5h8"/></svg></span><span class="nm">WATCHDOG</span></button>
-        <button class="node" style="left:80%;top:25%" data-k="media" aria-pressed="false"><span class="core"><svg viewBox="0 0 24 24" fill="none" stroke="#7CD3E0" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="M10 9l5 3-5 3z"/></svg></span><span class="nm">ARCHIVE</span></button>
-        <button class="node" style="left:80%;top:75%" data-k="models" aria-pressed="false"><span class="core"><svg viewBox="0 0 24 24" fill="none" stroke="#7CD3E0" stroke-width="1.6" stroke-linecap="round"><circle cx="12" cy="12" r="3"/><circle cx="5" cy="6" r="2"/><circle cx="19" cy="6" r="2"/><circle cx="12" cy="20" r="2"/><path d="M7 7l3 3M17 7l-3 3M12 15v3"/></svg></span><span class="nm">MODELS</span></button>
+        <button class="node center" style="left:50%;top:50%" data-k="memory" aria-pressed="false"><span class="core"><svg viewBox="0 0 24 24" fill="none" stroke="#9B8CFF" stroke-width="1.6" stroke-linecap="round"><ellipse cx="12" cy="6" rx="7" ry="3"/><path d="M5 6v6c0 1.7 3.1 3 7 3s7-1.3 7-3V6"/><path d="M5 12v6c0 1.7 3.1 3 7 3s7-1.3 7-3v-6"/></svg></span><span class="nm">MEMORY</span><span class="st">SYNCED EVERY 2 H</span></button>
+        <button class="node" style="left:20%;top:25%" data-k="home" aria-pressed="false"><span class="core"><svg viewBox="0 0 24 24" fill="none" stroke="#7CD3E0" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11l9-7 9 7"/><path d="M5 10v10h14V10"/></svg></span><span class="nm">HOME</span><span class="st">39 AUTOMATIONS</span></button>
+        <button class="node" style="left:20%;top:75%" data-k="watchdog" aria-pressed="true"><span class="core"><svg viewBox="0 0 24 24" fill="none" stroke="#3DF2B0" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12h4l2-5 4 10 2-5h8"/></svg></span><span class="nm">WATCHDOG</span><span class="st">AUDITING NOW</span></button>
+        <button class="node" style="left:80%;top:25%" data-k="media" aria-pressed="false"><span class="core"><svg viewBox="0 0 24 24" fill="none" stroke="#7CD3E0" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="M10 9l5 3-5 3z"/></svg></span><span class="nm">ARCHIVE</span><span class="st">52,221 PHOTOS</span></button>
+        <button class="node" style="left:80%;top:75%" data-k="models" aria-pressed="false"><span class="core"><svg viewBox="0 0 24 24" fill="none" stroke="#7CD3E0" stroke-width="1.6" stroke-linecap="round"><circle cx="12" cy="12" r="3"/><circle cx="5" cy="6" r="2"/><circle cx="19" cy="6" r="2"/><circle cx="12" cy="20" r="2"/><path d="M7 7l3 3M17 7l-3 3M12 15v3"/></svg></span><span class="nm">MODELS</span><span class="st">ANY MODEL</span></button>
+      <div class="badges" id="lab-badges" aria-hidden="true"></div>
+      </div>
+      <div class="map-hint" id="map-hint" aria-hidden="true"><i></i><span id="map-hint-t">TAP A NODE</span></div>
+      <div class="audit-log" aria-label="Watchdog audit log"><div class="al-hd mono"><span><i></i>WATCHDOG AUDIT</span><span>REPLAY OF REAL CHECKS</span></div><ol id="audit-lines" class="mono"></ol></div>
       </div>
 
       <div class="story rv" aria-live="polite">
@@ -207,29 +240,6 @@
     <h2 class="sec-title rv">Short pieces. Actual opinions.</h2>
     <div class="posts"><a class="post rv" href="/writing/the-camera-that-went-quiet/"><span class="when mono">SEP 2026 &middot; CASE STUDY</span><h3>The camera that went quiet for six days.</h3><p>Every dashboard said healthy. Nothing was. What it took to find, and what I changed so it can’t hide again.</p><span class="go mono">READ <span aria-hidden="true">&rarr;</span></span></a><a class="post rv" href="/writing/the-differentiator-is-trust/"><span class="when mono">JUN 2026 &middot; ON STAGE</span><h3>The differentiator isn&#x27;t the model. It&#x27;s the trust.</h3><p>Thirty seconds on stage at Pax8 Beyond, expanded.</p><span class="go mono">READ <span aria-hidden="true">&rarr;</span></span></a><a class="post rv" href="/writing/the-ai-first-msp/"><span class="when mono">JUN 2026 &middot; MSP 3.0</span><h3>The AI-first MSP doesn&#x27;t bolt AI on.</h3><p>A theme from our roadshow at Microsoft&#x27;s Atlanta office.</p><span class="go mono">READ <span aria-hidden="true">&rarr;</span></span></a></div>
     <a class="btn btn-ghost more rv" href="/writing/">All 9 pieces <span aria-hidden="true">&rarr;</span></a>
-  </section>
-
-  <section id="archive" class="wrap">
-    <div class="eyebrow rv">The archive</div>
-    <h2 class="sec-title rv">Ninety years, one library.</h2>
-    <div class="arc-teaser rv">
-      <div class="arc-tv">
-        <canvas id="arc-canvas" aria-hidden="true"></canvas>
-        <div class="arc-seg" aria-hidden="true"><span><i></i></span><span><i></i></span><span><i></i></span><span><i></i></span><span><i></i></span><span><i></i></span><span><i></i></span><span><i></i></span><span><i></i></span></div>
-        <div class="arc-cap in" aria-live="polite"><span class="k" id="arc-cap-k">01 &middot; COMBINE</span><b id="arc-cap-t">Three accounts, one library.</b></div>
-        <ol hidden data-arc-caps><li data-k="01 &middot; COMBINE">Three accounts, one library.</li><li data-k="02 &middot; DEDUPLICATE">Keep the best copy. Lose the rest.</li><li data-k="03 &middot; SORT">Photos here. Home movies there.</li><li data-k="04 &middot; STITCH">One day, one episode.</li><li data-k="05 &middot; RESTORE">Film reels from the 1930s, finally dated.</li><li data-k="06 &middot; RECOGNIZE">A face engine that runs at home.</li><li data-k="07 &middot; PRESENT">Every video gets a title card.</li><li data-k="08 &middot; APPROVE">Nothing publishes without my yes.</li><li data-k="09 &middot; LIBRARY">A library that keeps learning.</li></ol>
-      </div>
-      <div class="arc-side">
-        <p>Decades of family photos, phone videos and 1930s film reels, scattered across three accounts and a box of reels. Agents merged, cleaned, dated, stitched and titled all of it, and nothing publishes without my yes. Every dot is a photo or a clip.</p>
-        <div class="arc-nums">
-          <span><b data-count="52221">0</b>photos, one library</span>
-          <span><b data-count="61">0</b>film reels restored</span>
-          <span><b data-count="7639">0</b>faces matched at home</span>
-          <span><b data-count="133">0</b>home videos, titled</span>
-        </div>
-        <a class="btn btn-ghost arc-go" href="/archive/">See how it was built <span aria-hidden="true">&rarr;</span></a>
-      </div>
-    </div>
   </section>
 
   <section id="stack" class="wrap">
@@ -504,5 +514,6 @@ void main(){
 <script src="/assets/house-switch.js" defer></script>
 <script src="/assets/archive.js" defer></script>
 <script src="/assets/playbooks.js" defer></script>
+<script src="/assets/lab.js" defer></script>
 </body>
 </html>
