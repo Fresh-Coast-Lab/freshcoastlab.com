@@ -1,0 +1,38 @@
+{
+ "floor": 0.1,
+ "groups": [
+  "office",
+  "laundry",
+  "kitchen",
+  "pantry",
+  "garage",
+  "living",
+  "yard",
+  "drive",
+  "porch"
+ ],
+ "scales": {
+  "house_sun": 0.961959958076477,
+  "house_sky": 1.0,
+  "house_office": 2.408200979232788,
+  "house_laundry": 1.0048975944519043,
+  "house_kitchen": 1.6572391986846924,
+  "house_pantry": 1.2511711120605469,
+  "house_garage": 1.0205997228622437,
+  "house_living": 2.1144609451293945,
+  "house_yard": 0.6839370727539062,
+  "house_drive": 4.419158935546875,
+  "house_porch": 0.2571517527103424,
+  "lot_sun": 0.952909529209137,
+  "lot_sky": 1.0000001192092896,
+  "lot_office": 0.16162364184856415,
+  "lot_laundry": 0.046120524406433105,
+  "lot_kitchen": 0.13368499279022217,
+  "lot_pantry": 0.1261926293373108,
+  "lot_garage": 0.01549700740724802,
+  "lot_living": 0.5807949304580688,
+  "lot_yard": 5.335245132446289,
+  "lot_drive": 0.8713075518608093,
+  "lot_porch": 0.7097998857498169
+ }
+}
