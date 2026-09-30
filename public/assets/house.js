@@ -8,6 +8,7 @@
   const NS = 'http://www.w3.org/2000/svg';
   const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
   const stage = svg.closest('.stage');
+  let run = 0; // story generation counter
   let pausedUntil = 0;
 
   // ---------- isometric projection ----------
@@ -257,9 +258,10 @@
     const [a, b] = P(x, y, z);
     pos[id] = [a, b];
     const gg = el('g', { class: 'dev', transform: `translate(${a.toFixed(1)},${b.toFixed(1)})` }, gDev);
-    el('circle', { r: 17, class: 'hit' }, gg);
-    el('circle', { r: 9.5, class: 'ring0' }, gg);
-    el('path', { d: I[t], class: 'ic' }, gg);
+    const sc = el('g', { class: 'dsc' }, gg);
+    el('circle', { r: 17, class: 'hit' }, sc);
+    el('circle', { r: 9.5, class: 'ring0' }, sc);
+    el('path', { d: I[t], class: 'ic' }, sc);
     const l = el('text', { y: -13, class: 'lbl', 'text-anchor': 'middle' }, gg);
     l.textContent = name;
     dev[id] = gg; lbl[id] = l;
@@ -267,25 +269,62 @@
   const MESH = [['zb', 'r1'], ['zb', 'r2'], ['zb', 'm_garage'], ['zb', 'm_bench'], ['r1', 'm_laundry'], ['r1', 'leak'], ['r1', 'l_pantry'], ['r2', 'm_living'], ['r2', 'tilt'], ['r2', 'l_garage']];
   for (const [a, b] of MESH) el('line', { x1: pos[a][0], y1: pos[a][1], x2: pos[b][0], y2: pos[b][1] }, gMesh);
 
-  // ---------- camera: on narrow screens glide to the action ----------
+  // ---------- camera: on phones each story gets its own fixed shot. The frame cuts (a quick crossfade)
+  // to the rooms that matter and holds still while the story plays, with a slow push-in for life.
   const pan = svg.parentElement;
-  let focusTimer = 0;
-  const focusXY = (x, y) => {
-    if (!pan || pan.scrollWidth <= pan.clientWidth + 4) return;
-    clearTimeout(focusTimer);
-    focusTimer = setTimeout(() => {
-      const vb = svg.viewBox.baseVal, scale = svg.getBoundingClientRect().width / vb.width;
-      const left = (x - vb.x) * scale - pan.clientWidth / 2;
-      pan.scrollTo({ left: Math.max(0, left), behavior: reduce ? 'auto' : 'smooth' });
-    }, 140);
+  const compactQ = matchMedia('(max-width: 760px)');
+  const Z = 2.4, VB = { x: -455, y: -105, w: 1010, h: 540 };
+  const WIDE = [62, 178, 0.54];
+  // [grid x, grid y, zoom] per story, framed on the rooms it involves
+  const SHOT = { garage: [3.4, 10.2, 0.84], leave: [5.2, 12.6, 0.72], laundry: [9, 2.6, 0.9], art: [12.4, 10.6, 0.74],
+    drive: [3.8, 14.2, 0.66], leak: [8.6, 2.4, 0.92], smoke: [15.8, 2.4, 0.74], fridge: [16.4, 4.2, 0.86], gopen: [3.4, 12.2, 0.8], watchdog: [1.2, 8.6, 0.72] };
+  let overview = false, shotNow = null;
+  const camK = (sc) => (sc * Z * pan.clientWidth) / VB.w; // screen px per svg unit
+  const camT = ([x, y, sc]) => {
+    const W = pan.clientWidth, H = pan.clientHeight, k = camK(sc);
+    const fw = VB.w * k, fh = VB.h * k;
+    let tx = W / 2 - (x - VB.x) * k, ty = H / 2 - (y - VB.y) * k;
+    tx = fw <= W ? (W - fw) / 2 : Math.min(0, Math.max(W - fw, tx));
+    ty = fh <= H ? (H - fh) / 2 : Math.min(0, Math.max(H - fh, ty));
+    return `translate(${tx.toFixed(1)}px,${ty.toFixed(1)}px) scale(${sc.toFixed(4)})`;
   };
+  const shotFor = (k) => { if (overview || !SHOT[k]) return WIDE; const [gx, gy, sc] = SHOT[k]; const [x, y] = P(gx, gy); return [x, y, sc]; };
+  let cutTimer = 0;
+  const frame = (shot, cut = true) => {
+    if (!compactQ.matches) { svg.style.transform = ''; svg.style.transition = ''; return; }
+    shotNow = shot;
+    const settle = () => {
+      svg.style.transition = 'none'; svg.style.transform = camT(shot);
+      if (reduce) return;
+      requestAnimationFrame(() => requestAnimationFrame(() => { // slow push-in, compositor only
+        svg.style.transition = 'transform 16s cubic-bezier(.3,0,.4,1)'; svg.style.transform = camT([shot[0], shot[1], shot[2] * 1.06]); }));
+    };
+    clearTimeout(cutTimer);
+    if (!cut || reduce) { settle(); return; }
+    pan.classList.add('cut');
+    cutTimer = setTimeout(() => { settle(); pan.classList.remove('cut'); }, 230);
+  };
+  const focusXY = () => {}; // stories no longer steer the camera mid-scene
+  const camBtn = document.getElementById('house-cam');
+  const ICON_ALL = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5"/></svg>';
+  const ICON_IN = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="6"/><path d="M20 20l-4.5-4.5M11 8.5v5M8.5 11h5"/></svg>';
+  const syncBtn = () => { if (!camBtn) return; camBtn.innerHTML = overview ? ICON_IN + 'CLOSE-UP' : ICON_ALL + 'WHOLE HOUSE'; camBtn.setAttribute('aria-pressed', overview); };
+  let curStory = null;
+  if (camBtn) camBtn.addEventListener('click', () => { overview = !overview; syncBtn(); frame(shotFor(curStory)); });
+  syncBtn();
+  compactQ.addEventListener('change', () => frame(shotFor(curStory), false));
+  let rz = 0; new ResizeObserver(() => { clearTimeout(rz); rz = setTimeout(() => shotNow && frame(shotNow, false), 120); }).observe(pan);
+  if (compactQ.matches) { svg.style.setProperty('--Z', Z); frame(WIDE, false); }
+  const hint = document.getElementById('house-hint');
+  let hintShown = false;
+  const hideHint = () => hint && hint.classList.remove('show');
   const focus = (id) => focusXY(...pos[id]);
 
   // ---------- effects ----------
   const tween = (ms, fn, done) => {
     if (reduce) { fn(1); done && done(); return; }
-    const t0 = performance.now();
-    const step = (now) => { const t = Math.min(1, (now - t0) / ms); fn(t); if (t < 1) requestAnimationFrame(step); else done && done(); };
+    const t0 = performance.now(), gen = run; // a newer story cancels this one's leftover animations
+    const step = (now) => { if (gen !== run) { done && done(); return; } const t = Math.min(1, (now - t0) / ms); fn(t); if (t < 1) requestAnimationFrame(step); else done && done(); };
     requestAnimationFrame(step);
   };
   const ease = (t) => (t < 0.5 ? 2 * t * t : 1 - Math.pow(-2 * t + 2, 2) / 2);
@@ -348,7 +387,7 @@
     const b = document.createElement('b'); b.textContent = fmt(clock);
     d.append(b, document.createTextNode(text));
     logEl.append(d);
-    while (logEl.children.length > 11) logEl.firstChild.remove();
+    while (logEl.children.length > (compactQ.matches ? 4 : 11)) logEl.firstChild.remove();
     tick();
   };
   const TIERS = { active: ['ROUTINE', 'active'], ts: ['TIME-SENSITIVE', 'ts'], crit: ['CRITICAL · OVERRIDES SILENT MODE', 'crit'] };
@@ -359,14 +398,25 @@
     const h = document.createElement('div'); h.className = 'nt'; h.textContent = title;
     const p = document.createElement('div'); p.className = 'nb'; p.textContent = body;
     n.append(t, h, p); noteEl.prepend(n);
-    while (noteEl.children.length > 2) noteEl.lastChild.remove();
+    const max = compactQ.matches ? 1 : 2;
+    while (noteEl.children.length > max) noteEl.lastChild.remove();
+    if (compactQ.matches) {
+      const bye = () => { if (n.isConnected && !n.classList.contains('out')) { n.classList.add('out'); setTimeout(() => n.remove(), 420); } };
+      setTimeout(bye, tier === 'crit' ? 6500 : 4800);
+      let y0 = null;
+      n.addEventListener('pointerdown', (e) => { y0 = e.clientY; n.setPointerCapture(e.pointerId); n.style.animation = 'none'; });
+      n.addEventListener('pointermove', (e) => { if (y0 === null) return; const dy = Math.min(0, e.clientY - y0); n.style.transform = `translateY(${dy}px)`; n.style.opacity = 1 + dy / 120; });
+      n.addEventListener('pointerup', (e) => { if (y0 === null) return; const dy = e.clientY - y0; y0 = null;
+        if (dy < -28) { n.style.transition = 'transform .25s ease,opacity .25s ease'; n.style.transform = 'translateY(-120%)'; n.style.opacity = 0; setTimeout(() => n.remove(), 260); }
+        else { n.style.transition = 'transform .3s var(--spring),opacity .2s'; n.style.transform = ''; n.style.opacity = ''; } });
+    }
   };
 
   for (const [id, [, , , name]] of Object.entries(D)) {
     const gg = dev[id];
     gg.setAttribute('tabindex', '0'); gg.setAttribute('role', 'button'); gg.setAttribute('aria-label', name);
     const poke = () => {
-      pausedUntil = Date.now() + 20000;
+      pausedUntil = Date.now() + 20000; hideHint();
       gg.classList.add('peek'); setTimeout(() => gg.classList.remove('peek'), 2600);
       ring(id, '#7CD3E0', 1);
       if (id !== 'hub') pulse(id, 'hub', '#7CD3E0');
@@ -481,17 +531,74 @@
     b.addEventListener('click', () => { pausedUntil = Date.now() + 45000; play(k); });
     bar.append(b); btn[k] = b;
   }
-  let run = 0, idx = 0, inView = false, busy = false;
+  let idx = 0, inView = false, busy = false, started = false;
+  // measured run times (ms), used for the progress bar on the active chip
+  const DUR = { dusk: 9800, garage: 7400, leave: 9600, laundry: 6800, art: 5600, drive: 11200, leak: 5200, smoke: 5200, fridge: 9400, gopen: 8200, watchdog: 5400 };
+  let progRaf = 0;
+  const progress = (k, id) => {
+    cancelAnimationFrame(progRaf);
+    const b = btn[k], t0 = performance.now(), d = DUR[k] || 8000;
+    const step = (now) => { if (id !== run) { b.style.removeProperty('--run'); return; } const v = Math.min(1, (now - t0) / d).toFixed(3); b.style.setProperty('--run', v); if (player) player.style.setProperty('--run', v); if (busy) progRaf = requestAnimationFrame(step); };
+    if (!reduce && compactQ.matches) progRaf = requestAnimationFrame(step);
+  };
+  // phones: a "now playing" bar with prev / next, and a bottom sheet listing every moment
+  const ABOUT = { dusk: ['Lights follow the sunset', ''], garage: ['Motion, then a light-level check', ''], leave: ['Lock, verify, close, confirm', 'ts'],
+    laundry: ['Nags until someone moves the load', 'active'], art: ['The TV becomes a painting', ''], drive: ['Headlights open the garage', 'active'],
+    leak: ['Full volume, even on silent', 'crit'], smoke: ['One alert per detector', 'crit'], fridge: ['Three minutes, then it speaks up', 'active'],
+    gopen: ['Thirty minutes, closed from the phone', 'ts'], watchdog: ['Catches a sensor that stopped talking', 'ts'] };
+  const TIER_TAG = { active: ['ROUTINE', '#7CD3E0'], ts: ['TIME-SENSITIVE', '#FFC061'], crit: ['CRITICAL', '#FF6B61'] };
+  const player = document.getElementById('house-player'), sheet = document.getElementById('house-sheet');
+  const pn = document.getElementById('house-pn'), pname = document.getElementById('house-pname'), list = document.getElementById('house-list');
+  const pad = (n) => String(n).padStart(2, '0');
+  const rows = {};
+  let cur = 'dusk', sheetFocus = null;
+  const setSheet = (open) => {
+    sheet.classList.toggle('open', open); document.body.classList.toggle('locked', open);
+    if (open) { sheetFocus = document.activeElement; setTimeout(() => (rows[cur] || sheet.querySelector('.x')).focus({ preventScroll: true }), 60); }
+    else if (sheetFocus) sheetFocus.focus({ preventScroll: true });
+  };
+  if (player && sheet) {
+    order.forEach((k, i) => {
+      const li = document.createElement('li'), b = document.createElement('button'); b.type = 'button';
+      const [d, tier] = ABOUT[k] || ['', ''];
+      b.innerHTML = `<span class="n">${pad(i + 1)}</span><span class="t"></span>${tier ? `<span class="tier" style="color:${TIER_TAG[tier][1]}">${TIER_TAG[tier][0]}</span>` : ''}<span class="d"></span>`;
+      b.querySelector('.t').textContent = SC[k].name; b.querySelector('.d').textContent = d;
+      b.addEventListener('click', () => { setSheet(false); pausedUntil = Date.now() + 45000; play(k); });
+      li.append(b); list.append(li); rows[k] = b;
+    });
+    player.querySelector('.pt').addEventListener('click', () => setSheet(true));
+    player.querySelectorAll('.pv').forEach((b) => b.addEventListener('click', () => {
+      const n = (order.indexOf(cur) + Number(b.dataset.d) + order.length) % order.length; pausedUntil = Date.now() + 45000; play(order[n]); }));
+    sheet.querySelector('.x').addEventListener('click', () => setSheet(false));
+    sheet.querySelector('.sheet-bg').addEventListener('click', () => setSheet(false));
+    addEventListener('keydown', (e) => { if (e.key === 'Escape' && sheet.classList.contains('open')) setSheet(false); });
+    const panel = sheet.querySelector('.sheet-panel'); let y0 = null;
+    panel.addEventListener('pointerdown', (e) => { if (panel.scrollTop > 0 || !e.target.closest('.grab,.sheet-hd')) return; y0 = e.clientY; panel.style.transition = 'none'; panel.setPointerCapture(e.pointerId); });
+    panel.addEventListener('pointermove', (e) => { if (y0 !== null) panel.style.transform = `translateY(${Math.max(0, e.clientY - y0)}px)`; });
+    panel.addEventListener('pointerup', (e) => { if (y0 === null) return; const dy = e.clientY - y0; y0 = null; panel.style.transition = ''; panel.style.transform = ''; if (dy > 70) setSheet(false); });
+  }
+  const nowPlaying = (k) => {
+    cur = k; if (!player) return;
+    pn.textContent = `${pad(order.indexOf(k) + 1)} / ${order.length}`; pname.textContent = SC[k].name;
+    Object.entries(rows).forEach(([kk, b]) => b.setAttribute('aria-current', kk === k ? 'true' : 'false'));
+  };
+  const chipIntoView = (b) => { const r = bar.getBoundingClientRect(), c = b.getBoundingClientRect();
+    if (c.left < r.left + 12 || c.right > r.right - 36) bar.scrollTo({ left: bar.scrollLeft + c.left - r.left - 20, behavior: reduce ? 'auto' : 'smooth' }); };
   const sleep = (ms) => new Promise((r) => setTimeout(r, reduce ? 0 : ms));
   async function play(k) {
     const id = ++run; busy = true;
-    order.forEach((o) => btn[o].setAttribute('aria-pressed', o === k ? 'true' : 'false'));
-    reset(SC[k].setup);
+    order.forEach((o) => { btn[o].setAttribute('aria-pressed', o === k ? 'true' : 'false'); if (o !== k) btn[o].style.removeProperty('--run'); });
+    started = true; reset(SC[k].setup); chipIntoView(btn[k]); progress(k, id);
+    curStory = k; frame(shotFor(k)); nowPlaying(k); if (player) player.style.setProperty('--run', 0);
     const w = async (ms) => { clock += Math.max(1, Math.round(ms / 400)); tick(); await sleep(ms); if (id !== run) throw 0; };
     try { await SC[k].run(w); } catch (e) { return; }
-    if (id === run) { busy = false; idx = (order.indexOf(k) + 1) % order.length; }
+    if (id === run) { busy = false; idx = (order.indexOf(k) + 1) % order.length; btn[k].style.setProperty('--run', 1); if (player) player.style.setProperty('--run', 1);
+    }
   }
-  new IntersectionObserver((es) => { inView = es[0].isIntersecting; }, { threshold: 0.25 }).observe(svg);
+  new IntersectionObserver((es) => {
+    inView = es[0].isIntersecting;
+    if (inView && !hintShown && hint && compactQ.matches) { hintShown = true; setTimeout(() => { hint.classList.add('show'); setTimeout(hideHint, 3200); }, 5200); }
+  }, { threshold: 0.5 }).observe(stage || svg);
   let lastEnd = 0;
   setInterval(() => {
     if (reduce || !inView || document.hidden || Date.now() < pausedUntil) return;
@@ -499,6 +606,7 @@
     if (Date.now() - lastEnd > 2600) play(order[idx]);
   }, 400);
   document.getElementById('house-mesh').addEventListener('change', (e) => gMesh.classList.toggle('show', e.target.checked));
-  requestAnimationFrame(() => { if (pan.scrollWidth > pan.clientWidth) pan.scrollLeft = (pan.scrollWidth - pan.clientWidth) * 0.45; });
-  play('dusk');
+  // start the first story when the house is actually on screen, not while it's still below the fold
+  reset(SC.dusk.setup); btn.dusk.setAttribute('aria-pressed', 'true');
+  window.__house = { play, SC };
 })();
