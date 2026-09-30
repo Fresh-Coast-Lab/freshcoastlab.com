@@ -2,7 +2,7 @@
 (() => {
   // nav: floating dock after the hero, scroll-spy, full-screen menu
   const dock = document.getElementById('dock'), menu = document.getElementById('menu'), here = document.getElementById('here');
-  const secs = ['lab', 'house', 'archive', 'playbooks', 'stack', 'stage', 'writing', 'about', 'contact'].map((id) => document.getElementById(id)).filter(Boolean);
+  const secs = ['lab', 'house', 'stage', 'playbooks', 'writing', 'archive', 'stack', 'about', 'contact'].map((id) => document.getElementById(id)).filter(Boolean);
   const NAMES = { lab: 'THE LAB', house: 'THE HOUSE', archive: 'THE ARCHIVE', playbooks: 'PLAYBOOKS', stack: 'THE STACK', stage: 'STAGE', writing: 'WRITING', about: 'ABOUT', contact: 'CONTACT' };
   const heroEl = document.querySelector('.hero'); // absent on inner pages: the dock is always shown there
   let cur = null;

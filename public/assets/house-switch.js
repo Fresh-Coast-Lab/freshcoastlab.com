@@ -11,7 +11,7 @@
 
   // STEP A: reasons to stay 2D before loading anything
   const verdict = store.get('h3d-verdict');
-  if (verdict === 'fail' && params.get('house') !== '3d') return;
+  if (verdict === 'fail' && params.get('house') !== '3d') { if (link) link.hidden = true; return; } // this device couldn't carry it: don't offer it
   if (matchMedia('(prefers-reduced-motion: reduce)').matches) return;
   const conn = navigator.connection || {};
   const lean = conn.saveData || /(^|-)2g$/.test(conn.effectiveType || '');
@@ -54,7 +54,7 @@
     if (e.origin !== location.origin || !frame || e.source !== frame.contentWindow) return;
     const d = e.data || {};
     if (d.type === 'h3d-size' && d.h > 200) frame.style.height = Math.ceil(d.h) + 'px';
-    if (d.type === 'h3d-fallback') { store.set('h3d-verdict', 'fail'); unmount(d.reason || 'slow'); }
+    if (d.type === 'h3d-fallback') { store.set('h3d-verdict', 'fail'); unmount(d.reason || 'slow'); if (link) link.hidden = true; }
     if (d.type === 'h3d-verdict' && d.v) store.set('h3d-verdict', d.v);
   });
 

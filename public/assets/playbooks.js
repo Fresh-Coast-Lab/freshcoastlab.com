@@ -6,36 +6,46 @@
   const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
   const STATUS = { run: 'RUNNING', built: 'BUILT, PARKED', wip: 'BUILDING', plan: 'BLUEPRINT' };
   const P = [
-    { id: 'brief', s: 'wip', k: 'Productivity', t: 'The morning brief',
-      one: 'One screen that answers “what needs me today?”',
-      what: 'One scheduled agent reads three Google accounts, a work calendar feed and my reminders, then writes a single brief to my Home Assistant dashboard: meetings, what needs a reply, what is overdue, what the house needs. It drafts. It never sends.',
-      how: ['Claude', 'Google Calendar + Gmail', 'Apple Reminders', 'Home Assistant markdown card', 'Uptime Kuma heartbeats'],
-      biz: 'An owner’s daily brief: today’s jobs, overdue invoices, customers waiting on an answer, and the one thing that will bite you if nobody looks.' },
-    { id: 'cos', s: 'built', k: 'Business', t: 'A chief of staff in a browser tab',
-      one: 'Inbox, calendar, CRM and a daily briefing that knows my voice.',
-      what: 'Podium, my own web app. It reads Gmail and my calendar, keeps a lightweight CRM (snap a business card and it becomes a contact), tracks follow-ups and expenses, drafts replies and review responses, and posts a daily briefing to Slack. It writes speeches, decks and social posts in my voice.',
-      how: ['Python + Flask', 'Claude API', 'MCP bridge to Gmail + Calendar', 'Vision for business cards', 'pptxgenjs for decks', 'Slack API'],
-      biz: 'A front office in a box for a two to ten person business: every lead captured, every follow-up remembered, every review answered the same day.' },
     { id: 'interview', s: 'run', k: 'Business', t: 'The automation interview',
       one: 'The first hour of every automation project, done by an agent.',
       what: 'A structured discovery interview: one question at a time, never advising early. Identity, team and tools, pain points, a depth drill on time and cost, constraints. Then it writes an Automation Design Brief with opportunities, hours saved, complexity, compliance notes, and a ready-to-paste build prompt.',
       how: ['A system prompt that works in any model', 'Claude', 'Structured output'],
       biz: 'Try the pocket version below, or copy the real prompt and run it yourself.', demo: true },
+    { id: 'cos', s: 'built', k: 'Business', t: 'A chief of staff in a browser tab',
+      one: 'Inbox, calendar, CRM and a daily briefing that knows my voice.',
+      what: 'Podium, my own web app. It reads Gmail and my calendar, keeps a lightweight CRM (snap a business card and it becomes a contact), tracks follow-ups and expenses, drafts replies and review responses, and posts a daily briefing to Slack. It writes speeches, decks and social posts in my voice.',
+      how: ['Python + Flask', 'Claude API', 'MCP bridge to Gmail + Calendar', 'Vision for business cards', 'pptxgenjs for decks', 'Slack API'],
+      biz: 'A front office in a box for a two to ten person business: every lead captured, every follow-up remembered, every review answered the same day.' },
+    { id: 'brief', s: 'wip', k: 'Productivity', t: 'The morning brief',
+      one: 'One screen that answers “what needs me today?”',
+      what: 'One scheduled agent reads three Google accounts, a work calendar feed and my reminders, then writes a single brief to my Home Assistant dashboard: meetings, what needs a reply, what is overdue, what the house needs. It drafts. It never sends.',
+      how: ['Claude', 'Google Calendar + Gmail', 'Apple Reminders', 'Home Assistant markdown card', 'Uptime Kuma heartbeats'],
+      biz: 'An owner’s daily brief: today’s jobs, overdue invoices, customers waiting on an answer, and the one thing that will bite you if nobody looks.' },
+    { id: 'textback', s: 'plan', k: 'Small business', t: 'The front desk that never misses a call',
+      one: 'Missed call, instant text, booked appointment.',
+      what: 'The pattern: a missed call triggers a friendly text within seconds, an agent answers the common questions, offers real open slots from the calendar, and books it. Anything unusual goes to a human with the whole conversation attached.',
+      how: ['Phone system webhooks', 'An SMS provider', 'Calendar booking', 'Claude with guardrails'],
+      biz: 'Built for trades, clinics and salons, where every missed call is a customer calling the next name on the list.' },
     { id: 'strategist', s: 'run', k: 'Productivity', t: 'My AI channel strategist',
       one: 'Talk tracks and decks that sound like me, plus a news brief every morning.',
       what: 'Built from scratch over a few weeks of late nights. It knows my voice, my audience and what is happening in cybersecurity, drafts presentations and talk tracks, and briefs me on MSP news each morning. I once checked in on it from a dentist’s chair.',
       how: ['Python', 'Claude API', 'A curated voice and audience profile', 'Scheduled news brief'],
       biz: 'Every sales team has one person whose emails and decks just land. Capture how they write and let everyone start from that.' },
-    { id: 'travel', s: 'run', k: 'Productivity', t: 'Travel on autopilot',
-      one: 'Book a flight once. Every calendar that needs it, has it.',
-      what: 'Flight and hotel confirmations land in Gmail and go straight onto my calendar. A filter forwards them to my work address so coworkers can see when I’m on the road, and a shared schedule keeps home in the loop. Nobody types an itinerary twice.',
-      how: ['Gmail filters', 'Google Calendar', 'TripIt', 'Google Sheets'],
-      biz: 'Team travel visibility with zero admin: who is where, which client, and who is covering.' },
     { id: 'audit', s: 'wip', k: 'Reliability', t: 'The silent-failure audit',
       one: 'Healthy-looking systems that stopped working. Caught weekly.',
       what: 'Born from a camera that went quiet for six days while every dashboard said healthy. Always-on checks compare signals that should agree, and flag anything that should have fired by now. A weekly agent reviews every automation and reports only what changed. It never fixes anything on its own.',
       how: ['Home Assistant', 'Paired-signal checks', 'A weekly audit agent', 'An off-box dead-man’s switch'],
       biz: 'The question every business should ask about its backups, alarms and monitoring: is it actually running, or does it just look like it is?' },
+    { id: 'chaser', s: 'plan', k: 'Small business', t: 'The polite invoice chaser',
+      one: 'Tiered nudges, the same way my house handles alerts.',
+      what: 'The house alert tiers, applied to money: a friendly reminder before the due date, a firmer one after, and a heads-up to the owner only when it actually needs a human. Every message drafted, logged, and stopped the moment the payment lands.',
+      how: ['Accounting system API', 'Email + SMS', 'Claude for tone', 'A human approval step'],
+      biz: 'Cash flow without the awkward phone calls.' },
+    { id: 'travel', s: 'run', k: 'Productivity', t: 'Travel on autopilot',
+      one: 'Book a flight once. Every calendar that needs it, has it.',
+      what: 'Flight and hotel confirmations land in Gmail and go straight onto my calendar. A filter forwards them to my work address so coworkers can see when I’m on the road, and a shared schedule keeps home in the loop. Nobody types an itinerary twice.',
+      how: ['Gmail filters', 'Google Calendar', 'TripIt', 'Google Sheets'],
+      biz: 'Team travel visibility with zero admin: who is where, which client, and who is covering.' },
     { id: 'memory', s: 'run', k: 'AI', t: 'One memory for every AI',
       one: 'Switch models without starting over.',
       what: 'Everything my assistants need to know lives in one private git repo of plain markdown, read first by every tool through a single AGENTS.md. It syncs across two Macs every two hours, and every commit is scanned for secrets before it is saved.',
@@ -51,16 +61,6 @@
       what: 'Monitors on every service, routed through Home Assistant into three alert tiers. Critical breaks through Do Not Disturb. Warnings are suppressed when the thing they depend on is already down, so one failure means one alert, not twelve. Verified end to end on my phone.',
       how: ['Uptime Kuma', 'Home Assistant', 'Tiered iOS alerts', 'A private mesh VPN'],
       biz: 'MSP-grade monitoring sized for a five-person office, without the alert fatigue.' },
-    { id: 'textback', s: 'plan', k: 'Small business', t: 'The front desk that never misses a call',
-      one: 'Missed call, instant text, booked appointment.',
-      what: 'The pattern: a missed call triggers a friendly text within seconds, an agent answers the common questions, offers real open slots from the calendar, and books it. Anything unusual goes to a human with the whole conversation attached.',
-      how: ['Phone system webhooks', 'An SMS provider', 'Calendar booking', 'Claude with guardrails'],
-      biz: 'Built for trades, clinics and salons, where every missed call is a customer calling the next name on the list.' },
-    { id: 'chaser', s: 'plan', k: 'Small business', t: 'The polite invoice chaser',
-      one: 'Tiered nudges, the same way my house handles alerts.',
-      what: 'The house alert tiers, applied to money: a friendly reminder before the due date, a firmer one after, and a heads-up to the owner only when it actually needs a human. Every message drafted, logged, and stopped the moment the payment lands.',
-      how: ['Accounting system API', 'Email + SMS', 'Claude for tone', 'A human approval step'],
-      biz: 'Cash flow without the awkward phone calls.' },
     { id: 'edge', s: 'built', k: 'Just for fun', t: 'Fantasy Edge',
       one: 'A draft-day cheat sheet in Lions colors.',
       what: 'A small web app that pulls live average draft position data and tells me who is falling and who is a reach, styled in Honolulu blue and silver. I am a self-described fantasy beginner. The app is not.',
@@ -73,6 +73,15 @@
     <span class="pb-st mono"><i></i>${STATUS[p.s]}</span><span class="pb-k mono">${p.k}</span>
     <h3></h3><p></p><span class="pb-go mono">${p.demo ? 'TRY IT' : 'OPEN'} <span aria-hidden="true">&rarr;</span></span></button>`).join('');
   grid.querySelectorAll('.pb-card').forEach((c, i) => { c.querySelector('h3').textContent = P[i].t; c.querySelector('p').textContent = P[i].one; });
+  // home shows the first six; the rest are one tap away
+  const SHOW = 6, cards = [...grid.querySelectorAll('.pb-card')];
+  if (cards.length > SHOW) {
+    cards.slice(SHOW).forEach((c) => { c.hidden = true; });
+    const more = document.createElement('button'); more.type = 'button'; more.className = 'btn btn-ghost pb-more';
+    more.innerHTML = `Show all ${cards.length} playbooks <span aria-hidden="true">&darr;</span>`;
+    more.addEventListener('click', () => { cards.forEach((c) => { c.hidden = false; }); more.remove(); cards[SHOW].focus({ preventScroll: true }); });
+    root.append(more);
+  }
 
   // ---------- detail sheet (bottom sheet on phones, dialog on desktop) ----------
   const dlg = document.getElementById('pb-dlg'), body = dlg.querySelector('.pb-body');
