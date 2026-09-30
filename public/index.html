@@ -79,11 +79,7 @@ nav.top{display:flex;justify-content:space-between;align-items:center;padding-bl
 .orbit .halo{position:absolute;inset:12%;border-radius:50%;background:radial-gradient(circle at 50% 55%,rgba(61,242,176,.28),rgba(124,211,224,.10) 45%,transparent 70%);filter:blur(10px);animation:breathe 7s ease-in-out infinite}
 @keyframes breathe{50%{transform:scale(1.06);opacity:.8}}
 .orbit .disc{position:absolute;inset:16%;border-radius:50%;overflow:hidden;background:radial-gradient(circle at 50% 35%,#16324A,#0A1626 70%);border:1px solid rgba(124,211,224,.25);box-shadow:inset 0 0 60px rgba(61,242,176,.12),0 30px 80px -30px rgba(0,0,0,.8)}
-.orbit .disc img{position:absolute;left:50%;bottom:-2%;width:112%;max-width:none;height:auto;transform:translateX(-50%);filter:drop-shadow(0 0 18px rgba(61,242,176,.18))}
-/* head breaks out of the circle: same image, unclipped, masked to the part above the disc's centre line */
-.orbit .disc{z-index:1}
-.orbit .pop{position:absolute;left:50%;bottom:14.64%;width:76.16%;max-width:none;height:auto;transform:translateX(-50%);z-index:2;pointer-events:none;-webkit-mask-image:linear-gradient(to bottom,#000 57%,transparent 59.5%);mask-image:linear-gradient(to bottom,#000 57%,transparent 59.5%);filter:drop-shadow(0 0 18px rgba(61,242,176,.18))}
-.orbit .tag{z-index:3}
+.orbit .disc img{position:absolute;left:50%;bottom:-2%;width:84%;max-width:none;height:auto;transform:translateX(-50%);filter:drop-shadow(0 0 18px rgba(61,242,176,.18))}
 .orbit svg.rings{position:absolute;inset:0;width:100%;height:100%;overflow:visible;pointer-events:none}
 .ring{transform-origin:240px 240px;animation:spin linear infinite}
 .ring.r1{animation-duration:26s}.ring.r2{animation-duration:38s;animation-direction:reverse}.ring.r3{animation-duration:52s}
@@ -238,8 +234,7 @@ footer{position:relative;padding-block:120px 48px;overflow:hidden;border-top:1px
         <g class="ring r2"><ellipse cx="240" cy="240" rx="226" ry="80" fill="none" stroke="rgba(155,140,255,.30)" stroke-width="1" transform="rotate(32 240 240)"/><circle cx="48" cy="120" r="4" fill="#9B8CFF"/></g>
         <g class="ring r3"><circle cx="240" cy="240" r="236" fill="none" stroke="rgba(255,255,255,.07)" stroke-width="1" stroke-dasharray="2 10"/><circle cx="240" cy="4" r="4" fill="#FF6A3D"/></g>
       </svg>
-      <div class="disc"><img src="/assets/jason-myers-cutout.png" alt="" width="820" height="943"></div>
-      <img class="pop" src="/assets/jason-myers-cutout.png" alt="Jason Myers" width="820" height="943">
+      <div class="disc"><img src="/assets/jason-myers-cutout.png" alt="Jason Myers" width="820" height="943"></div>
       <div class="tag"><b>&#9679;</b> systems nominal</div>
     </div>
   </div>
