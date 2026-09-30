@@ -167,17 +167,27 @@
     const f = (now) => { const t = Math.min(1, (now - t1) / 1400); elx.textContent = fmt(Math.round(target * (1 - Math.pow(1 - t, 3)))); if (t < 1) requestAnimationFrame(f); };
     requestAnimationFrame(f);
   };
+  const caps = [...document.querySelectorAll('[data-arc-caps] li')].map((li) => [li.dataset.k, li.textContent]);
+  const capK = document.getElementById('arc-cap-k'), capT = document.getElementById('arc-cap-t'), segs = [...document.querySelectorAll('.arc-seg i')];
   const setStage = (st) => {
     if (st === stage && W) return;
     stage = st; layout(st);
     steps.forEach((s, k) => s.classList.toggle('on', k === st));
-    steps[st].querySelectorAll('[data-count]').forEach(countUp);
+    if (steps[st]) steps[st].querySelectorAll('[data-count]').forEach(countUp);
+    if (caps[st] && capT) {
+      const cap = capT.parentElement; cap.classList.remove('in'); void cap.offsetWidth;
+      capK.textContent = caps[st][0]; capT.textContent = caps[st][1]; cap.classList.add('in');
+      segs.forEach((g, k) => { g.parentElement.classList.toggle('done', k < st); g.parentElement.classList.toggle('cur', k === st); });
+    }
     if (reduce) { snap(); draw(0); }
   };
-  const io = new IntersectionObserver((es) => {
-    es.forEach((e) => { if (e.isIntersecting) setStage(steps.indexOf(e.target)); });
-  }, { rootMargin: '-45% 0px -45% 0px' });
-  steps.forEach((s) => io.observe(s));
+  const auto = !steps.length; // home-page teaser: the story plays itself, story-mode style
+  if (!auto) {
+    const io = new IntersectionObserver((es) => {
+      es.forEach((e) => { if (e.isIntersecting) setStage(steps.indexOf(e.target)); });
+    }, { rootMargin: '-45% 0px -45% 0px' });
+    steps.forEach((s) => io.observe(s));
+  }
 
   let visible = false, raf = 0;
   const loop = (tm) => { raf = 0; if (!visible || document.hidden) return; draw(tm); raf = requestAnimationFrame(loop); };
@@ -187,5 +197,27 @@
   // start: particles scattered, then gather into stage 0
   P.forEach((p) => { p.x = Math.random(); p.y = Math.random(); p.a = 0; });
   resize(); setStage(0);
-  counters.forEach((c) => { if (!c.closest('.arc-step')) countUp(c); });
+  if (auto && caps.length) {
+    // advance on a clock while on screen; tap the right side to skip ahead, the left side to go back
+    const HOLD = 3000, LAST = 5200;
+    let t0 = 0, acc = 0, prev = 0;
+    const tick = (now) => {
+      requestAnimationFrame(tick);
+      const dt = prev ? Math.min(100, now - prev) : 0; prev = now;
+      if (!visible || document.hidden || reduce) return;
+      acc += dt;
+      const hold = stage === caps.length - 1 ? LAST : HOLD;
+      if (segs[stage]) segs[stage].style.transform = `scaleX(${Math.min(1, acc / hold)})`;
+      if (acc >= hold) { acc = 0; setStage((stage + 1) % caps.length); segs.forEach((g, k) => { if (k !== stage) g.style.transform = k < stage ? 'scaleX(1)' : 'scaleX(0)'; }); }
+    };
+    requestAnimationFrame(tick);
+    cv.addEventListener('click', (e) => {
+      const r = cv.getBoundingClientRect(), back = e.clientX - r.left < r.width * 0.3;
+      acc = 0; setStage((stage + (back ? caps.length - 1 : 1)) % caps.length);
+      segs.forEach((g, k) => { g.style.transform = k < stage ? 'scaleX(1)' : 'scaleX(0)'; });
+      if (reduce) { snap(); draw(0); }
+    });
+  }
+  const cio = new IntersectionObserver((es) => es.forEach((e) => { if (e.isIntersecting) { countUp(e.target); cio.unobserve(e.target); } }), { threshold: 0.6 });
+  counters.forEach((c) => { if (!c.closest('.arc-step')) cio.observe(c); });
 })();
