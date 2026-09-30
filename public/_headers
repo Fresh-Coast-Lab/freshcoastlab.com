@@ -1,0 +1,14 @@
+# Long-lived caching for files whose names never change content
+/assets/fonts/*
+  Cache-Control: public, max-age=31536000, immutable
+/lab/house-3d/vendor/*
+  Cache-Control: public, max-age=31536000, immutable
+# Baked 3D assets and photos: a day fresh, a week stale-while-revalidate (a re-bake shows up within a day)
+/lab/house-3d/*.glb
+  Cache-Control: public, max-age=86400, stale-while-revalidate=604800
+/lab/house-3d/*.webp
+  Cache-Control: public, max-age=86400, stale-while-revalidate=604800
+/lab/house-3d/low/*
+  Cache-Control: public, max-age=86400, stale-while-revalidate=604800
+/assets/stage/*
+  Cache-Control: public, max-age=86400, stale-while-revalidate=2592000

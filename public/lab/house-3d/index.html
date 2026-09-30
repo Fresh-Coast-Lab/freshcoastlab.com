@@ -37,7 +37,7 @@ h1{font-family:var(--display);font-weight:700;letter-spacing:-.035em;line-height
 /* chip rows */
 .chips{display:flex;gap:8px;overflow-x:auto;scroll-snap-type:x proximity;padding:4px 0;scrollbar-width:none;-webkit-overflow-scrolling:touch;margin:0 calc(-1 * var(--gutter));padding-inline:var(--gutter)}
 .chips::-webkit-scrollbar{display:none}
-.chips button{flex:none;scroll-snap-align:start;min-height:44px;font:inherit;font-size:14px;color:var(--muted);background:var(--panel);border:1px solid var(--line);border-radius:999px;padding:0 16px;cursor:pointer;transition:color .2s,border-color .2s,background .2s;-webkit-tap-highlight-color:transparent}
+.chips button{touch-action:manipulation;flex:none;scroll-snap-align:start;min-height:44px;font:inherit;font-size:14px;color:var(--muted);background:var(--panel);border:1px solid var(--line);border-radius:999px;padding:0 16px;cursor:pointer;transition:color .2s,border-color .2s,background .2s;-webkit-tap-highlight-color:transparent}
 .chips button:hover{color:var(--text);border-color:rgba(124,211,224,.4)}
 .chips button[aria-pressed="true"]{color:var(--night);background:var(--aurora);border-color:transparent}
 #scen{margin-top:22px}
@@ -122,18 +122,23 @@ html.embed{--gutter:0px}
 html.embed header.top,html.embed .eyebrow,html.embed h1,html.embed .sub,html.embed .foot{display:none}
 html.embed .wrap{padding:0;max-width:none}
 html.embed main{padding-bottom:2px}
+html.embed .chips{min-height:52px}
 html.embed #scen{margin-top:0;padding-top:2px}
 html.embed .stage{width:min(100%,var(--embed-maxw,100%));margin-inline:auto}
 html.embed #rooms{margin-top:8px}
 </style>
 <script>if (/[?&]embed=1(&|$)/.test(location.search)) document.documentElement.classList.add('embed')</script>
 <script type="importmap">{"imports":{"three":"./vendor/three.module.min.js"}}</script>
+<link rel="modulepreload" href="vendor/three.module.min.js">
+<link rel="modulepreload" href="vendor/GLTFLoader.min.js">
+<link rel="modulepreload" href="vendor/meshopt_decoder.min.js">
+<link rel="modulepreload" href="house3d.js">
 </head>
 <body>
 <main class="wrap">
   <header class="top">
     <a class="home" href="/#house"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg>FRESHCOASTLAB.COM</a>
-    <span class="proto">FULL SCREEN</span>
+    
   </header>
   <div class="eyebrow">The house</div>
   <h1>Watch the house think.</h1>
@@ -158,7 +163,7 @@ html.embed #rooms{margin-top:8px}
     </div>
     <div class="loading" id="loading">LOADING THE HOUSE</div>
     <div class="nogl" id="nogl" hidden>
-      <p>This 3D version needs WebGL, which this browser has turned off.</p>
+      <p>This 3D version needs WebGL 2, which this browser has turned off.</p>
       <a href="/#house">See the 2D house</a>
     </div>
   </div>

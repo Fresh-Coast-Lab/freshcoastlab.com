@@ -10,14 +10,22 @@
   if (params.get('house') === '2d') return; // manual override for testing
 
   // STEP A: reasons to stay 2D before loading anything
-  const verdict = store.get('h3d-verdict');
+  // verdicts expire ('fail' after 3 days, 'low' after 7) so one bad moment never sticks; old plain strings are ignored
+  const TTL = { fail: 3 * 864e5, low: 7 * 864e5, ok: 30 * 864e5 };
+  const verdict = (() => { try { const o = JSON.parse(store.get('h3d-verdict')); return o && Date.now() - o.ts < (TTL[o.v] || 0) ? o.v : null; } catch (e) { return null; } })();
   if (verdict === 'fail' && params.get('house') !== '3d') { if (link) link.hidden = true; return; } // this device couldn't carry it: don't offer it
   if (matchMedia('(prefers-reduced-motion: reduce)').matches) return;
   const conn = navigator.connection || {};
   const lean = conn.saveData || /(^|-)2g$/.test(conn.effectiveType || '');
   let gl = null;
-  try { const c = document.createElement('canvas'); gl = c.getContext('webgl2') || c.getContext('webgl'); } catch (e) {}
+  // the 3D house needs WebGL 2; a software renderer (no GPU) gets the 2D house
+  try { const c = document.createElement('canvas'); gl = c.getContext('webgl2', params.get('house') === '3d' ? {} : { failIfMajorPerformanceCaveat: true }); } catch (e) {}
   if (!gl) return;
+  try {
+    const dbg = gl.getExtension('WEBGL_debug_renderer_info');
+    const gpu = dbg ? String(gl.getParameter(dbg.UNMASKED_RENDERER_WEBGL)) : '';
+    if (/swiftshader|llvmpipe|software/i.test(gpu) && params.get('house') !== '3d') { gl.getExtension('WEBGL_lose_context')?.loseContext(); return; }
+  } catch (e) {}
   const lose = gl.getExtension && gl.getExtension('WEBGL_lose_context'); if (lose) lose.loseContext();
 
   // STEP B: a rough prior for the starting tier (the 3D page adapts from here)
@@ -54,9 +62,12 @@
     if (e.origin !== location.origin || !frame || e.source !== frame.contentWindow) return;
     const d = e.data || {};
     if (d.type === 'h3d-size' && d.h > 200) frame.style.height = Math.ceil(d.h) + 'px';
-    if (d.type === 'h3d-fallback') { store.set('h3d-verdict', 'fail'); unmount(d.reason || 'slow'); if (link) link.hidden = true; }
-    if (d.type === 'h3d-verdict' && d.v) store.set('h3d-verdict', d.v);
+    if (d.type === 'h3d-fallback') { unmount(d.reason || 'slow'); if (link && d.reason === 'slow') link.hidden = true; } // the 3D page records its own verdict
   });
+
+  // the 3D page caps its stage against our viewport height; tell it when that changes
+  let rz = 0;
+  addEventListener('resize', () => { clearTimeout(rz); rz = setTimeout(() => { if (frame && frame.contentWindow) frame.contentWindow.postMessage({ type: 'h3d-vh' }, location.origin); }, 150); });
 
   if (lean) {
     // on Data Saver or a 2G connection: keep 2D, offer the 3D house on a tap

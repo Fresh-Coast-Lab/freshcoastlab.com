@@ -23,9 +23,19 @@ const store = {
   get: (k) => { try { return localStorage.getItem(k); } catch { return null; } },
   set: (k, v) => { try { localStorage.setItem(k, v); } catch { /* private mode */ } },
 };
+// verdicts expire: 'fail' after 3 days, 'low' after 7, so one bad moment (heat, a busy page) never sticks
+const VERDICT_TTL = { fail: 3 * 864e5, low: 7 * 864e5, ok: 30 * 864e5 };
+const readVerdict = () => { try { const o = JSON.parse(store.get('h3d-verdict')); return o && Date.now() - o.ts < (VERDICT_TTL[o.v] || 0) ? o.v : null; } catch { return null; } };
 
+const NOGL_TEXT = {
+  'no-webgl': 'This 3D version needs WebGL 2, which this browser has turned off.',
+  'load-error': 'The 3D house didn\u2019t finish loading. The 2D house is right here instead.',
+  'context-lost': 'The graphics chip dropped the 3D house. The 2D house is right here instead.',
+  slow: 'This device is having trouble keeping the 3D house smooth.',
+};
 function noGL(err, reason = 'no-webgl') {
   if (err) console.error(err);
+  $('#nogl p').textContent = NOGL_TEXT[reason] || NOGL_TEXT['no-webgl'];
   $('#nogl').hidden = false;
   $('#loading').style.display = 'none';
   toParent({ type: 'h3d-fallback', reason });
@@ -52,7 +62,8 @@ if (EMBED) {
   };
   capToParent();
   addEventListener('resize', capToParent);
-  try { window.top.addEventListener('resize', capToParent); } catch { /* cross-origin */ }
+  // the parent tells us its viewport height on resize (a listener on window.top would keep this iframe alive after removal)
+  addEventListener('message', (e) => { if (e.origin === location.origin && e.data && e.data.type === 'h3d-vh') capToParent(); });
 }
 
 function webglOK() {
@@ -156,7 +167,7 @@ async function main() {
   // The runtime monitor walks down this ladder one rung at a time.
   const PHONE = matchMedia('(pointer: coarse)').matches || innerWidth < 820;
   const devDpr = window.devicePixelRatio || 1;
-  const verdict0 = store.get('h3d-verdict');
+  const verdict0 = readVerdict();
   const TIER = ['high', 'mid', 'low'].includes(params.get('tier')) ? params.get('tier') : verdict0 === 'low' ? 'low' : 'high';
   const dprs = [...new Set([Math.min(devDpr, PHONE ? 1.5 : 2), Math.min(devDpr, 1.5), Math.min(devDpr, 1.25), 1].map((v) => Math.max(1, v)))].sort((a, b) => b - a);
   const LEVELS = [...dprs.map((d) => ({ dpr: d, glows: true })), { dpr: 1, glows: false }];
@@ -172,12 +183,19 @@ async function main() {
   // ---------------------------------------------------------------- assets
   const loader = new GLTFLoader();
   loader.setMeshoptDecoder(MeshoptDecoder);
+  // lightmaps decode off the main thread (ImageBitmap) where supported, so the home page never stalls on them
+  const bitmapOK = typeof createImageBitmap === 'function';
+  const bmpLoader = bitmapOK ? new THREE.ImageBitmapLoader().setOptions({ imageOrientation: 'none', premultiplyAlpha: 'none', colorSpaceConversion: 'none' }) : null;
   const texLoader = new THREE.TextureLoader();
-  const loadTex = (name) => new Promise((res, rej) => texLoader.load(name, (t) => {
+  const finish = (t) => {
     t.flipY = false; t.colorSpace = THREE.NoColorSpace; t.anisotropy = 4;
     t.minFilter = THREE.LinearMipmapLinearFilter; t.magFilter = THREE.LinearFilter; t.generateMipmaps = true;
-    res(t);
-  }, undefined, rej));
+    t.needsUpdate = true; return t;
+  };
+  const loadTex = (name) => new Promise((res, rej) => {
+    if (bmpLoader) bmpLoader.load(name, (bmp) => res(finish(new THREE.Texture(bmp))), undefined, rej);
+    else texLoader.load(name, (t) => res(finish(t)), undefined, rej);
+  });
   const [gltf, meta, ...tex] = await Promise.all([
     loader.loadAsync('house.glb'),
     fetch('meta.json').then((r) => r.json()),
@@ -473,7 +491,7 @@ async function main() {
     transparent: true, depthWrite: false, blending: THREE.AdditiveBlending, side: THREE.DoubleSide, toneMapped: false,
     uniforms: { uI: { value: 0 } },
     vertexShader: 'varying float vD; varying vec3 vN; varying vec3 vV; void main(){ vD = -position.z / 9.0; vec4 mv = modelViewMatrix * vec4(position,1.); vV = normalize(-mv.xyz); vN = normalize(normalMatrix * normal); gl_Position = projectionMatrix * mv; }',
-    fragmentShader: 'uniform float uI; varying float vD; varying vec3 vN; varying vec3 vV; void main(){ float edge = pow(abs(dot(normalize(vN), vV)), 1.5); float a = (1.0 - smoothstep(0.0, 1.0, vD)) * smoothstep(0.0, 0.06, vD) * edge * 0.22 * uI; gl_FragColor = vec4(vec3(1.0, 0.93, 0.75) * a, 1.0); }',
+    fragmentShader: 'uniform float uI; varying float vD; varying vec3 vN; varying vec3 vV; void main(){ float edge = pow(abs(dot(normalize(vN), vV)), 1.5); float a = (1.0 - smoothstep(0.0, 1.0, vD)) * smoothstep(0.0, 0.06, vD) * edge * 0.22 * uI; vec3 c = vec3(1.0, 0.93, 0.75) * a; gl_FragColor = vec4(c, max(c.r, max(c.g, c.b))); }',
   });
   for (const bx of [-0.62, 0.62]) {
     const b = new THREE.Mesh(beamGeo, beamMat);
@@ -517,7 +535,7 @@ async function main() {
   const glowMesh = new THREE.Mesh(gGeo, new THREE.ShaderMaterial({
     transparent: true, depthWrite: false, blending: THREE.AdditiveBlending, toneMapped: false,
     vertexShader: 'attribute vec3 offset; attribute vec3 gcol; attribute float gsize; varying vec2 vU; varying vec3 vC; void main(){ vU = position.xy * 2.0; vC = gcol; vec4 mv = viewMatrix * vec4(offset, 1.0); mv.xyz += normalize(-mv.xyz) * min(gsize * 0.5, 1.2); mv.xy += position.xy * gsize; gl_Position = projectionMatrix * mv; }',
-    fragmentShader: 'varying vec2 vU; varying vec3 vC; void main(){ float d = dot(vU, vU); float a = exp(-d * 5.5) * (1.0 - smoothstep(0.7, 1.0, d)); gl_FragColor = vec4(vC * a, 1.0); }',
+    fragmentShader: 'varying vec2 vU; varying vec3 vC; void main(){ float d = dot(vU, vU); float a = exp(-d * 5.5) * (1.0 - smoothstep(0.7, 1.0, d)); vec3 c = vC * a; gl_FragColor = vec4(c, max(c.r, max(c.g, c.b))); }',
   }));
   glowMesh.frustumCulled = false; glowMesh.renderOrder = 10;
   scene.add(glowMesh);
@@ -530,7 +548,7 @@ async function main() {
     transparent: true, depthWrite: false, blending: THREE.AdditiveBlending, toneMapped: false,
     uniforms: { uA: { value: 1 } },
     vertexShader: 'varying vec3 vN; varying vec3 vV; void main(){ vec4 mv = modelViewMatrix * vec4(position,1.); vV = normalize(-mv.xyz); vN = normalize(normalMatrix * normal); gl_Position = projectionMatrix * mv; }',
-    fragmentShader: 'uniform float uA; varying vec3 vN; varying vec3 vV; void main(){ float f = 1.0 - abs(dot(normalize(vN), vV)); vec3 c = vec3(0.49, 0.83, 0.88); gl_FragColor = vec4(c * (0.28 + 1.3 * pow(f, 2.0)) * uA, 1.0); }',
+    fragmentShader: 'uniform float uA; varying vec3 vN; varying vec3 vV; void main(){ float f = 1.0 - abs(dot(normalize(vN), vV)); vec3 c = vec3(0.49, 0.83, 0.88); vec3 o = c * (0.28 + 1.3 * pow(f, 2.0)) * uA; gl_FragColor = vec4(o, max(o.r, max(o.g, o.b))); }',
   });
   const bodyGeo = new THREE.CapsuleGeometry(0.2, 0.78, 6, 14); bodyGeo.translate(0, 0.62, 0);
   const headGeo = new THREE.SphereGeometry(0.15, 16, 12); headGeo.translate(0, 1.36, 0);
@@ -630,7 +648,11 @@ async function main() {
   const whereEl = $('#where'), backBtn = $('#back');
   function goShot(k, instant = false) {
     if (!SHOTS[k]) return;
-    if (k === shotKey && camT >= 1) return;
+    const inRoom0 = k !== 'dollhouse';
+    whereEl.textContent = SHOTS[k].name; whereEl.classList.toggle('show', inRoom0);
+    backBtn.hidden = !(inRoom0 && userRoom);
+    roomBtns.forEach(([rk, b]) => b.setAttribute('aria-pressed', rk === userRoom ? 'true' : 'false'));
+    if (k === shotKey && camT >= 1) { if (userRoom) { user.az = 0; user.el = 0; user.zoom = 1; wake(); } return; }
     from.c.copy(cam.c); from.az = cam.az; from.el = cam.el; from.r = cam.r;
     setShotVals(to, k);
     // take the short way round
@@ -666,7 +688,7 @@ async function main() {
       // pull back a little mid-flight so the move reads as a dolly, not a zoom
       cam.r = from.r + (to.r - from.r) * e + Math.sin(Math.PI * e) * Math.min(3, from.c.distanceTo(to.c) * 0.18);
     }
-    if (pendingZone && T - lastFocus >= 1.4) { const z = pendingZone; pendingZone = null; lastFocus = T; goShot(z); }
+    if (pendingZone && !userRoom && scenarioActive && T - lastFocus >= 1.4) { const z = pendingZone; pendingZone = null; lastFocus = T; goShot(z); }
     // idle drift in the dollhouse view
     // idle drift: advances only while scenarios autoplay, so a paused house can stop rendering
     if (autoplayOn() && now - user.lastInput > 4000) driftT += dt;
@@ -851,7 +873,7 @@ async function main() {
   let pausedUntil = 0, idx = 0, busy = false, run = 0, lastEnd = -1e9;
   for (const k of order) {
     const b = document.createElement('button'); b.type = 'button'; b.textContent = SC[k].name; b.setAttribute('aria-pressed', 'false');
-    b.addEventListener('click', () => { pausedUntil = performance.now() + 45000; userRoom = null; play(k); });
+    b.addEventListener('click', () => { pausedUntil = performance.now() + 45000; userRoom = null; play(k, true); });
     scenBar.append(b); btn[k] = b;
   }
   const roomBar = $('#rooms');
@@ -862,24 +884,26 @@ async function main() {
     roomBar.append(b); roomBtns.push([k, b]);
   }
   function enterRoom(k) {
-    userRoom = k; pausedUntil = Infinity;
+    userRoom = k; pausedUntil = Infinity; pendingZone = null;
     goShot(k);
     roomBtns.forEach(([rk, b]) => b.setAttribute('aria-pressed', rk === k ? 'true' : 'false'));
   }
   function exitRoom() {
-    userRoom = null; pausedUntil = performance.now() + 6000;
+    userRoom = null; pausedUntil = performance.now() + 6000; pendingZone = null;
     goShot('dollhouse');
   }
   backBtn.addEventListener('click', exitRoom);
   const nextBtn = $('#next');
   nextBtn.hidden = !REDUCE;
   nextBtn.addEventListener('click', () => {
-    if (!busy) { play(order[idx]); return; }
+    if (!busy) { play(order[idx], true); return; }
     hold = false; wake();
   });
 
-  async function play(k) {
+  const liveEls = ['#ticker', '#where', '#alerts'].map((q) => $(q)).filter(Boolean);
+  async function play(k, byUser = false) {
     const id = ++run; busy = true; scenarioActive = true; wake();
+    liveEls.forEach((el) => el.setAttribute('aria-live', byUser ? 'polite' : 'off'));
     $('#hint').classList.remove('show');
     if (REDUCE) nextBtn.textContent = 'Next step';
     order.forEach((o) => btn[o].setAttribute('aria-pressed', o === k ? 'true' : 'false'));
@@ -935,6 +959,7 @@ async function main() {
     }
     if (!drag) return;
     const dx = e.clientX - drag.x, dy = e.clientY - drag.y;
+    if (!drag.orbit && Math.hypot(dx, dy) > 8) drag.moved = true;
     if (!drag.orbit && (Math.abs(dx) > 8 || (drag.mouse && Math.abs(dy) > 8))) {
       if (drag.mouse || Math.abs(dx) > Math.abs(dy) * 1.2) { drag.orbit = true; drag.moved = true; stage.setPointerCapture(e.pointerId); }
       else { drag.moved = true; }
@@ -949,13 +974,20 @@ async function main() {
   const endPtr = (e) => {
     if (!ptrs.has(e.pointerId)) return;
     ptrs.delete(e.pointerId);
-    if (ptrs.size < 2) pinch0 = 0;
+    if (ptrs.size < 2 && pinch0) {
+      pinch0 = 0;
+      // one finger still down after a pinch: carry on from here instead of jumping
+      const [rest] = [...ptrs.entries()];
+      if (rest) drag = { x: rest[1].x, y: rest[1].y, az: user.az, el: user.el, moved: true, orbit: false, t: 0, id: rest[0], mouse: false };
+    }
     if (drag && drag.id === e.pointerId) {
       if (!drag.moved && e.type === 'pointerup' && performance.now() - drag.t < 600) tapAt(e.clientX, e.clientY);
       drag = null;
     }
   };
   stage.addEventListener('pointerup', endPtr);
+  // two fingers on the house belong to the house: stop the browser claiming the gesture mid-pinch
+  stage.addEventListener('touchmove', (e) => { if (e.touches.length > 1) e.preventDefault(); }, { passive: false });
   stage.addEventListener('pointercancel', endPtr);
   stage.addEventListener('wheel', (e) => {
     if (!e.ctrlKey) return; // plain wheel scrolls the page; trackpad pinch arrives as ctrl+wheel
@@ -1139,6 +1171,7 @@ async function main() {
   function resize() {
     const r = stage.getBoundingClientRect();
     const w = Math.max(1, Math.round(r.width)), h = Math.max(1, Math.round(r.height));
+    if (w === markSize.w && h === markSize.h && renderer.getPixelRatio() === dpr && !ctxLost) { wake(); return; }
     renderer.setPixelRatio(dpr);
     renderer.setSize(w, h, false);
     camera.aspect = w / h; camera.updateProjectionMatrix();
@@ -1214,13 +1247,13 @@ async function main() {
   // Modelled on drei's PerformanceMonitor: 250 ms windows, the last 10 kept, act when 8 of 10 agree.
   // A steady 30 fps (iOS Low Power Mode caps rAF there) is fine and never counts against us.
   const mon = { lowest: startLevel, t0: 0, acc: 0, n: 0, win: [], flips: 0, lastDir: 0, locked: false, okSent: false, events: [] };
-  const setVerdict = (v) => { store.set('h3d-verdict', v); toParent({ type: 'h3d-verdict', v }); };
+  const setVerdict = (v) => { store.set('h3d-verdict', JSON.stringify({ v, ts: Date.now() })); toParent({ type: 'h3d-verdict', v }); };
   function applyLevel(i, why) {
     level = i; dpr = LEVELS[i].dpr; glowsOn = LEVELS[i].glows;
     mon.events.push(`${why} -> level ${i} (dpr ${dpr}, glows ${glowsOn ? 'on' : 'off'})`);
     if (DEBUG) console.info('[h3d]', mon.events[mon.events.length - 1]);
     resize();
-    if (dpr <= 1) setVerdict('low');
+    if (why === 'decline' && dpr <= 1) setVerdict('low');
   }
   function step(dir) {
     if (mon.lastDir && dir !== mon.lastDir) mon.flips++;
@@ -1242,29 +1275,31 @@ async function main() {
     const count = (f) => mon.win.filter(f).length;
     const bottom = level === LEVELS.length - 1;
     // struggling: under the 30 fps cap, or an uncapped display stuck well short of 60
-    const slow = count((f) => f < 26 || (f > 34 && f < 50));
+    const slow = count((f) => f < 26 || (f > 34 && f < 43));
     const fast = count((f) => f > 57);
     if (bottom && count((f) => f < 24) >= 8) { fallback('slow'); return; }
     if (slow >= 8 && !bottom) { step(+1); mon.win = []; return; }
-    if (fast >= 8 && level > startLevel && !mon.locked) { step(-1); mon.win = []; return; }
-    if (!mon.okSent && slow <= 2 && dpr > 1) { mon.okSent = true; setVerdict('ok'); }
+    if (fast >= 8 && level > 0 && !mon.locked) { step(-1); mon.win = []; return; }
+    if (!mon.okSent && slow <= 2) { mon.okSent = true; setVerdict('ok'); }
   }
   function fallback(reason) {
     if (fellBack) return;
     fellBack = true; loopActive = false;
-    setVerdict('fail');
+    if (reason === 'slow') setVerdict('fail'); // only a measured struggle marks the device; load errors and lost contexts don't
     mon.events.push('fallback: ' + reason);
     toParent({ type: 'h3d-fallback', reason });
     if (DEBUG) console.info('[h3d] fallback', reason);
     const box = $('#nogl');
-    box.querySelector('p').textContent = 'This device is having trouble keeping the 3D house smooth.';
+    box.querySelector('p').textContent = NOGL_TEXT[reason] || NOGL_TEXT.slow;
     box.hidden = false;
   }
   // a lost WebGL context that is not restored within 3 s means fall back
   let lostTimer = 0;
   canvas.addEventListener('webglcontextlost', (e) => {
     e.preventDefault(); ctxLost = true; loopActive = false;
-    lostTimer = setTimeout(() => fallback('context-lost'), 3000);
+    const arm = () => { clearTimeout(lostTimer); lostTimer = setTimeout(() => { if (ctxLost) fallback('context-lost'); }, 3000); };
+    if (document.hidden) document.addEventListener('visibilitychange', function once() { if (!document.hidden) { document.removeEventListener('visibilitychange', once); arm(); } });
+    else arm();
   });
   canvas.addEventListener('webglcontextrestored', () => { clearTimeout(lostTimer); ctxLost = false; resize(); wake(); });
 
@@ -1281,6 +1316,8 @@ async function main() {
     log('reduced motion: tap a moment, then "Next step"');
     nextBtn.textContent = 'Start';
   }
+  // compile every shader off the critical path (parallel compile where the driver supports it)
+  try { if (renderer.compileAsync) await renderer.compileAsync(scene, camera); } catch { /* fall through to a normal first frame */ }
   frame(0, performance.now());
   stage.classList.add('ready');
   const hint = $('#hint');
@@ -1313,4 +1350,4 @@ async function main() {
   }
 }
 
-main().catch((e) => noGL(e));
+main().catch((e) => noGL(e, 'load-error'));
