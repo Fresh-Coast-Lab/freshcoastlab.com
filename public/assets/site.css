@@ -159,9 +159,9 @@ nav.top{display:flex;justify-content:space-between;align-items:center;padding-bl
 @keyframes breathe{50%{transform:scale(1.06);opacity:.8}}
 .orbit .disc{position:absolute;inset:16%;border-radius:50%;overflow:hidden;background:radial-gradient(circle at 50% 35%,#16324A,#0A1626 70%);border:1px solid rgba(124,211,224,.25);box-shadow:inset 0 0 60px rgba(61,242,176,.12),0 30px 80px -30px rgba(0,0,0,.8)}
 .orbit .disc img{position:absolute;left:50%;bottom:-2%;width:84%;max-width:none;height:auto;transform:translateX(-50%);filter:drop-shadow(0 0 18px rgba(61,242,176,.18))}
-.orbit .neon{position:absolute;left:50%;top:50%;width:66%;height:auto;transform:translate(-50%,-52%);opacity:.14;filter:grayscale(1) brightness(.55)}
-.orbit .neon.lit{opacity:1;filter:drop-shadow(0 0 16px rgba(255,106,61,.85)) drop-shadow(0 0 48px rgba(124,211,224,.45));animation:neon 2.6s steps(1,end) both,stutter 7.5s steps(1,end) 4s infinite}
-@media (prefers-reduced-motion:reduce){.orbit .neon{opacity:1;filter:drop-shadow(0 0 16px rgba(255,106,61,.85)) drop-shadow(0 0 48px rgba(124,211,224,.45))}.orbit .neon.lit{animation:none}}
+.orbit .neon{position:absolute;left:50%;top:50%;width:66%;height:auto;transform:translate(-50%,-52%);opacity:1;filter:drop-shadow(0 0 4px rgba(255,170,120,.9)) drop-shadow(0 0 20px rgba(255,106,61,.75))}
+.orbit .neon.lit{opacity:1;filter:drop-shadow(0 0 4px rgba(255,170,120,.9)) drop-shadow(0 0 20px rgba(255,106,61,.75));}
+@media (prefers-reduced-motion:reduce){.orbit .neon{opacity:1;filter:drop-shadow(0 0 4px rgba(255,170,120,.9)) drop-shadow(0 0 20px rgba(255,106,61,.75))}.orbit .neon.lit{animation:none}}
 .orbit svg.rings{position:absolute;inset:0;width:100%;height:100%;overflow:visible;pointer-events:none}
 .ring{transform-origin:240px 240px;animation:spin linear infinite}
 .ring.r1{animation-duration:26s}.ring.r2{animation-duration:38s;animation-direction:reverse}.ring.r3{animation-duration:52s}
@@ -374,11 +374,11 @@ footer{position:relative;padding-block:120px 48px;overflow:hidden;border-top:1px
   background:radial-gradient(70% 60% at 50% 0%,rgba(255,106,61,.10),transparent 70%),var(--night)}
 @keyframes neon{
   0%{opacity:.14;filter:grayscale(1) brightness(.55)}
-  6%{opacity:1;filter:drop-shadow(0 0 16px rgba(255,106,61,.85)) drop-shadow(0 0 48px rgba(124,211,224,.45))}  8%{opacity:.18;filter:grayscale(1) brightness(.55)}
-  11%{opacity:1;filter:drop-shadow(0 0 16px rgba(255,106,61,.85)) drop-shadow(0 0 48px rgba(124,211,224,.45))} 13%{opacity:.25;filter:grayscale(1) brightness(.55)}
-  21%{opacity:1;filter:drop-shadow(0 0 16px rgba(255,106,61,.85)) drop-shadow(0 0 48px rgba(124,211,224,.45))} 24%{opacity:.5;filter:grayscale(.5) brightness(.75)}
-  31%{opacity:1;filter:drop-shadow(0 0 16px rgba(255,106,61,.85)) drop-shadow(0 0 48px rgba(124,211,224,.45))} 44%{opacity:.7;filter:brightness(.8) drop-shadow(0 0 8px rgba(255,106,61,.5))}
-  46%,100%{opacity:1;filter:drop-shadow(0 0 16px rgba(255,106,61,.85)) drop-shadow(0 0 48px rgba(124,211,224,.45))}
+  6%{opacity:1;filter:drop-shadow(0 0 4px rgba(255,170,120,.9)) drop-shadow(0 0 20px rgba(255,106,61,.75))}  8%{opacity:.18;filter:grayscale(1) brightness(.55)}
+  11%{opacity:1;filter:drop-shadow(0 0 4px rgba(255,170,120,.9)) drop-shadow(0 0 20px rgba(255,106,61,.75))} 13%{opacity:.25;filter:grayscale(1) brightness(.55)}
+  21%{opacity:1;filter:drop-shadow(0 0 4px rgba(255,170,120,.9)) drop-shadow(0 0 20px rgba(255,106,61,.75))} 24%{opacity:.5;filter:grayscale(.5) brightness(.75)}
+  31%{opacity:1;filter:drop-shadow(0 0 4px rgba(255,170,120,.9)) drop-shadow(0 0 20px rgba(255,106,61,.75))} 44%{opacity:.7;filter:brightness(.8) drop-shadow(0 0 8px rgba(255,106,61,.5))}
+  46%,100%{opacity:1;filter:drop-shadow(0 0 4px rgba(255,170,120,.9)) drop-shadow(0 0 20px rgba(255,106,61,.75))}
 }
 @keyframes hum{0%,95%,100%{opacity:1}96%{opacity:.62}97%{opacity:1}98.5%{opacity:.8}}
 .cta{text-align:center;display:flex;flex-direction:column;align-items:center;gap:22px}
@@ -857,17 +857,38 @@ a.post:hover{border-color:rgba(61,242,176,.4);transform:translateY(-3px)}
 .map-wrap .map-hint{position:static;transform:none;align-self:center;margin-top:2px}
 @media (max-width:760px){.map-wrap .map-hint{top:auto}}
 
-/* the cream T in COAST is a tube on its way out: a dimmed copy of just that letter flickers over the lit sign */
-.orbit .neon-t{position:absolute;left:50%;top:50%;width:66%;height:auto;transform:translate(-50%,-52%);pointer-events:none;opacity:0}
-.orbit .neon.lit ~ .neon-t{animation:dying 5.3s steps(1,end) 3.2s infinite}
-@keyframes dying{
-  0%,9%{opacity:0} 10%{opacity:1} 11%{opacity:0} 12.5%{opacity:1} 13%{opacity:0}
-  31%{opacity:.85} 31.8%{opacity:0} 32.6%{opacity:1}
-  33%,51%{opacity:1} 52%{opacity:0} 53%{opacity:.7} 54%{opacity:0} 55.5%{opacity:1} 56%{opacity:.4} 57%,78%{opacity:0}
-  79%{opacity:1} 79.6%{opacity:0} 80.4%{opacity:.9} 81%,100%{opacity:0}}
-@media (prefers-reduced-motion:reduce){.orbit .neon.lit ~ .neon-t{animation:none}}
 
 /* stack logos: brand marks from Simple Icons, drawn in the chip's own color */
 .lg{display:inline-block;width:14px;height:14px;margin-right:7px;vertical-align:-2px;background:currentColor;-webkit-mask:var(--lg) center/contain no-repeat;mask:var(--lg) center/contain no-repeat;opacity:.9}
 .stk-g button:hover .lg,.stk-g button.on .lg{opacity:1}
 .stk-tease li .lg{width:13px;height:13px}
+
+/* NEON v2: a blurred bloom glows behind the sign; the T is its own tube, orange when lit, black when it dies */
+.orbit .neon{z-index:2}
+.orbit .neon-bloom{position:absolute;left:50%;top:50%;width:66%;height:auto;transform:translate(-50%,-52%);z-index:1;pointer-events:none;opacity:0;filter:blur(16px) saturate(1.9) brightness(1.35)}
+.orbit .neon-bloom{opacity:.5}
+.orbit .neon.lit ~ .neon-bloom{animation:breathe2 4.5s ease-in-out infinite}
+.orbit .neon-t{position:absolute;left:50%;top:50%;width:66%;aspect-ratio:440/411;transform:translate(-50%,-52%);z-index:3;pointer-events:none;
+  background:#C98060;-webkit-mask:url(/assets/sign-t-dead.webp?v=3) center/100% 100% no-repeat;mask:url(/assets/sign-t-dead.webp?v=3) center/100% 100% no-repeat;opacity:1}
+
+@keyframes neonO{0%{opacity:.14}6%{opacity:1}8%{opacity:.18}11%{opacity:1}13%{opacity:.25}21%{opacity:1}24%{opacity:.5}31%{opacity:1}44%{opacity:.7}46%,100%{opacity:1}}
+@keyframes breathe2{0%,100%{opacity:.42}50%{opacity:.6}}
+@keyframes dyingC{
+  0%,9%{background:#C98060} 10%{background:#181B1F} 11%{background:#C98060} 12.5%{background:#181B1F} 13%{background:#C98060}
+  31%{background:#2A2320} 31.8%{background:#C98060} 32.6%{background:#181B1F}
+  33%,51%{background:#181B1F} 52%{background:#C98060} 53%{background:#3A2A22} 54%{background:#C98060} 55.5%{background:#181B1F} 56%{background:#6A4636} 57%,78%{background:#C98060}
+  79%{background:#181B1F} 79.6%{background:#C98060} 80.4%{background:#181B1F} 81%,100%{background:#C98060}}
+@media (prefers-reduced-motion:reduce){.orbit .neon-bloom{opacity:.55;animation:none}.orbit .neon-t{opacity:1;filter:none;animation:none}}
+/* UFO easter egg */
+.ufo-layer{position:absolute;inset:0;width:100%;height:100%;z-index:0;pointer-events:none;overflow:visible}
+.ufo-layer .man,.ufo-layer .ship{opacity:0}
+.ufo-layer .ship{filter:drop-shadow(0 0 8px rgba(124,211,224,.5))}
+.hero-stack{position:relative;z-index:1}
+
+/* the saucer's pass knocks the sign out for a moment, and leaves the T damaged */
+@keyframes jolt{0%{opacity:1}4%{opacity:.15}7%{opacity:1}10%{opacity:.3}12%{opacity:.9}15%{opacity:.1}22%{opacity:.1}24%{opacity:1}30%{opacity:.4}32%{opacity:1}45%{opacity:.6}47%{opacity:1}60%{opacity:.2}62%{opacity:1}100%{opacity:1}}
+.orbit.disturbed .neon,.orbit.disturbed .neon-t{animation:jolt 2.4s steps(1,end) both}
+.orbit.disturbed .neon-bloom{animation:jolt 2.4s steps(1,end) both}
+.orbit.damaged .neon-t{animation:dyingC 5.3s steps(1,end) infinite}
+.orbit.damaged .neon{animation:stutter 9s steps(1,end) 3s infinite}
+.orbit.disturbed.damaged .neon-t{animation:jolt 2.4s steps(1,end) both}
