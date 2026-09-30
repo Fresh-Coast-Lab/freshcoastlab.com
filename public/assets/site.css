@@ -744,3 +744,19 @@ a.post:hover{border-color:rgba(61,242,176,.4);transform:translateY(-3px)}
 .try3d b{font-family:var(--display);font-size:17px}
 .try3d .d{grid-column:2;font-size:13.5px;color:var(--muted)}
 .try3d .ar{grid-column:3;grid-row:1/span 2;font-size:20px;color:#B7AEFF}
+.reel figure{flex:none;height:clamp(260px,34vw,380px);width:auto}
+.reel img{height:100%;width:auto;aspect-ratio:auto;object-fit:cover}
+.tl-b img{aspect-ratio:auto;height:auto;width:100%;max-width:520px;max-height:440px;object-fit:cover}
+
+/* HERO v3: the sign sits between the two halves of the headline; the blurb follows the hero */
+.hero-stack{display:flex;flex-direction:column;align-items:center;text-align:center;padding-block:10px 64px}
+.hero-stack .kicker{justify-content:center}
+.hero-stack h1{max-width:none;display:flex;flex-direction:column;align-items:center;margin:16px 0 0;font-size:clamp(36px,5.6vw,84px);line-height:1.04;letter-spacing:-.035em}
+.hero-stack h1 .l1,.hero-stack h1 .l2{display:block;text-wrap:balance;max-width:14ch}
+.hero-stack h1 .l2{max-width:15ch}
+.hero-stack .orbit{display:block;order:0;width:min(430px,80vw);margin:-4% auto -6%;font-size:initial;letter-spacing:normal}
+.hero-stack .orbit .halo{display:block}
+.intro{display:flex;flex-direction:column;align-items:center;text-align:center;padding-block:4px 40px}
+.intro .lede{max-width:660px;font-size:clamp(18px,1.7vw,22px);margin:0}
+.intro .hero-ctas{justify-content:center;margin-top:26px}
+@media (max-width:560px){.hero-stack{padding-bottom:36px}.intro .hero-ctas{width:100%}.intro{padding-bottom:30px}}
