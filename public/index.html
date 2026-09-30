@@ -1,0 +1,328 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Jason Myers - Fresh Coast Lab</title>
+<meta name="description" content="Jason Myers - strategist, builder and two-time founder on Lake Michigan's fresh coast. I run AI at home before I talk about it on stage.">
+<link rel="canonical" href="https://freshcoastlab.com/">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://freshcoastlab.com/">
+<meta property="og:title" content="Jason Myers - Fresh Coast Lab">
+<meta property="og:description" content="I run AI at home before I talk about it on stage. Strategist, builder and speaker in Traverse City, Michigan.">
+<meta property="og:image" content="https://freshcoastlab.com/assets/jason-myers.jpg">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display&family=DM+Sans:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --sand:#F5ECDD; --sand-card:#FBF5EA; --sand-deep:#E9DBC0; --sky:#F3D9B1;
+  --bay:#16445A; --lake:#2F7F95; --aqua:#7CC4C8; --dune:#D4AE6E; --dune-light:#E4C891;
+  --grass:#5E7D4F; --sun:#E07A4A; --cherry:#B83A34;
+  --ink:#1B2A33; --text:#3B4B55; --muted:#5B6B75; --on-bay:#F5ECDD; --on-bay-muted:#A9CBD2;
+  --serif:'DM Serif Display',Georgia,serif; --sans:'DM Sans',system-ui,sans-serif;
+  --gutter:clamp(20px,6.5vw,96px);
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{margin:0;background:var(--sand);color:var(--ink);font-family:var(--sans);font-size:18px;line-height:1.6;-webkit-font-smoothing:antialiased}
+img{max-width:100%;display:block}
+a{color:var(--bay)} a:hover{color:var(--cherry)}
+:focus-visible{outline:3px solid var(--cherry);outline-offset:3px;border-radius:4px}
+h1,h2,h3{font-family:var(--serif);font-weight:400;margin:0;color:var(--bay);line-height:1.05}
+p{margin:0}
+.wrap{padding-inline:var(--gutter);max-width:1440px;margin-inline:auto}
+.eyebrow{font-size:13px;letter-spacing:.22em;font-weight:700;text-transform:uppercase}
+.btn{display:inline-block;padding:15px 28px;border-radius:999px;font-weight:700;text-decoration:none;font-size:16px;border:2px solid transparent;transition:transform .15s ease}
+.btn:hover{transform:translateY(-2px)}
+.btn-cherry{background:var(--cherry);color:#FBF5EA}.btn-cherry:hover{color:#FBF5EA}
+.btn-ghost-light{border-color:var(--on-bay);color:var(--on-bay)}.btn-ghost-light:hover{color:var(--on-bay)}
+.skip{position:absolute;left:-999px}.skip:focus{left:16px;top:16px;background:var(--bay);color:var(--sand);padding:10px 16px;z-index:10}
+
+/* nav */
+nav.top{display:flex;justify-content:space-between;align-items:center;padding-block:28px}
+.brand{display:flex;align-items:center;gap:12px;text-decoration:none;color:var(--bay)}
+.brand span{font-size:14px;letter-spacing:.22em;font-weight:700}
+.links{display:flex;gap:36px;font-weight:500;font-size:15px}
+.links a{text-decoration:none}
+@media (max-width:760px){.links{display:none}}
+
+/* hero */
+.hero{display:grid;grid-template-columns:1.15fr .85fr;gap:56px;align-items:center;padding-block:40px 64px}
+.hero h1{font-size:clamp(40px,5.8vw,82px);line-height:1.02;margin-block:22px 26px}
+.hero .lede{font-size:clamp(17px,1.5vw,21px);color:var(--text);max-width:560px}
+.hero .lede strong{color:var(--bay)}
+.kicker{color:var(--lake)}
+.poster{position:relative;aspect-ratio:5/6;border-radius:999px 999px 28px 28px;overflow:hidden;background:var(--sky)}
+.poster .sun{position:absolute;left:50%;top:24%;width:36%;aspect-ratio:1;transform:translateX(-50%);border-radius:50%;background:var(--sun)}
+.poster .lake{position:absolute;inset:48% 0 auto;height:15%;background:var(--lake)}
+.poster .glint{position:absolute;left:0;right:0;height:2%;background:var(--aqua)}
+.poster .dune1{position:absolute;left:-14%;right:-7%;top:62%;height:60%;border-radius:60% 40% 0 0;background:var(--dune-light)}
+.poster .dune2{position:absolute;left:24%;right:-20%;top:70%;height:60%;border-radius:55% 45% 0 0;background:var(--dune)}
+.poster .grass{position:absolute;left:7%;top:64%;width:28%}
+.poster img{position:absolute;right:5%;bottom:5%;width:47%;height:auto;aspect-ratio:13/16;object-fit:cover;object-position:50% 20%;border-radius:999px 999px 18px 18px;border:6px solid var(--sand)}
+@media (max-width:900px){.hero{grid-template-columns:1fr;gap:32px}.poster{order:-1;max-width:460px;width:100%;margin-inline:auto}}
+
+/* live strip */
+.lab-strip{background:var(--bay);color:var(--on-bay);border-radius:999px;padding:18px 36px;display:flex;align-items:center;justify-content:space-between;gap:28px;margin-bottom:64px}
+.lab-strip[hidden]{display:none}
+.lab-strip .label{display:flex;align-items:center;gap:12px;color:var(--aqua)}
+.dot{width:11px;height:11px;border-radius:50%;background:var(--aqua);box-shadow:0 0 0 6px rgba(124,196,200,.22);animation:pulse 2.4s ease-in-out infinite}
+@keyframes pulse{50%{box-shadow:0 0 0 10px rgba(124,196,200,.06)}}
+@media (prefers-reduced-motion:reduce){.dot{animation:none}}
+.lab-strip .stats{display:flex;gap:40px;flex-wrap:wrap}
+.lab-strip .stats b{font-family:var(--serif);font-weight:400;font-size:26px;margin-right:6px}
+.lab-strip .when{font-size:13px;color:var(--on-bay-muted)}
+@media (max-width:900px){.lab-strip{border-radius:22px;flex-direction:column;align-items:flex-start}}
+
+/* waves */
+.wave{display:block;width:100%;height:28px}
+.wave-top{display:block;width:100%;height:40px;background:var(--bay)}
+
+section{padding-block:clamp(64px,8vw,112px)}
+.sec-head{display:flex;justify-content:space-between;align-items:flex-end;gap:32px;margin-bottom:40px;flex-wrap:wrap}
+.sec-head h2{font-size:clamp(36px,4vw,56px)}
+.sec-head p{max-width:460px;color:var(--text);font-size:17px}
+
+/* stage */
+.cards{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:24px}
+.cards-2{grid-template-columns:repeat(2,minmax(0,1fr))}
+@media (max-width:980px){.cards,.cards-2{grid-template-columns:1fr}}
+.talk{border:2px solid var(--bay);border-radius:24px;padding:34px;background:var(--sand-card);display:flex;flex-direction:column;gap:16px}
+.chip{align-self:flex-start;background:var(--lake);color:#FBF5EA;border-radius:999px;padding:6px 14px;font-size:12px;font-weight:700;letter-spacing:.1em}
+.chip.hot{background:var(--cherry)}
+.talk h3{font-size:clamp(24px,2.1vw,30px);line-height:1.2}
+.talk .where{font-size:15px;color:var(--muted)}
+.also{margin-top:22px;font-size:16px;color:var(--muted)}
+
+/* lab */
+.lab{background:var(--bay);color:var(--on-bay);padding-top:0}
+.lab h2{color:var(--on-bay)}
+.lab .sec-head{padding-top:56px}
+.lab .sec-head p{color:var(--on-bay-muted)}
+.story{background:var(--sand);color:var(--ink);border-radius:20px;padding:34px;display:flex;flex-direction:column;gap:14px}
+.story .eyebrow{color:var(--cherry)}
+.story h3{font-size:clamp(24px,2.1vw,30px);line-height:1.15;color:var(--ink)}
+.story p{font-size:16px;color:var(--text)}
+.offer{margin-top:32px;border:1px solid #3F7087;border-radius:20px;padding:28px 34px;display:flex;justify-content:space-between;align-items:center;gap:28px;flex-wrap:wrap}
+.offer p{color:#E6DCC8;max-width:820px}
+
+/* writing */
+.writing{display:grid;grid-template-columns:1fr 2fr;gap:48px}
+@media (max-width:900px){.writing{grid-template-columns:1fr}}
+.writing h2{font-size:clamp(36px,4vw,56px);margin-bottom:16px}
+.posts a{display:flex;justify-content:space-between;align-items:baseline;gap:24px;padding:26px 0;border-top:1px solid #D8C8A8;text-decoration:none}
+.posts a:first-child{border-top:2px solid var(--bay)}
+.posts a:last-child{border-bottom:1px solid #D8C8A8}
+.posts .t{font-family:var(--serif);font-size:clamp(22px,2.4vw,32px);color:var(--bay)}
+.posts .s{font-size:14px;color:var(--muted);white-space:nowrap}
+
+/* about */
+.about{background:var(--sand-deep)}
+.about-grid{display:grid;grid-template-columns:1fr 1fr;gap:64px;align-items:center}
+@media (max-width:900px){.about-grid{grid-template-columns:1fr}}
+.tiles{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px}
+.tiles div{aspect-ratio:1/2;border-radius:16px}
+.tiles div:nth-child(1){background:var(--lake);border-radius:999px 999px 16px 16px}
+.tiles div:nth-child(2){background:var(--dune);margin-top:18%}
+.tiles div:nth-child(3){background:var(--grass);border-radius:16px 16px 999px 999px}
+.about .eyebrow{color:var(--cherry)}
+.about h2{font-size:clamp(34px,3.6vw,52px);margin-block:18px 20px}
+.about p{color:var(--text)}
+
+/* path */
+.path{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:24px}
+@media (max-width:980px){.path{grid-template-columns:1fr 1fr}}
+@media (max-width:560px){.path{grid-template-columns:1fr}}
+.step{border-top:4px solid var(--bay);padding-top:22px;display:flex;flex-direction:column;gap:10px}
+.step.now{border-top-color:var(--cherry)}
+.step .eyebrow{color:var(--muted)}.step.now .eyebrow{color:var(--cherry)}
+.step h3{font-size:clamp(22px,2vw,28px);line-height:1.15}
+.step p{font-size:15px;color:var(--text)}
+
+/* footer */
+footer{background:var(--bay);color:var(--on-bay);padding-bottom:48px}
+.cta{display:flex;justify-content:space-between;align-items:flex-end;gap:40px;flex-wrap:wrap;padding-top:48px}
+.cta h2{color:var(--on-bay);font-size:clamp(34px,4.2vw,60px);max-width:780px}
+.cta p{color:var(--on-bay-muted);margin-top:16px;font-size:19px}
+.cta .btns{display:flex;gap:14px;flex-wrap:wrap}
+.fine{display:flex;justify-content:space-between;gap:20px;flex-wrap:wrap;margin-top:56px;padding-top:26px;border-top:1px solid #3F7087;font-size:14px;color:#8FB3BD}
+</style>
+</head>
+<body>
+<a class="skip" href="#main">Skip to content</a>
+
+<header class="wrap">
+  <nav class="top" aria-label="Main">
+    <a class="brand" href="/" aria-label="Fresh Coast Lab home">
+      <svg width="28" height="28" viewBox="0 0 30 30" aria-hidden="true"><g stroke="#B83A34" stroke-width="2.3" stroke-linecap="round"><line x1="15" y1="2" x2="15" y2="28"/><line x1="2" y1="15" x2="28" y2="15"/><line x1="5.8" y1="5.8" x2="24.2" y2="24.2"/><line x1="24.2" y1="5.8" x2="5.8" y2="24.2"/></g></svg>
+      <span>FRESH COAST LAB</span>
+    </a>
+    <div class="links">
+      <a href="#stage">Stage</a><a href="#lab">Lab</a><a href="#writing">Writing</a><a href="#about">About</a>
+    </div>
+  </nav>
+</header>
+
+<main id="main">
+  <div class="wrap">
+    <div class="hero">
+      <div>
+        <div class="eyebrow kicker">Jason Myers &middot; Traverse City, Michigan &middot; 44.76&deg; N</div>
+        <h1>I run AI at home before I talk about it on stage.</h1>
+        <p class="lede">Strategist, builder and two-time founder on Lake Michigan's fresh coast - twenty years of turning technology into things people actually use, now mostly about AI, trust, and what it does to the work in between.</p>
+      </div>
+      <div class="poster" role="img" aria-label="Portrait of Jason Myers in front of a mid-century illustration of a Lake Michigan sunset over the dunes">
+        <div class="sun"></div>
+        <div class="lake"></div>
+        <div class="glint" style="top:52%"></div>
+        <div class="glint" style="top:56%;height:1.4%"></div>
+        <div class="dune1"></div>
+        <div class="dune2"></div>
+        <svg class="grass" viewBox="0 0 160 90" aria-hidden="true"><g stroke="#5E7D4F" stroke-width="3" stroke-linecap="round" fill="none"><path d="M20 90 Q22 50 10 20"/><path d="M30 90 Q34 45 40 10"/><path d="M44 90 Q46 60 62 30"/><path d="M110 90 Q108 55 96 25"/><path d="M122 90 Q126 50 136 18"/></g></svg>
+        <img src="/assets/jason-myers.jpg" alt="" width="782" height="900">
+      </div>
+    </div>
+
+    <aside class="lab-strip" id="lab-strip" hidden aria-label="The Lab, right now">
+      <div class="label"><span class="dot" aria-hidden="true"></span><span class="eyebrow">The Lab, right now</span></div>
+      <div class="stats">
+        <span><b id="ls-auto">-</b>automations running</span>
+        <span><b id="ls-repair">-</b>since the last self-repair</span>
+        <span><b id="ls-silent">-</b>silent failures this week</span>
+      </div>
+      <span class="when" id="ls-when">live from Traverse City</span>
+    </aside>
+  </div>
+
+  <svg class="wave" viewBox="0 0 1440 28" preserveAspectRatio="none" aria-hidden="true"><path d="M0 14 Q30 0 60 14 T120 14 T180 14 T240 14 T300 14 T360 14 T420 14 T480 14 T540 14 T600 14 T660 14 T720 14 T780 14 T840 14 T900 14 T960 14 T1020 14 T1080 14 T1140 14 T1200 14 T1260 14 T1320 14 T1380 14 T1440 14" stroke="#7CC4C8" stroke-width="3" fill="none"/></svg>
+
+  <section id="stage" class="wrap">
+    <div class="sec-head">
+      <h2>On stage</h2>
+      <p>Keynotes, panels and boardrooms for MSPs, security leaders and the channel.</p>
+    </div>
+    <div class="cards cards-2">
+      <article class="talk">
+        <span class="chip hot">BOARDROOMS &middot; AUG 2026</span>
+        <h3>Shadow AI and vibe coding, across eleven executive boardrooms</h3>
+        <p class="where">XChange Security</p>
+      </article>
+      <article class="talk">
+        <span class="chip">QUICKFIRE</span>
+        <h3>Relationships and trust in the age of AI</h3>
+        <p class="where">Pax8 Beyond &middot; Salt Lake City</p>
+      </article>
+    </div>
+    <p class="also">Also on the program at ChannelPro Defend, Ultimate Partner and Kaseya Connect.</p>
+  </section>
+
+  <section id="lab" class="lab">
+    <svg class="wave-top" viewBox="0 0 1440 40" preserveAspectRatio="none" aria-hidden="true"><path d="M0 0 H1440 V14 Q1410 40 1380 14 T1320 14 T1260 14 T1200 14 T1140 14 T1080 14 T1020 14 T960 14 T900 14 T840 14 T780 14 T720 14 T660 14 T600 14 T540 14 T480 14 T420 14 T360 14 T300 14 T240 14 T180 14 T120 14 T60 14 T0 14 Z" fill="#F5ECDD"/></svg>
+    <div class="wrap">
+      <div class="sec-head">
+        <h2>From the Lab</h2>
+        <p>What I build when nobody's paying me to - and what it teaches me about AI in the real world.</p>
+      </div>
+      <div class="cards">
+        <article class="story">
+          <span class="eyebrow">Silent failures</span>
+          <h3>The camera that went quiet for six days</h3>
+          <p>Every dashboard said healthy. The floodlight kept working. Only a cross-check caught it - and changed how I think about trusting automated systems.</p>
+        </article>
+        <article class="story">
+          <span class="eyebrow">AI that remembers</span>
+          <h3>One memory, every model</h3>
+          <p>A single store of context my AI tools share across machines and vendors - so I can compare models fairly instead of starting over in each one.</p>
+        </article>
+        <article class="story">
+          <span class="eyebrow">Family archive</span>
+          <h3>Home movies back to the 1930s, named by Mom</h3>
+          <p>Family film reels digitized and put on a private page where my mother names the faces - and every answer flows back into the library.</p>
+        </article>
+      </div>
+      <div class="offer">
+        <p>I occasionally help homes and small offices up here put this kind of thing to work. If that's you, say hello.</p>
+        <a class="btn btn-ghost-light" href="#contact">Say hello</a>
+      </div>
+    </div>
+  </section>
+
+  <section id="writing" class="wrap writing">
+    <div>
+      <h2>Writing</h2>
+      <p style="color:var(--text)">Short pieces with an actual opinion in them. First ones coming soon.</p>
+    </div>
+    <div class="posts">
+      <a href="#writing" aria-disabled="true"><span class="t">Zero Trust is a checklist, not a slogan</span><span class="s">coming soon</span></a>
+      <a href="#writing" aria-disabled="true"><span class="t">Shadow AI is already in your client's office</span><span class="s">coming soon</span></a>
+    </div>
+  </section>
+
+  <section id="about" class="about">
+    <div class="wrap about-grid">
+      <div class="tiles" aria-hidden="true"><div></div><div></div><div></div></div>
+      <div>
+        <span class="eyebrow">Off the clock</span>
+        <h2>Home is the fresh coast.</h2>
+        <p>Traverse City, Michigan, on Lake Michigan's fresh coast - a garden I'm still learning, and a house that doubles as my test lab. Father, tinkerer, and the family's unofficial archivist. <mark>[DRAFT - Jason to rewrite in his own words]</mark></p>
+      </div>
+    </div>
+  </section>
+
+  <section class="wrap" aria-labelledby="path-h">
+    <h2 id="path-h" style="font-size:clamp(36px,4vw,56px);margin-bottom:48px">The path so far</h2>
+    <div class="path">
+      <div class="step"><span class="eyebrow">The code years</span><h3>Senior developer, Java and .NET</h3><p>MS in Computer Science, first in class.</p></div>
+      <div class="step"><span class="eyebrow">Building</span><h3>Two-time founder</h3><p><mark>[companies and one-line outcomes]</mark></p></div>
+      <div class="step"><span class="eyebrow">Product</span><h3>Chief Product Officer, Judy Security</h3><p>Cybersecurity SaaS. <mark>[one line on what you built]</mark></p></div>
+      <div class="step now"><span class="eyebrow">Now</span><h3>Cybersecurity Strategist, MSP Partnerships</h3><p>OpenText Cybersecurity, since 2024.</p></div>
+    </div>
+  </section>
+</main>
+
+<footer id="contact">
+  <svg class="wave-top" viewBox="0 0 1440 40" preserveAspectRatio="none" aria-hidden="true"><path d="M0 0 H1440 V14 Q1410 40 1380 14 T1320 14 T1260 14 T1200 14 T1140 14 T1080 14 T1020 14 T960 14 T900 14 T840 14 T780 14 T720 14 T660 14 T600 14 T540 14 T480 14 T420 14 T360 14 T300 14 T240 14 T180 14 T120 14 T60 14 T0 14 Z" fill="#F5ECDD"/></svg>
+  <div class="wrap">
+    <div class="cta">
+      <div>
+        <h2>Bring me the AI problem you haven't figured out yet.</h2>
+        <p>The interesting ones are the best part of my week.</p>
+      </div>
+      <div class="btns">
+        <a class="btn btn-cherry" href="https://calendar.google.com/calendar/appointments/schedules/AcZssZ0U1brViZwrWHJzWAFDuYXFovXKUvNQaqh7NbSA3e3cjHAQlU3cZogHAp1v87UduzwFyRSjS0X6" target="_blank" rel="noopener">Book 30 minutes</a>
+        <a class="btn btn-ghost-light" href="#contact">[EMAIL]</a>
+        <a class="btn btn-ghost-light" href="#contact">[LINKEDIN URL]</a>
+      </div>
+    </div>
+    <div class="fine">
+      <span>Fresh Coast Lab &middot; Traverse City, Michigan &middot; 44.76&deg; N, 85.62&deg; W</span>
+      <span>Built with AI, by a human with opinions.</span>
+    </div>
+  </div>
+</footer>
+
+<script>
+// "The Lab, right now": shows only fresh data. Missing, broken or stale (>2 h) -> stays hidden,
+// because a stale "live" number is itself a silent failure.
+(async () => {
+  try {
+    const r = await fetch('/api/lab-status', { cache: 'no-store' });
+    if (!r.ok) return;
+    const d = await r.json();
+    const age = Date.now() - Date.parse(d.updated);
+    if (!(age >= 0 && age < 2 * 3600 * 1000)) return;
+    const days = Number(d.days_since_self_repair);
+    document.getElementById('ls-auto').textContent = d.automations_running;
+    document.getElementById('ls-repair').textContent = days === 1 ? '1 day' : days + ' days';
+    document.getElementById('ls-silent').textContent = d.silent_failures_week;
+    const mins = Math.max(1, Math.round(age / 60000));
+    document.getElementById('ls-when').textContent = 'live from Traverse City · updated ' + mins + ' min ago';
+    document.getElementById('lab-strip').hidden = false;
+  } catch (e) { /* stay hidden */ }
+})();
+</script>
+</body>
+</html>

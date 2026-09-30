@@ -1,0 +1,16 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "freshcoastlab",
+  "main": "src/worker.js",
+  "compatibility_date": "2026-09-30",
+  "observability": { "enabled": true },
+  // Only public/ is published (the old config published the whole repo, README included).
+  "assets": {
+    "directory": "./public",
+    "binding": "ASSETS",
+    "run_worker_first": ["/api/*"]
+  }
+  // "The Lab, right now" storage - added once the KV namespace exists:
+  // "kv_namespaces": [{ "binding": "LAB", "id": "<namespace id>" }]
+  // Push token (never in this public repo): wrangler secret put LAB_PUSH_TOKEN
+}
