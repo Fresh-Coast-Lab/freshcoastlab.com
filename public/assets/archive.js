@@ -43,16 +43,17 @@
   };
   const overlays = { labels: [], axis: null, lines: null, bins: [] };
   const layout = (st) => {
+    const m = Math.min(W, H) || 1, kx = m / (W || 1), ky = m / (H || 1); // keep round things round on tall phone canvases
     overlays.labels = []; overlays.axis = null; overlays.lines = null; overlays.bins = [];
     P.forEach((p) => { p.ta = 1; p.ts = 2; p.tw = 1; });
     const keep = P.filter((p) => !p.dup && !p.live);
     const photos = keep.filter((p) => !p.video && !p.reel), vids = keep.filter((p) => p.video && !p.junk), reels = keep.filter((p) => p.reel);
     if (st === 0) { // three accounts
-      P.forEach((p) => { const cy = [0.22, 0.5, 0.78][p.src]; const a = rnd(0, 6.28), r = Math.sqrt(Math.random()) * 0.13; p.tx = 0.2 + Math.cos(a) * r * 0.7; p.ty = cy + Math.sin(a) * r; p.tc = [COL.aurora, COL.aqua, COL.violet][p.src]; });
+      P.forEach((p) => { const cy = [0.22, 0.5, 0.78][p.src]; const a = rnd(0, 6.28), r = Math.sqrt(Math.random()) * 0.2; p.tx = 0.2 + Math.cos(a) * r * kx; p.ty = cy + Math.sin(a) * r * ky * 0.62; p.tc = [COL.aurora, COL.aqua, COL.violet][p.src]; });
       overlays.labels = [['ACCOUNT 1', 0.36, 0.23], ['ACCOUNT 2', 0.36, 0.51], ['ACCOUNT 3', 0.36, 0.79], ['ONE LIBRARY', 0.72, 0.5]];
       overlays.lines = 'merge';
     } else if (st === 1) { // merged + dedupe
-      P.forEach((p) => { const a = rnd(0, 6.28), r = Math.sqrt(Math.random()) * 0.3; p.tx = 0.5 + Math.cos(a) * r * 0.75; p.ty = 0.44 + Math.sin(a) * r * 0.9; p.tc = mixc(COL.aqua, [COL.aurora, COL.aqua, COL.violet][p.src], 0.35); });
+      P.forEach((p) => { const a = rnd(0, 6.28), r = Math.sqrt(Math.random()) * 0.36; p.tx = 0.5 + Math.cos(a) * r * kx; p.ty = 0.44 + Math.sin(a) * r * ky; p.tc = mixc(COL.aqua, [COL.aurora, COL.aqua, COL.violet][p.src], 0.35); });
       P.filter((p) => p.dup).forEach((p) => { p.tx = rnd(0.12, 0.42); p.ty = rnd(0.9, 0.97); p.tc = COL.red; p.ta = 0.55; p.ts = 1.6; });
       P.filter((p) => p.live).forEach((p) => { p.tx = rnd(0.58, 0.88); p.ty = rnd(0.9, 0.97); p.tc = COL.amber; p.ta = 0.55; p.ts = 1.6; });
       overlays.bins = [['DUPLICATES: LOWER-QUALITY COPY', 0.27, 0.86], ['LIVE PHOTO MOTION FRAGMENTS', 0.73, 0.86]];
@@ -78,7 +79,7 @@
       P.forEach((p) => { p.ta = 0; });
       const pool = P.filter((p) => !p.dup && !p.live).slice(0, small ? 300 : 620);
       const K = 9, centers = Array.from({ length: K }, (_, k) => [0.14 + (k % 3) * 0.36 + rnd(-0.04, 0.04), 0.2 + Math.floor(k / 3) * 0.3 + rnd(-0.03, 0.03)]);
-      pool.forEach((p) => { const [cx, cy] = centers[p.face]; const a = rnd(0, 6.28), r = Math.pow(Math.random(), 1.6) * 0.075; p.tx = cx + Math.cos(a) * r; p.ty = cy + Math.sin(a) * r * 1.2; p.ta = 0.95; p.tc = [COL.aurora, COL.aqua, COL.violet][p.face % 3]; p.ts = 2.2; });
+      pool.forEach((p) => { const [cx, cy] = centers[p.face]; const a = rnd(0, 6.28), r = Math.pow(Math.random(), 1.6) * 0.09; p.tx = cx + Math.cos(a) * r * kx; p.ty = cy + Math.sin(a) * r * ky; p.ta = 0.95; p.tc = [COL.aurora, COL.aqua, COL.violet][p.face % 3]; p.ts = 2.2; });
       overlays.lines = { centers };
     } else if (st === 6) { // title cards
       P.forEach((p) => { p.ta = 0; });
