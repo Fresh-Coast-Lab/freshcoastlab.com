@@ -177,8 +177,8 @@ nav.top{display:flex;justify-content:space-between;align-items:center;padding-bl
 .kicker{color:var(--aqua);display:flex;gap:14px;flex-wrap:wrap}
 .kicker b{color:var(--aurora);font-weight:500}
 .hero h1{font-size:clamp(34px,4vw,62px);font-weight:700;margin:18px 0 22px;max-width:17ch;letter-spacing:-.03em;line-height:1.04;text-wrap:balance}
-.hero h1 .w{display:inline-block;opacity:0;transform:translateY(.45em) rotate(2deg);filter:blur(8px);animation:wordIn .9s cubic-bezier(.2,.8,.2,1) forwards}
-.hero h1 .glow{background:linear-gradient(92deg,var(--aurora),var(--aqua) 55%,var(--violet));-webkit-background-clip:text;background-clip:text;color:transparent}
+.hero h1 .w{display:inline-block;padding:.06em .02em .2em;margin:-.06em -.02em -.2em;opacity:0;transform:translateY(.45em) rotate(2deg);filter:blur(8px);animation:wordIn .9s cubic-bezier(.2,.8,.2,1) forwards}
+.hero h1 .glow{padding-bottom:.2em;margin-bottom:-.2em;background:linear-gradient(92deg,var(--aurora),var(--aqua) 55%,var(--violet));-webkit-background-clip:text;background-clip:text;color:transparent}
 @keyframes wordIn{to{opacity:1;transform:none;filter:none}}
 @media (prefers-reduced-motion:reduce){.hero h1 .w{animation:none;opacity:1;transform:none;filter:none}}
 .lede{font-size:clamp(17px,1.5vw,21px);color:#C5D1DA;max-width:560px}
