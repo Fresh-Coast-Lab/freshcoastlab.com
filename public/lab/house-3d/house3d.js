@@ -14,11 +14,45 @@ const DEBUG = params.has('debug');
 const REDUCE = matchMedia('(prefers-reduced-motion: reduce)').matches || params.has('still');
 const stage = $('#stage');
 const canvas = $('#gl');
+const EMBED = params.get('embed') === '1';
+const FORCE_FPS = DEBUG ? +params.get('forcefps') || 0 : 0;
 
-function noGL(err) {
+// messages to the page that embeds us (same origin only)
+const toParent = (msg) => { if (window.parent !== window) { try { window.parent.postMessage(msg, location.origin); } catch { /* detached */ } } };
+const store = {
+  get: (k) => { try { return localStorage.getItem(k); } catch { return null; } },
+  set: (k, v) => { try { localStorage.setItem(k, v); } catch { /* private mode */ } },
+};
+
+function noGL(err, reason = 'no-webgl') {
   if (err) console.error(err);
   $('#nogl').hidden = false;
   $('#loading').style.display = 'none';
+  toParent({ type: 'h3d-fallback', reason });
+}
+
+// embed: keep the parent's iframe exactly as tall as this document
+if (EMBED) {
+  let lastH = 0;
+  const postSize = () => {
+    const h = Math.ceil(document.documentElement.getBoundingClientRect().height);
+    if (h !== lastH) { lastH = h; toParent({ type: 'h3d-size', h }); }
+  };
+  new ResizeObserver(postSize).observe(document.documentElement);
+  addEventListener('load', postSize);
+  postSize();
+  document.querySelectorAll('#nogl a').forEach((a) => { a.target = '_top'; });
+  // the stage can't size itself against our own viewport (the parent sizes us from our height),
+  // so on wide screens cap it against the parent's window instead
+  const capToParent = () => {
+    try {
+      const vh = window.top.innerHeight;
+      document.documentElement.style.setProperty('--embed-maxw', innerWidth >= 821 ? `${Math.round(Math.max(480, vh - 150) * 16 / 9)}px` : '100%');
+    } catch { /* cross-origin parent: no cap */ }
+  };
+  capToParent();
+  addEventListener('resize', capToParent);
+  try { window.top.addEventListener('resize', capToParent); } catch { /* cross-origin */ }
 }
 
 function webglOK() {
@@ -105,20 +139,32 @@ const LAMP = {
 const LAMP_POS = { office: [2.4, 2.4, 1.9], laundry: [9, 3.2, 1.9], kitchen: [14.2, 3.4, 1.95], pantry: [18.5, 1.7, 1.9], garage: [3.6, 10.6, 2.1], living: [14.5, 11, 1.9], yard: [9.5, -2.8, 2.2], drive: [3, 15.5, 2.3], porch: [10.3, 15.2, 1.2] };
 
 async function main() {
-  if (!webglOK() || params.has('nogl')) { noGL(); return; }
+  if (!webglOK() || params.has('nogl')) { noGL(null, 'no-webgl'); return; }
 
   // ---------------------------------------------------------------- renderer
   let renderer;
   try {
     renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: true, powerPreference: 'high-performance', preserveDrawingBuffer: DEBUG });
-  } catch (e) { noGL(e); return; }
+  } catch (e) { noGL(e, 'no-webgl'); return; }
   renderer.outputColorSpace = THREE.SRGBColorSpace;
   renderer.toneMapping = THREE.ACESFilmicToneMapping;
   renderer.toneMappingExposure = 1.0;
   renderer.setClearColor(0x000000, 0);
-  const maxDpr = Math.min(window.devicePixelRatio || 1, 2);
-  let dpr = maxDpr;
+
+  // ---------------------------------------------------------------- quality tiers
+  // high: DPR up to 2 on desktop, 1.5 on phones. mid: DPR 1.25. low: DPR 1, glow sprites off, small lightmaps.
+  // The runtime monitor walks down this ladder one rung at a time.
+  const PHONE = matchMedia('(pointer: coarse)').matches || innerWidth < 820;
+  const devDpr = window.devicePixelRatio || 1;
+  const verdict0 = store.get('h3d-verdict');
+  const TIER = ['high', 'mid', 'low'].includes(params.get('tier')) ? params.get('tier') : verdict0 === 'low' ? 'low' : 'high';
+  const dprs = [...new Set([Math.min(devDpr, PHONE ? 1.5 : 2), Math.min(devDpr, 1.5), Math.min(devDpr, 1.25), 1].map((v) => Math.max(1, v)))].sort((a, b) => b - a);
+  const LEVELS = [...dprs.map((d) => ({ dpr: d, glows: true })), { dpr: 1, glows: false }];
+  const startLevel = TIER === 'low' ? LEVELS.length - 1 : TIER === 'mid' ? LEVELS.findIndex((l) => l.dpr <= 1.25) : 0;
+  let level = startLevel;
+  let dpr = LEVELS[level].dpr, glowsOn = LEVELS[level].glows;
   renderer.setPixelRatio(dpr);
+  const TEXDIR = TIER === 'low' ? 'low/' : '';
 
   const scene = new THREE.Scene();
   const camera = new THREE.PerspectiveCamera(32, 1, 0.5, 400);
@@ -135,9 +181,12 @@ async function main() {
   const [gltf, meta, ...tex] = await Promise.all([
     loader.loadAsync('house.glb'),
     fetch('meta.json').then((r) => r.json()),
-    ...['house_env', 'house_lamps0', 'house_lamps1', 'house_lamps2', 'lot_env', 'lot_lamps0', 'lot_lamps1', 'lot_lamps2'].map((n) => loadTex(n + '.webp')),
+    ...['house_env', 'house_lamps0', 'house_lamps1', 'house_lamps2', 'lot_env', 'lot_lamps0', 'lot_lamps1', 'lot_lamps2'].map((n) => loadTex(TEXDIR + n + '.webp')),
   ]);
   const TEX = { house: tex.slice(0, 4), lot: tex.slice(4, 8) };
+  // decoded GPU memory of the lightmaps: w x h x 4 bytes, plus a third for mipmaps
+  const texMiB = tex.reduce((sum, t) => sum + t.image.width * t.image.height * 4 * 1.333, 0) / 1048576;
+  if (DEBUG) console.info(`[h3d] tier ${TIER}, lightmaps ${tex.map((t) => t.image.width).join('/')} px, ${texMiB.toFixed(1)} MiB decoded`);
   const root = gltf.scene;
   scene.add(root);
   root.updateMatrixWorld(true);
@@ -322,7 +371,7 @@ async function main() {
   const envScene = new THREE.Scene();
   const envGeo = new THREE.SphereGeometry(10, 16, 8);
   envScene.add(new THREE.Mesh(envGeo, new THREE.ShaderMaterial({ side: THREE.BackSide, vertexShader: 'varying vec3 p; void main(){ p = position; gl_Position = projectionMatrix * modelViewMatrix * vec4(position,1.); }', fragmentShader: 'varying vec3 p; void main(){ float y = normalize(p).y; vec3 c = mix(vec3(0.05,0.06,0.08), vec3(0.55,0.62,0.75), smoothstep(-0.2, 0.8, y)); c += vec3(1.0,0.8,0.6) * smoothstep(0.96, 1.0, dot(normalize(p), normalize(vec3(-0.4, 0.6, 0.5)))) * 2.0; gl_FragColor = vec4(c, 1.); }' })));
-  const envTex = pmrem.fromScene(envScene, 0.02).texture;
+  const envTex = pmrem.fromScene(envScene, 0.02, 0.1, 100, { size: 64 }).texture;
   scene.environment = envTex;
 
   // ---------------------------------------------------------------- dynamic objects from the GLB
@@ -473,7 +522,8 @@ async function main() {
   glowMesh.frustumCulled = false; glowMesh.renderOrder = 10;
   scene.add(glowMesh);
   let gN = 0;
-  const glow = (p, r, g, b, s) => { if (gN >= GMAX || (r + g + b) < 0.004) return; gOff.setXYZ(gN, p.x, p.y, p.z); gCol.setXYZ(gN, r, g, b); gSize.setX(gN, s); gN++; };
+  let decor = true;
+  const glow = (p, r, g, b, s) => { if (!decor || gN >= GMAX || (r + g + b) < 0.004) return; gOff.setXYZ(gN, p.x, p.y, p.z); gCol.setXYZ(gN, r, g, b); gSize.setX(gN, s); gN++; };
 
   // ---------------------------------------------------------------- people (glowing figures)
   const personMat = new THREE.ShaderMaterial({
@@ -572,6 +622,7 @@ async function main() {
   const cam = { c: new THREE.Vector3(), az: 0, el: 0, r: 10 };
   const from = { c: new THREE.Vector3(), az: 0, el: 0, r: 10 };
   const to = { c: new THREE.Vector3(), az: 0, el: 0, r: 10 };
+  let driftT = 0, driftAmp = 0.2;
   let camT = 1, camDur = 1.6, shotKey = 'dollhouse', userRoom = null;
   const user = { az: 0, el: 0, zoom: 1, lastInput: -1e9 };
   const setShotVals = (o, k) => { const s = SHOTS[k]; o.c.copy(W(s.c[0], s.c[1], s.c[2])); o.az = s.az; o.el = s.el; o.r = s.r; };
@@ -589,7 +640,7 @@ async function main() {
     camDur = Math.min(2.4, 1.1 + dist * 0.06);
     camT = instant || REDUCE ? 1 : 0;
     if (camT >= 1) { cam.c.copy(to.c); cam.az = to.az; cam.el = to.el; cam.r = to.r; }
-    shotKey = k;
+    shotKey = k; wake();
     user.az *= 0.3; user.el = 0; user.zoom = 1;
     const inRoom = k !== 'dollhouse';
     whereEl.textContent = SHOTS[k].name; whereEl.classList.toggle('show', inRoom);
@@ -617,8 +668,10 @@ async function main() {
     }
     if (pendingZone && T - lastFocus >= 1.4) { const z = pendingZone; pendingZone = null; lastFocus = T; goShot(z); }
     // idle drift in the dollhouse view
-    const idle = now - user.lastInput > 4000;
-    const drift = !REDUCE && shotKey === 'dollhouse' && idle ? Math.sin(now * 0.00011) * 0.2 : (!REDUCE ? Math.sin(now * 0.00017) * 0.04 : 0);
+    // idle drift: advances only while scenarios autoplay, so a paused house can stop rendering
+    if (autoplayOn() && now - user.lastInput > 4000) driftT += dt;
+    driftAmp += ((shotKey === 'dollhouse' ? 0.2 : 0.04) - driftAmp) * Math.min(1, dt * 1.5);
+    const drift = REDUCE ? 0 : Math.sin(driftT * 0.11) * driftAmp;
     const aspect = camera.aspect;
     const vf = THREE.MathUtils.degToRad(camera.fov);
     const hf = 2 * Math.atan(Math.tan(vf / 2) * aspect);
@@ -822,11 +875,11 @@ async function main() {
   nextBtn.hidden = !REDUCE;
   nextBtn.addEventListener('click', () => {
     if (!busy) { play(order[idx]); return; }
-    hold = false;
+    hold = false; wake();
   });
 
   async function play(k) {
-    const id = ++run; busy = true; scenarioActive = true;
+    const id = ++run; busy = true; scenarioActive = true; wake();
     $('#hint').classList.remove('show');
     if (REDUCE) nextBtn.textContent = 'Next step';
     order.forEach((o) => btn[o].setAttribute('aria-pressed', o === k ? 'true' : 'false'));
@@ -847,6 +900,7 @@ async function main() {
   }
 
   function poke(id) {
+    wake();
     pausedUntil = Math.max(pausedUntil, performance.now() + 20000);
     cls(id, 'peek'); setTimeout(() => cls(id, 'peek', false), 2600);
     say(id);
@@ -865,6 +919,7 @@ async function main() {
   stage.addEventListener('pointerdown', (e) => {
     if (e.target.closest('button')) return;
     ptrs.set(e.pointerId, { x: e.clientX, y: e.clientY });
+    wake();
     if (ptrs.size === 1) drag = { x: e.clientX, y: e.clientY, az: user.az, el: user.el, moved: false, orbit: false, t: performance.now(), id: e.pointerId, mouse: e.pointerType === 'mouse' };
     if (ptrs.size === 2) { const [a, b] = [...ptrs.values()]; pinch0 = Math.hypot(a.x - b.x, a.y - b.y); zoom0 = user.zoom; drag && (drag.moved = true); }
   });
@@ -906,7 +961,7 @@ async function main() {
     if (!e.ctrlKey) return; // plain wheel scrolls the page; trackpad pinch arrives as ctrl+wheel
     e.preventDefault();
     user.zoom = THREE.MathUtils.clamp(user.zoom * Math.exp(e.deltaY * 0.01), 0.5, 1.45);
-    user.lastInput = performance.now();
+    user.lastInput = performance.now(); wake();
   }, { passive: false });
   function tapAt(cx, cy) {
     const r = canvas.getBoundingClientRect();
@@ -1000,7 +1055,7 @@ async function main() {
   }
 
   function buildGlows() {
-    gN = 0;
+    gN = 0; decor = glowsOn; // tier low: decorative glows off, but keep the story (people, pulses)
     const a = amb, nightK = 1 - 0.75 * a;
     for (const wdw of windows) {
       const l = lvl[wdw.room] || 0; if (l < 0.02) continue;
@@ -1026,6 +1081,7 @@ async function main() {
       const t = tailOn * carOpacity;
       for (const bx of [1.78, 3.33]) glow(W(bx, 12.74 + carOff, FLOOR + 0.71 + (carOff > 3.6 ? -0.07 : 0)), 0.9 * t, 0.08 * t, 0.05 * t, 0.8);
     }
+    decor = true;
     for (const p of people) { tmp.copy(W(p.x, p.y, FLOOR + 0.8 + p.bob)); glow(tmp, 0.12 * p.a, 0.3 * p.a, 0.34 * p.a, 2.2); }
     for (const p of pulses) {
       tmp.lerpVectors(p.a, p.b, p.t); tmp.y += Math.sin(Math.PI * p.t) * Math.min(3, p.a.distanceTo(p.b) * 0.25);
@@ -1079,7 +1135,7 @@ async function main() {
     x.fillStyle = '#E4ECF6'; x.beginPath(); x.arc(mx, my, mr, 0, Math.PI * 2); x.fill();
   }
 
-  // ---------------------------------------------------------------- sizing, loop, visibility
+  // ---------------------------------------------------------------- sizing
   function resize() {
     const r = stage.getBoundingClientRect();
     const w = Math.max(1, Math.round(r.width)), h = Math.max(1, Math.round(r.height));
@@ -1088,14 +1144,43 @@ async function main() {
     camera.aspect = w / h; camera.updateProjectionMatrix();
     markSize.w = w; markSize.h = h;
     drawStars();
+    wake();
   }
-  new ResizeObserver(resize).observe(stage);
-  resize();
 
-  let inView = true, running = false, last = 0;
-  const ft = []; let dprCheck = 0;
+  // ---------------------------------------------------------------- render on demand
+  // The rAF loop runs only while something moves: a scenario, a camera flight or drag, a pulse,
+  // lights still fading, or the idle drift while scenarios autoplay. Otherwise it stops, and any
+  // input, resize or scenario wakes it. Off-screen or hidden, it never runs.
+  const DEBUG_HOLD = DEBUG && params.has('hold');
+  function autoplayOn() { return !REDUCE && !DEBUG_HOLD && performance.now() > pausedUntil; }
+  let inView = true, loopActive = false, last = 0, lastDrawn = 0, idleFrames = 0, wakeTimer = 0;
+  let fellBack = false, ctxLost = false;
+  const visible = () => inView && !document.hidden && !fellBack && !ctxLost;
+  function isAnimating() {
+    if ((busy && !hold) || camT < 1 || ptrs.size || pulses.length || tweens.length || people.length || smokeOn) return true;
+    if (autoplayOn()) return true;
+    for (const g of GROUPS) if (Math.abs(goal[g] - lvl[g]) > 0.002) return true;
+    return Math.abs(headGoal - headOn) > 0.002 || Math.abs(tailGoal - tailOn) > 0.002 || Math.abs(tvGoal - tvLvl) > 0.002;
+  }
+  function wake() {
+    clearTimeout(wakeTimer);
+    if (!visible() || loopActive) return;
+    loopActive = true; last = 0; idleFrames = 0; mon.acc = 0; mon.n = 0;
+    requestAnimationFrame(loop);
+  }
+  function sleepLoop() {
+    loopActive = false;
+    // come back when autoplay is due again
+    if (!REDUCE && !DEBUG_HOLD && pausedUntil !== Infinity && visible()) {
+      const due = Math.max(pausedUntil, lastEnd + 2600) - performance.now();
+      wakeTimer = setTimeout(wake, Math.max(50, due + 50));
+    }
+  }
+
+  const ft = [];
   const dbgEl = DEBUG && params.has('stats') ? Object.assign(document.createElement('div'), { className: 'dbg' }) : null;
   if (dbgEl) stage.append(dbgEl);
+  let frames = 0;
   function frame(dt, now) {
     advance(dt);
     applyLighting(dt);
@@ -1103,35 +1188,90 @@ async function main() {
     buildGlows();
     renderer.render(scene, camera);
     placeMarks();
+    frames++;
   }
   function loop(now) {
-    if (!running) return;
-    requestAnimationFrame(loop);
-    const dt = Math.min(0.1, (now - (last || now)) / 1000);
+    if (!loopActive) return;
+    if (!visible()) { loopActive = false; return; }
+    // debug: simulate a slow GPU by only drawing FORCE_FPS times a second
+    if (FORCE_FPS && lastDrawn && now - lastDrawn < 1000 / FORCE_FPS - 1) { requestAnimationFrame(loop); return; }
+    lastDrawn = now;
+    const dtMs = last ? now - last : 0;
     last = now;
-    frame(dt, now);
-    // frame-time stats and adaptive resolution
-    ft.push(dt * 1000); if (ft.length > 120) ft.shift();
-    if (++dprCheck % 90 === 0 && ft.length >= 90) {
-      const avg = ft.reduce((s, v) => s + v, 0) / ft.length;
-      if (avg > 22 && dpr > 1.25) { dpr = Math.max(1.25, dpr - 0.25); resize(); }
-      else if (avg < 14 && dpr < maxDpr) { dpr = Math.min(maxDpr, dpr + 0.25); resize(); }
+    frame(Math.min(0.1, dtMs / 1000), now);
+    if (dtMs > 0) { ft.push(dtMs); if (ft.length > 120) ft.shift(); monitor(dtMs, now); }
+    if (dbgEl && frames % 15 === 0) {
+      const srt = [...ft].sort((x, y) => x - y), avg = srt.reduce((q, v) => q + v, 0) / (srt.length || 1);
+      dbgEl.textContent = `${(1000 / avg).toFixed(0)} fps  avg ${avg.toFixed(1)} ms  p95 ${(srt[Math.floor(srt.length * 0.95)] || 0).toFixed(1)} ms\ntier ${TIER}  level ${level}  dpr ${dpr}  glows ${glowsOn ? 'on' : 'off'}\ncalls ${renderer.info.render.calls}  tris ${renderer.info.render.triangles}  maps ${texMiB.toFixed(1)} MiB`;
     }
-    if (dbgEl && dprCheck % 15 === 0) {
-      const s = [...ft].sort((x, y) => x - y), avg = s.reduce((a, v) => a + v, 0) / (s.length || 1);
-      dbgEl.textContent = `${(1000 / avg).toFixed(0)} fps  avg ${avg.toFixed(1)} ms  p95 ${(s[Math.floor(s.length * 0.95)] || 0).toFixed(1)} ms\ndpr ${dpr}  calls ${renderer.info.render.calls}  tris ${renderer.info.render.triangles}`;
-    }
-    // autoplay
-    if (!REDUCE && !busy && now > pausedUntil && now - lastEnd > 2600 && !DEBUG_HOLD) play(order[idx]);
+    if (autoplayOn() && !busy && now - lastEnd > 2600) play(order[idx]);
+    if (isAnimating()) idleFrames = 0;
+    else if (++idleFrames >= 3) { sleepLoop(); return; }
+    requestAnimationFrame(loop);
   }
-  const DEBUG_HOLD = DEBUG && params.has('hold');
-  function setRunning() {
-    const want = inView && !document.hidden;
-    if (want && !running) { running = true; last = 0; requestAnimationFrame(loop); }
-    else if (!want) running = false;
+
+  // ---------------------------------------------------------------- performance monitor
+  // Modelled on drei's PerformanceMonitor: 250 ms windows, the last 10 kept, act when 8 of 10 agree.
+  // A steady 30 fps (iOS Low Power Mode caps rAF there) is fine and never counts against us.
+  const mon = { lowest: startLevel, t0: 0, acc: 0, n: 0, win: [], flips: 0, lastDir: 0, locked: false, okSent: false, events: [] };
+  const setVerdict = (v) => { store.set('h3d-verdict', v); toParent({ type: 'h3d-verdict', v }); };
+  function applyLevel(i, why) {
+    level = i; dpr = LEVELS[i].dpr; glowsOn = LEVELS[i].glows;
+    mon.events.push(`${why} -> level ${i} (dpr ${dpr}, glows ${glowsOn ? 'on' : 'off'})`);
+    if (DEBUG) console.info('[h3d]', mon.events[mon.events.length - 1]);
+    resize();
+    if (dpr <= 1) setVerdict('low');
   }
-  new IntersectionObserver((es) => { inView = es[0].isIntersecting; setRunning(); }, { threshold: 0.05 }).observe(stage);
-  document.addEventListener('visibilitychange', setRunning);
+  function step(dir) {
+    if (mon.lastDir && dir !== mon.lastDir) mon.flips++;
+    mon.lastDir = dir;
+    mon.lowest = Math.max(mon.lowest, level + dir);
+    if (mon.flips >= 2) { mon.locked = true; applyLevel(mon.lowest, 'flip-flop limit, locked at the lowest level reached'); return; }
+    applyLevel(level + dir, dir > 0 ? 'decline' : 'incline');
+  }
+  function monitor(dtMs, now) {
+    if (fellBack) return;
+    if (!mon.t0) mon.t0 = now;
+    if (now - mon.t0 < 1000) return; // let shaders compile and textures upload first
+    if (dtMs > 250) { mon.acc = 0; mon.n = 0; return; } // a stall or a gap, not a frame rate
+    mon.acc += dtMs; mon.n++;
+    if (mon.acc < 250) return;
+    mon.win.push((mon.n * 1000) / mon.acc); mon.acc = 0; mon.n = 0;
+    if (mon.win.length > 10) mon.win.shift();
+    if (mon.win.length < 10) return;
+    const count = (f) => mon.win.filter(f).length;
+    const bottom = level === LEVELS.length - 1;
+    // struggling: under the 30 fps cap, or an uncapped display stuck well short of 60
+    const slow = count((f) => f < 26 || (f > 34 && f < 50));
+    const fast = count((f) => f > 57);
+    if (bottom && count((f) => f < 24) >= 8) { fallback('slow'); return; }
+    if (slow >= 8 && !bottom) { step(+1); mon.win = []; return; }
+    if (fast >= 8 && level > startLevel && !mon.locked) { step(-1); mon.win = []; return; }
+    if (!mon.okSent && slow <= 2 && dpr > 1) { mon.okSent = true; setVerdict('ok'); }
+  }
+  function fallback(reason) {
+    if (fellBack) return;
+    fellBack = true; loopActive = false;
+    setVerdict('fail');
+    mon.events.push('fallback: ' + reason);
+    toParent({ type: 'h3d-fallback', reason });
+    if (DEBUG) console.info('[h3d] fallback', reason);
+    const box = $('#nogl');
+    box.querySelector('p').textContent = 'This device is having trouble keeping the 3D house smooth.';
+    box.hidden = false;
+  }
+  // a lost WebGL context that is not restored within 3 s means fall back
+  let lostTimer = 0;
+  canvas.addEventListener('webglcontextlost', (e) => {
+    e.preventDefault(); ctxLost = true; loopActive = false;
+    lostTimer = setTimeout(() => fallback('context-lost'), 3000);
+  });
+  canvas.addEventListener('webglcontextrestored', () => { clearTimeout(lostTimer); ctxLost = false; resize(); wake(); });
+
+  new ResizeObserver(resize).observe(stage);
+  resize();
+  new IntersectionObserver((es) => { inView = es[0].isIntersecting; wake(); }, { threshold: 0.05 }).observe(stage);
+  document.addEventListener('visibilitychange', wake);
 
   // first frame, then fade in over the poster
   reset(SC.dusk.setup);
@@ -1145,7 +1285,7 @@ async function main() {
   stage.classList.add('ready');
   const hint = $('#hint');
   if (!REDUCE) { hint.classList.add('show'); setTimeout(() => hint.classList.remove('show'), 2400); }
-  setRunning();
+  wake();
   if (!REDUCE && !DEBUG_HOLD) setTimeout(() => { if (!busy) play('dusk'); }, 900);
 
   // ---------------------------------------------------------------- debug hooks for screenshots
@@ -1164,7 +1304,8 @@ async function main() {
       orbit: (az, el = 0, zoom = 1) => { user.az = az; user.el = el; user.zoom = zoom; frame(0, performance.now()); },
       render: () => frame(0, performance.now()),
       cam: () => ({ shot: shotKey, userAz: user.az, userZoom: user.zoom, userRoom }),
-      stats: () => { const s = [...ft].sort((x, y) => x - y); return { avg: s.reduce((a, v) => a + v, 0) / (s.length || 1), p95: s[Math.floor(s.length * 0.95)], n: s.length, dpr, calls: renderer.info.render.calls, tris: renderer.info.render.triangles }; },
+      stats: () => { const q = [...ft].sort((x, y) => x - y); return { avg: q.reduce((a, v) => a + v, 0) / (q.length || 1), p95: q[Math.floor(q.length * 0.95)], n: q.length, frames, loopActive, tier: TIER, level, dpr, glowsOn, texMiB: +texMiB.toFixed(2), maps: tex.map((t) => t.image.width), calls: renderer.info.render.calls, tris: renderer.info.render.triangles, monitor: mon.events, windows: mon.win.map((f) => +f.toFixed(1)), verdict: store.get('h3d-verdict') }; },
+      loseContext: () => { renderer.getContext().getExtension('WEBGL_lose_context').loseContext(); return 'lost'; },
       log: () => fullLog.join('\n'),
       snapshot: (type = 'image/webp', q = 0.8) => canvas.toDataURL(type, q),
       set: (k, v) => { if (k === 'amb') amb = v; else { goal[k] = v; lvl[k] = v; } frame(0, performance.now()); },

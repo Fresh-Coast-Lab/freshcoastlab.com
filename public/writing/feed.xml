@@ -1,0 +1,126 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+<channel>
+  <title>Jason Myers: Writing</title>
+  <link>https://freshcoastlab.com/writing/</link>
+  <atom:link href="https://freshcoastlab.com/writing/feed.xml" rel="self" type="application/rss+xml"/>
+  <description>Short pieces with actual opinions on AI, security and the MSP of the future.</description>
+  <language>en-us</language>
+  <lastBuildDate>Thu, 11 Jun 2026 12:00:00 +0000</lastBuildDate>
+  <item>
+    <title>The differentiator isn&#x27;t the model. It&#x27;s the trust.</title>
+    <link>https://freshcoastlab.com/writing/the-differentiator-is-trust/</link>
+    <guid isPermaLink="true">https://freshcoastlab.com/writing/the-differentiator-is-trust/</guid>
+    <pubDate>Thu, 11 Jun 2026 12:00:00 +0000</pubDate>
+    <description><![CDATA[<p>Pax8 Beyond gave me a 30-second quick-fire slot. It's hard to land a message in 30 seconds, so I kept it to one: in the age of AI, the differentiator isn't the model. It's the trust.</p>
+<p>Here's the longer version.</p>
+<h2>Tools change every week</h2>
+<p>There's a new model, a new agent framework or a new copilot almost every week. If your value is “we have the newest tool,” your value expires every week too. Your customers can buy the same tools you can.</p>
+<h2>People buy from people</h2>
+<p>What they can't buy is someone who knows their business, tells them the truth, and picks up the phone when something breaks at 2 AM. Relationships are the one thing AI can't automate, at least not yet.</p>
+<p>I saw the same thing at my first Ultimate Partner event in Bellevue a few weeks earlier. The content was excellent, but the real work happened in the hallways and at dinner. That's where problems get solved and partnerships get built.</p>
+<p>The AI-first shift won't be won by whoever has the best stack. It'll be won by whoever has the strongest relationships. Tech may be the headline. People are why I keep showing up.</p>]]></description>
+  </item>
+  <item>
+    <title>The AI-first MSP doesn&#x27;t bolt AI on.</title>
+    <link>https://freshcoastlab.com/writing/the-ai-first-msp/</link>
+    <guid isPermaLink="true">https://freshcoastlab.com/writing/the-ai-first-msp/</guid>
+    <pubDate>Sun, 07 Jun 2026 12:00:00 +0000</pubDate>
+    <description><![CDATA[<p>At our roadshow in Microsoft's Atlanta office, I kept coming back to one idea with partners: the AI-first MSP.</p>
+<p>It isn't about bolting AI onto what you already do. A chatbot on the website and a summarizer in the ticketing system is a start, but it's not a shift. The shift is rethinking how the business runs when intelligence is assumed in every workflow.</p>
+<h2>What “assumed” looks like</h2>
+<p>Threat detection where the first pass is always automated and a human reviews what matters. Client communication where the draft is ready before the tech opens the ticket. Onboarding where the checklist runs itself and flags only the exceptions. Reporting that writes itself and gets read, because it's short.</p>
+<p>None of that is science fiction. I run a smaller version of it at home: a house where sensors, a local brain and tiered alerts do the watching, and I only hear about what needs me.</p>
+<h2>The catch</h2>
+<p>When AI is in every workflow, AI security is in every workflow too. Every agent you deploy is something that can be tricked, over-permissioned or quietly wrong. The AI-first MSP plans for that from day one, not after the first incident.</p>
+<p>Don't add AI to the business. Build the business like AI was always there.</p>]]></description>
+  </item>
+  <item>
+    <title>Collaboration over competition.</title>
+    <link>https://freshcoastlab.com/writing/collaboration-over-competition/</link>
+    <guid isPermaLink="true">https://freshcoastlab.com/writing/collaboration-over-competition/</guid>
+    <pubDate>Tue, 26 May 2026 12:00:00 +0000</pubDate>
+    <description><![CDATA[<p>Our peer group met in New York last month, and one partner closed a deal at the dinner table. That's not luck. That's what happens when you put people in a room who trade real playbooks instead of guarding them.</p>
+<h2>It's a mindset, not a club</h2>
+<p>Peer groups can look exclusive from the outside. They aren't, really. The structure helps, but the thing that makes them work is available to anyone: show up, share openly, ask the hard question, and stay coachable.</p>
+<p>The MSPs I see growing fastest all have some version of this. A circle of people who will tell them the truth about their pricing, their hiring and their stack. Some of it is formal. A lot of it is a text thread.</p>
+<h2>What I'd tell a newer MSP</h2>
+<p>Find three or four owners a little ahead of you and a little different from you. Meet on a schedule. Bring numbers, not war stories. Give away your best idea first.</p>
+<p>Collaboration over competition. Generosity over guardedness. We really are stronger together.</p>]]></description>
+  </item>
+  <item>
+    <title>A different muscle: when the room is the customers.</title>
+    <link>https://freshcoastlab.com/writing/when-the-room-is-the-customers/</link>
+    <guid isPermaLink="true">https://freshcoastlab.com/writing/when-the-room-is-the-customers/</guid>
+    <pubDate>Mon, 11 May 2026 12:00:00 +0000</pubDate>
+    <description><![CDATA[<p>As a channel guy, about 95% of my stage time is in front of MSPs. We talk strategy, stack and growth. We speak the same language.</p>
+<p>Then TeamLogic IT in Fort Lauderdale invited me to an executive briefing, and the room wasn't MSPs. It was their small and midsize business customers. Business owners. Office managers. People who run companies, not networks.</p>
+<p>That is a different muscle entirely.</p>
+<h2>What I noticed</h2>
+<p>There is a real gap between what we know AI can do and what small businesses are actually doing with it. Some are already all in without a plan. Some are waiting for permission that nobody is going to give them. Almost nobody had a clear picture of where their data goes when an employee pastes it into a chatbot.</p>
+<p>They didn't want a product pitch. They wanted someone to explain it plainly: here's what's useful, here's what's risky, here's where to start.</p>
+<h2>Why it matters for MSPs</h2>
+<p>An MSP that puts its vendor partners in front of its customers is doing something smart. It's saying: we're not just your IT provider, we're how you'll figure this out. That's the trusted advisor role everyone talks about, done for real.</p>
+<p>If you're an MSP, invite your customers to the conversation. They're more ready than you think, and more confused than they'll admit.</p>]]></description>
+  </item>
+  <item>
+    <title>The MSPs winning right now automate the boring stuff.</title>
+    <link>https://freshcoastlab.com/writing/automate-the-boring-stuff/</link>
+    <guid isPermaLink="true">https://freshcoastlab.com/writing/automate-the-boring-stuff/</guid>
+    <pubDate>Fri, 01 May 2026 12:00:00 +0000</pubDate>
+    <description><![CDATA[<p>Wheels up from Vegas after Kaseya Connect, and one thing was clear from every hallway conversation: the MSPs pulling ahead aren't the ones with the biggest stacks.</p>
+<p>They're the ones who automated the boring stuff so their techs can do real work.</p>
+<h2>Boring is where the time goes</h2>
+<p>Password resets. Onboarding checklists. Patch reports nobody reads. License reconciliations. None of it is hard. All of it eats hours. And every hour a senior tech spends on it is an hour they're not spending with a customer.</p>
+<p>The best shops I talked to picked one of those jobs, automated it end to end, and then checked that it actually worked. Then they picked the next one.</p>
+<h2>The part people skip</h2>
+<p>Automation that nobody watches is just a new way to fail quietly. I learned that at home when a camera stopped reporting motion for six days and every dashboard still said healthy. So whatever you automate, give it a watchdog. Something that notices when the thing that should happen, didn't.</p>
+<p>Automate the boring stuff. Watch the automation. Spend the time you get back with customers.</p>]]></description>
+  </item>
+  <item>
+    <title>Start by building something for yourself.</title>
+    <link>https://freshcoastlab.com/writing/start-by-building-something-for-yourself/</link>
+    <guid isPermaLink="true">https://freshcoastlab.com/writing/start-by-building-something-for-yourself/</guid>
+    <pubDate>Mon, 06 Apr 2026 12:00:00 +0000</pubDate>
+    <description><![CDATA[<p>I wrote the first version of this from a dentist's chair, remotely checking in on an AI agent I'd built over a few weeks of late nights.</p>
+<p>It knows my voice, my audience and what's happening in cybersecurity this week. It drafts presentations, writes talk tracks that actually sound like me, and briefs me on MSP news every morning. No off-the-shelf tool. Just Python, the Claude API, and a lot of trial and error.</p>
+<h2>Why build it yourself</h2>
+<p>MSPs ask me the same question at almost every event: where do we start with AI? My answer is always the same. Start by building something for yourself.</p>
+<p>Not a product. Not a pilot for a client. Something that solves your own annoying problem. You'll learn more in two weekends of building than in two months of webinars, because you'll hit the real problems: where the model is confidently wrong, what it should never be allowed to touch, and how much context it actually needs to be useful.</p>
+<h2>What it taught me</h2>
+<p>The model is the easy part. The hard part is memory, guardrails and knowing when it's quietly failing. That's why everything I run now shares one memory across machines, gets scanned for secrets before it's saved, and gets checked by something other than itself. This whole site was built the same way, with Claude Code doing the heavy lifting and me approving every change.</p>
+<p>You can't advise customers on AI you've never built with. Go build something.</p>]]></description>
+  </item>
+  <item>
+    <title>Your customers already have AI agents. That&#x27;s your opening.</title>
+    <link>https://freshcoastlab.com/writing/your-customers-already-have-ai-agents/</link>
+    <guid isPermaLink="true">https://freshcoastlab.com/writing/your-customers-already-have-ai-agents/</guid>
+    <pubDate>Wed, 11 Mar 2026 12:00:00 +0000</pubDate>
+    <description><![CDATA[<p>Everyone is talking about AI agents right now, and they should be. Your small business customers are already using them. They're connecting them to Microsoft 365, Slack, Gmail and Google Drive. Most of them have no security guardrails in place at all. They said yes to AI long before anyone signed off on it.</p>
+<p><a href="https://www.gartner.com/en/newsroom/press-releases/2025-08-26-gartner-predicts-40-percent-of-enterprise-apps-will-feature-task-specific-ai-agents-by-2026-up-from-less-than-5-percent-in-2025" target="_blank" rel="noopener">Gartner forecasts</a> that 40% of enterprise applications will include task-specific AI agents by 2026. A <a href="https://bigid.com/blog/ai-adoption-risk-and-readiness/" target="_blank" rel="noopener">BigID study</a> the same year found only about 6% of organizations have an advanced AI security strategy.</p>
+<p>Let that sink in.</p>
+<h2>Why this is different</h2>
+<p>An AI agent isn't a chatbot. It can send email, move data and change settings on its own. Attackers have noticed. They don't need to crack a password if they can trick an agent into doing the work for them.</p>
+<p>That's a new kind of risk, and most small businesses don't have anyone watching for it.</p>
+<h2>That gap is the opportunity</h2>
+<p>I've spent the last year in boardrooms, peer groups and roadshows across North America and EMEA. The MSPs pulling ahead aren't the ones with the most tools. They're the ones who showed up before the breach and said, “Let's talk about what AI is doing inside your business.”</p>
+<p>Selling licenses and managing endpoints still matters. But the MSP of the future is the trusted advisor who helps customers use AI without burning the house down. The ones who wait for customers to ask could be cleaning up a big mess. The ones who start the conversation will own the relationship for the next decade.</p>
+<p>Which MSP do you want to be?</p>]]></description>
+  </item>
+  <item>
+    <title>“Add AI” is not a strategy.</title>
+    <link>https://freshcoastlab.com/writing/ai-is-the-differentiator-not-the-strategy/</link>
+    <guid isPermaLink="true">https://freshcoastlab.com/writing/ai-is-the-differentiator-not-the-strategy/</guid>
+    <pubDate>Tue, 13 Jan 2026 12:00:00 +0000</pubDate>
+    <description><![CDATA[<p>I sat down with Efe Senel on the Partnerships Unraveled podcast to talk about what I call MSP 3.0. The short version: the MSPs who win the next few years won't be the ones with the most AI in their pitch deck.</p>
+<p>AI is a differentiator. It is not a strategy. If your plan is “add AI,” you don't have a plan, you have a feature. The strategy is still the same one it has always been: know your customer's business better than anyone, and make their technology boring in the best way.</p>
+<h2>Three things I keep coming back to</h2>
+<p><strong>Open beats walled.</strong> Partners don't want to be locked into one vendor's garden. They want tools that play well with the stack they already run. Every time I see an MSP get boxed in, it costs them later.</p>
+<p><strong>Simple wins.</strong> Enablement and licensing should not require a decoder ring. If a partner can't explain what they're selling in one breath, their customer won't buy it.</p>
+<p><strong>There's money on the table.</strong> A lot of MSPs are sitting on vendor program revenue they never claim, especially in the Microsoft world. That's not a technology problem. That's a “nobody looked” problem.</p>
+<h2>Where AI actually fits</h2>
+<p>AI earns its keep when it makes your people faster and your service better. Summarizing tickets. Drafting the QBR. Catching the alert nobody was watching. That's real. What isn't real is slapping “AI-powered” on the same service and raising the price.</p>
+<p>Build the strategy first. Then let AI make it hard to compete with.</p>]]></description>
+  </item>
+</channel>
+</rss>

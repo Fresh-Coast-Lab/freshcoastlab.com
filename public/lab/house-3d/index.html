@@ -9,7 +9,6 @@
 <meta name="theme-color" content="#060A12">
 <link rel="icon" href="/favicon.svg" type="image/svg+xml">
 <link rel="stylesheet" href="/assets/fonts.css">
-<meta name="robots" content="noindex">
 <link rel="preload" href="house.glb" as="fetch" crossorigin>
 <style>
 :root{
@@ -116,7 +115,18 @@ h1{font-family:var(--display);font-weight:700;letter-spacing:-.035em;line-height
 .foot{margin:18px 0 40px;display:flex;flex-wrap:wrap;gap:10px 22px;align-items:center;justify-content:space-between}
 .opsec{font-family:var(--mono);font-size:12px;color:var(--dim);margin:0;max-width:640px}
 .foot a{font-family:var(--mono);font-size:12px;color:var(--aqua)}
+
+/* embed mode (?embed=1): only the chips and the stage, sized by the parent iframe */
+html.embed,html.embed body{background:#060A12;overflow:hidden;height:auto}
+html.embed{--gutter:0px}
+html.embed header.top,html.embed .eyebrow,html.embed h1,html.embed .sub,html.embed .foot{display:none}
+html.embed .wrap{padding:0;max-width:none}
+html.embed main{padding-bottom:2px}
+html.embed #scen{margin-top:0;padding-top:2px}
+html.embed .stage{width:min(100%,var(--embed-maxw,100%));margin-inline:auto}
+html.embed #rooms{margin-top:8px}
 </style>
+<script>if (/[?&]embed=1(&|$)/.test(location.search)) document.documentElement.classList.add('embed')</script>
 <script type="importmap">{"imports":{"three":"./vendor/three.module.min.js"}}</script>
 </head>
 <body>
