@@ -1,12 +1,12 @@
 // freshcoastlab.com - static site plus one tiny API for "The Lab, right now".
 //
-// GET  /api/lab-status  -> latest aggregate numbers (or 404 if none yet)
+// GET  /api/lab-status  -> latest aggregate numbers (or 204 if none yet)
 // POST /api/lab-status  -> Home Assistant pushes numbers here (Bearer LAB_PUSH_TOKEN)
 //
 // Home Assistant is never reachable from the internet: it PUSHES out to this Worker.
 // Only whitelisted, aggregate fields are accepted and stored - never devices,
 // addresses or routines. If the KV binding or token isn't configured yet, the API
-// answers 404/503 and the page simply keeps the strip hidden.
+// answers 204 (or 503 for a bad push) and the page simply keeps the strip hidden.
 
 const FIELDS = {
   automations_running: (v) => Number.isInteger(v) && v >= 0 && v < 10000,
@@ -37,11 +37,11 @@ export default {
     const url = new URL(request.url);
 
     if (url.pathname === '/api/lab-status') {
-      if (!env.LAB) return json({ error: 'not configured' }, 404);
+      if (!env.LAB) return new Response(null, { status: 204 }); // nothing to show yet: the strip stays hidden, no console noise
 
       if (request.method === 'GET') {
         const data = await env.LAB.get('status', 'json');
-        return data ? json(data) : json({ error: 'no data yet' }, 404);
+        return data ? json(data) : new Response(null, { status: 204 });
       }
 
       if (request.method === 'POST') {

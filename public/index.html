@@ -15,10 +15,10 @@
 <meta property="og:image" content="https://freshcoastlab.com/assets/jason-myers.jpg">
 <meta name="twitter:card" content="summary_large_image">
 <link rel="icon" href="/favicon.svg" type="image/svg+xml">
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Syne:wght@600;700;800&family=Space+Grotesk:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="preload" href="/assets/fonts/syne-latin-c37e2f.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="/assets/fonts/space-grotesk-latin-a57c94.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="stylesheet" href="/assets/site.css">
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"Person","name":"Jason Myers","url":"https://freshcoastlab.com/","image":"https://freshcoastlab.com/assets/jason-myers.jpg","jobTitle":"Channel Chief & Cybersecurity Strategist, MSP Partnerships","worksFor":{"@type":"Organization","name":"OpenText Cybersecurity"},"address":{"@type":"PostalAddress","addressLocality":"Traverse City","addressRegion":"MI","addressCountry":"US"},"email":"mailto:jason@freshcoastlab.com","sameAs":["https://www.linkedin.com/in/jasonmyers/"],"award":["Best Stage Presentation, ChannelPro Defend Chicago 2026","CRN 100 People You Don't Know But Should, 2025"],"knowsAbout":["AI strategy","Cybersecurity","MSP partnerships","Home automation","Home Assistant","Zero Trust","AI agents"]}</script>
 </head>
 <body>
 <a class="skip" href="#main">Skip to content</a>
@@ -72,7 +72,7 @@
         <g class="ring r2"><ellipse cx="240" cy="240" rx="226" ry="80" fill="none" stroke="rgba(155,140,255,.30)" stroke-width="1" transform="rotate(32 240 240)"/><circle cx="48" cy="120" r="4" fill="#9B8CFF"/></g>
         <g class="ring r3"><circle cx="240" cy="240" r="236" fill="none" stroke="rgba(255,255,255,.07)" stroke-width="1" stroke-dasharray="2 10"/><circle cx="240" cy="4" r="4" fill="#FF6A3D"/></g>
       </svg>
-      <img class="neon" id="neon" src="/assets/fresh-coast-lab-sign.png" alt="Fresh Coast Lab, a mid-century roadside sign" width="440" height="411">
+      <img class="neon" id="neon" src="/assets/fresh-coast-lab-sign.webp" alt="Fresh Coast Lab, a mid-century roadside sign" width="440" height="411">
     </div>
   </div>
   <a class="cue" href="#lab" aria-label="Scroll to the Lab"><span></span></a>
@@ -218,7 +218,7 @@
 
   <section id="about" class="wrap about">
     <div class="rv me">
-      <div class="me-disc"><img src="/assets/jason-myers-cutout.png" alt="Jason Myers" width="820" height="943" loading="lazy"></div>
+      <div class="me-disc"><img src="/assets/jason-myers-cutout.webp" alt="Jason Myers" width="820" height="943" loading="lazy"></div>
       <div class="me-cap mono">JASON MYERS &middot; 44.76&deg;N 85.62&deg;W</div>
     </div>
     <div class="rv">
@@ -355,7 +355,7 @@
   (async () => {
     try {
       const r = await fetch('/api/lab-status', { cache: 'no-store' });
-      if (!r.ok) return;
+      if (r.status !== 200) return;
       const d = await r.json();
       const age = Date.now() - Date.parse(d.updated);
       if (!(age >= 0 && age < 2 * 3600 * 1000)) return;

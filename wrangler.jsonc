@@ -8,7 +8,8 @@
   "assets": {
     "directory": "./public",
     "binding": "ASSETS",
-    "run_worker_first": ["/api/*"]
+    "run_worker_first": ["/api/*"],
+    "not_found_handling": "404-page"
   }
   // "The Lab, right now" storage - added once the KV namespace exists:
   // "kv_namespaces": [{ "binding": "LAB", "id": "<namespace id>" }]
