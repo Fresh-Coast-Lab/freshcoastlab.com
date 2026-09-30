@@ -892,3 +892,11 @@ a.post:hover{border-color:rgba(61,242,176,.4);transform:translateY(-3px)}
 .orbit.damaged .neon-t{animation:dyingC 5.3s steps(1,end) infinite}
 .orbit.damaged .neon{animation:stutter 9s steps(1,end) 3s infinite}
 .orbit.disturbed.damaged .neon-t{animation:jolt 2.4s steps(1,end) both}
+
+/* the monster knocks the sign over; it springs back and sputters */
+.orbit .neon,.orbit .neon-bloom,.orbit .neon-t{transform-origin:50% 96%;transition:transform .9s var(--spring),opacity .35s}
+.orbit.toppled .neon,.orbit.toppled .neon-bloom,.orbit.toppled .neon-t{transform:translate(-50%,-52%) rotate(-32deg) translate(-6%,26%);transition:transform .45s cubic-bezier(.55,0,.9,.4),opacity .3s;animation:none!important;opacity:.22}
+.orbit.toppled .neon-bloom{opacity:0}
+.hero-stack.quake{animation:quake .12s linear infinite}
+@keyframes quake{0%{transform:translate(0,0)}25%{transform:translate(1.5px,-1px)}50%{transform:translate(-1.5px,1px)}75%{transform:translate(1px,1.5px)}100%{transform:translate(0,0)}}
+.ufo-layer .monster,.ufo-layer .bigfoot{transition:none}
