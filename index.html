@@ -264,6 +264,34 @@
     line-height: 1;
   }
 
+  /* PROBLEM STATEMENT */
+  .problem {
+    padding: 80px 48px;
+    text-align: center;
+    background: var(--teal-deep);
+    color: var(--cream);
+  }
+  .problem .section-eyebrow {
+    color: var(--mustard);
+  }
+  .problem .section-title {
+    color: var(--cream);
+    margin-bottom: 32px;
+  }
+  .problem-body {
+    font-size: 19px;
+    line-height: 1.65;
+    max-width: 680px;
+    margin: 0 auto 24px;
+    color: rgba(242, 230, 206, 0.85);
+  }
+  .problem-pivot {
+    font-family: 'Anton', sans-serif;
+    font-size: clamp(24px, 3vw, 36px);
+    color: var(--orange);
+    margin-top: 16px;
+  }
+
   /* THE LABORATORY */
   .laboratory {
     padding: 80px 48px;
@@ -334,6 +362,56 @@
     text-decoration: none;
     border-bottom: 2px solid var(--orange);
     padding-bottom: 2px;
+  }
+
+  /* SOCIAL PROOF BAR */
+  .social-proof {
+    padding: 60px 48px;
+    background: var(--cream);
+    border-top: 1px solid rgba(0, 0, 0, 0.06);
+    border-bottom: 1px solid rgba(0, 0, 0, 0.06);
+  }
+  .proof-bar {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 40px;
+    flex-wrap: wrap;
+    max-width: 900px;
+    margin: 0 auto 24px;
+  }
+  .proof-item {
+    text-align: center;
+  }
+  .proof-number {
+    display: block;
+    font-family: 'Anton', sans-serif;
+    font-size: clamp(32px, 4vw, 48px);
+    color: var(--teal-deep);
+    line-height: 1;
+  }
+  .proof-label {
+    display: block;
+    font-family: 'Space Mono', monospace;
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+    color: var(--brown);
+    margin-top: 8px;
+  }
+  .proof-divider {
+    width: 1px;
+    height: 48px;
+    background: rgba(0, 0, 0, 0.12);
+  }
+  .proof-tagline {
+    text-align: center;
+    font-size: 17px;
+    color: var(--brown);
+    max-width: 600px;
+    margin: 0 auto;
+    line-height: 1.5;
+    font-style: italic;
   }
 
   /* HOW WE WORK */
@@ -615,7 +693,10 @@
     }
     .hero-graphic { height: 280px; }
     .lab-grid, .steps { grid-template-columns: 1fr; gap: 32px; }
-    .laboratory, .method, .cta { padding: 60px 24px; }
+    .problem, .laboratory, .social-proof, .method, .cta { padding: 60px 24px; }
+    .proof-bar { gap: 24px; }
+    .proof-divider { display: none; }
+    .proof-bar { display: grid; grid-template-columns: 1fr 1fr; }
     .about {
       grid-template-columns: 1fr;
       padding: 60px 24px;
@@ -631,7 +712,7 @@
 <body>
 
 <nav>
-  <img src="/logo.png" alt="Fresh Coast Lab" class="brand-logo">
+  <img src="logo.png" alt="Fresh Coast Lab" class="brand-logo">
   <div class="nav-links">
     <a href="#lab">The Lab</a>
     <a href="#method">Method</a>
@@ -641,14 +722,25 @@
 </nav>
 
 <section class="hero">
-  <img src="/logo.png" alt="Fresh Coast Lab" class="hero-logo">
+  <img src="logo.png" alt="Fresh Coast Lab" class="hero-logo">
   <div class="est-tag">EST · MMXXVI · PRACTICAL AI</div>
-  <h1>The future of small business<br>is <span class="highlight">already here.</span></h1>
-  <p class="hero-sub">Fresh Coast Lab builds working AI automation for small businesses. Less busywork. More time on the work that actually matters.</p>
+  <h1>Cut 10 hours of busywork<br><span class="highlight">every week.</span></h1>
+  <p class="hero-sub">Fresh Coast Lab builds AI that answers your calls, sends your quotes, and sorts your inbox — so you can focus on the work that grows your business.</p>
   <a href="#contact" class="googie-btn">
-    <span>Start a Project</span>
+    <span>Book a Discovery Call</span>
     <span class="arrow">→</span>
   </a>
+</section>
+
+<div class="divider"></div>
+
+<section class="problem">
+  <div class="section-header">
+    <span class="section-eyebrow">THE REAL PROBLEM</span>
+    <h2 class="section-title">You didn't start a business<br>to drown in busywork.</h2>
+  </div>
+  <p class="problem-body">Missed calls at 9 PM. Quotes that take 30 minutes to write. An inbox that buries the messages that actually matter. You're spending hours every day on work that doesn't grow your business — and it's costing you clients, revenue, and sanity.</p>
+  <p class="problem-pivot">What if that work just... handled itself?</p>
 </section>
 
 <div class="divider"></div>
@@ -663,28 +755,53 @@
     <div class="specimen-card">
       <span class="specimen-tag">SPECIMEN №001</span>
       <div class="specimen-number">01</div>
-      <h3 class="specimen-title">The Front-Desk<br>Assistant</h3>
-      <p class="specimen-desc">A trained AI receptionist that handles intake, books appointments, and answers your top 50 questions. Live 24/7. Sounds like your staff.</p>
+      <h3 class="specimen-title">Never Miss a Lead<br>at 2 AM</h3>
+      <p class="specimen-desc">An AI receptionist that answers calls, handles intake, and books appointments around the clock. It knows your top 50 questions and sounds like your best employee.</p>
       <a href="#" class="specimen-link">Try the Demo →</a>
     </div>
 
     <div class="specimen-card">
       <span class="specimen-tag">SPECIMEN №002</span>
       <div class="specimen-number">02</div>
-      <h3 class="specimen-title">The Quote<br>Generator</h3>
-      <p class="specimen-desc">Upload an inquiry — get a tailored, brand-matched quote in 30 seconds. Built for service businesses drowning in estimate requests.</p>
+      <h3 class="specimen-title">Send Quotes in<br>30 Seconds</h3>
+      <p class="specimen-desc">Upload an inquiry, get a tailored, brand-matched quote back instantly. No more 30-minute estimates. No more lost deals while you "get back to them."</p>
       <a href="#" class="specimen-link">Try the Demo →</a>
     </div>
 
     <div class="specimen-card">
       <span class="specimen-tag">SPECIMEN №003</span>
       <div class="specimen-number">03</div>
-      <h3 class="specimen-title">The Inbox<br>Triage Engine</h3>
-      <p class="specimen-desc">Reads every email, classifies, drafts a reply, and routes the urgent ones. Cuts the inbox time of a small business owner in half.</p>
+      <h3 class="specimen-title">Cut Your Inbox<br>Time in Half</h3>
+      <p class="specimen-desc">AI reads every email, classifies priority, drafts replies, and routes the urgent ones straight to you. The rest? Handled — without you touching it.</p>
       <a href="#" class="specimen-link">Try the Demo →</a>
     </div>
 
   </div>
+</section>
+
+<section class="social-proof">
+  <div class="proof-bar">
+    <div class="proof-item">
+      <span class="proof-number">20+</span>
+      <span class="proof-label">Years Building Software</span>
+    </div>
+    <div class="proof-divider"></div>
+    <div class="proof-item">
+      <span class="proof-number">2x</span>
+      <span class="proof-label">Founded & Scaled</span>
+    </div>
+    <div class="proof-divider"></div>
+    <div class="proof-item">
+      <span class="proof-number">MS</span>
+      <span class="proof-label">Computer Science</span>
+    </div>
+    <div class="proof-divider"></div>
+    <div class="proof-item">
+      <span class="proof-number">24/7</span>
+      <span class="proof-label">Your AI Never Sleeps</span>
+    </div>
+  </div>
+  <p class="proof-tagline">Built by an engineer who's run small businesses — not a consultant who's read about them.</p>
 </section>
 
 <section class="method" id="method">
@@ -763,7 +880,7 @@
 </section>
 
 <footer>
-  <img src="/logo.png" alt="Fresh Coast Lab" class="brand-logo-footer">
+  <img src="logo.png" alt="Fresh Coast Lab" class="brand-logo-footer">
   <div class="footer-meta">© MMXXVI · ALL EXPERIMENTS RESERVED</div>
 </footer>
 
