@@ -64,7 +64,8 @@
   };
   size(); addEventListener('resize', size); new ResizeObserver(size).observe(hero);
   const mix = (a, b, t) => a.map((v, i) => Math.round(v + (b[i] - v) * t));
-  let lastDark = -1, t0 = performance.now(), raf = 0, visible = true;
+  let lastDark = -1, t0 = performance.now(), raf = 0, visible = true, outAt = 0;
+  const orbitEl = document.querySelector('.hero .orbit');
   const frame = (now) => {
     raf = 0;
     const wx = window.__wx || { day: 0, sun: 0, cloud: 0 };
@@ -74,16 +75,20 @@
     mass.style.opacity = (0.88 + 0.12 * dark).toFixed(2);
     // windows switch on as it gets dark; a few blink now and then
     const t = (now - t0) / 1000;
+    const fried = orbitEl && orbitEl.classList.contains('fried') || orbitEl && orbitEl.classList.contains('zapped');
+    if (fried && dark > .4 && !outAt) outAt = now; else if (!fried) outAt = 0;
+    const outK = outAt ? (now - outAt) / 900 : -1; // windows fail block by block over ~0.9 s
     if (Math.abs(dark - lastDark) > .01 || !reduce) {
       winEls.forEach((w, i) => {
         let on = dark > 0.25 + thr[i] * 0.55 ? 1 : 0;
+        if (outK >= 0 && thr[i] < outK + (Math.random() < .02 ? .1 : 0)) on = 0;
         if (on && !reduce && i % 11 === 3 && Math.sin(t * .7 + i) > .97) on = 0;
         w.setAttribute('opacity', on ? (0.65 + 0.35 * ((i * 31) % 7) / 7).toFixed(2) : 0);
       });
       lastDark = dark;
     }
-    marq.style.fill = dark > .35 ? (Math.floor(t * 3) % 2 ? '#FFD27A' : '#FFB85A') : 'rgb(110,120,130)';
-    beacon.setAttribute('opacity', dark > .4 ? (reduce ? .9 : (Math.sin(t * 3.2) > 0 ? 1 : .15)).toFixed(2) : 0);
+    marq.style.fill = dark > .35 && outK < .3 ? (Math.floor(t * 3) % 2 ? '#FFD27A' : '#FFB85A') : 'rgb(110,120,130)';
+    beacon.setAttribute('opacity', dark > .4 && outK < .6 ? (reduce ? .9 : (Math.sin(t * 3.2) > 0 ? 1 : .15)).toFixed(2) : 0);
     lamp.setAttribute('opacity', dark > .35 ? 1 : .15);
     // the lighthouse beam swings out over the water and back
     if (dark > .4 && !reduce) {
@@ -91,7 +96,7 @@
       beam.setAttribute('opacity', (0.35 + 0.45 * Math.max(0, a)).toFixed(2));
       beam.setAttribute('transform', `rotate(${(-150 + 150 * (a * .5 + .5)).toFixed(1)} 214 -20.2)`);
     } else beam.setAttribute('opacity', dark > .4 ? .4 : 0);
-    reflEls.forEach((r, i) => r.setAttribute('opacity', (dark > .45 ? 0.18 + 0.12 * Math.sin(t * 2 + i * 1.7) : 0).toFixed(2)));
+    reflEls.forEach((r, i) => r.setAttribute('opacity', (dark > .45 && outK < 0 ? 0.18 + 0.12 * Math.sin(t * 2 + i * 1.7) : 0).toFixed(2)));
     if (visible && !document.hidden && !reduce) raf = requestAnimationFrame(frame);
   };
   const wake = () => { if (!raf) raf = requestAnimationFrame(frame); };
