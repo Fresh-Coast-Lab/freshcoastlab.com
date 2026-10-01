@@ -1,5 +1,5 @@
 // Easter eggs in the hero, in 1950s B-movie style: a saucer beams up a walker (on load), a comet sinks a cruise ship
-// (once, later; a lifeboat rows away), Bigfoot strolls the shore. Tap the sign to cycle through them.
+// (once, later; a lifeboat rows away), Bigfoot strolls the shore, the Michigan Dogman howls. Tap the sign to cycle through them.
 (() => {
   const hero = document.querySelector('.hero');
   if (!hero || matchMedia('(prefers-reduced-motion: reduce)').matches) return;
@@ -274,11 +274,88 @@
     requestAnimationFrame(step);
   };
 
+  // ---------------------------------------------------------------- the Michigan Dogman (Wexford County, 1887; WTCM-FM, April 1, 1987)
+  const DFUR = '#140D0A', DTIP = '#3A2A20';
+  const dfur = (pts, amp = 1.4) => `<path d="${shag(pts, 2, amp)}" fill="${DFUR}" stroke="${DTIP}" stroke-width=".6" stroke-linejoin="round"/>`;
+  const dm = document.createElementNS(NS, 'g');
+  dm.innerHTML = `
+    <rect class="dmdim" x="-4000" y="-4000" width="9000" height="9000" fill="#02040A" opacity="0"/>
+    <g class="dogman" opacity="0">
+      <g class="upright">
+        ${dfur([[-7, -1], [-3, -1], [-5, -8], [-1, -16], [-3, -27], [-9, -26], [-9, -16], [-10, -8]], 1.1)}
+        ${dfur([[3, -1], [8, -1], [6, -8], [9, -16], [7, -27], [1, -27], [2, -16], [1, -8]], 1.1)}
+        <g transform="rotate(10 0 -26)">
+          ${dfur([[-9, -25], [-12, -40], [-10, -56], [-2, -61], [9, -58], [12, -44], [8, -25]], 2.2)}
+          ${dfur([[-10, -54], [-16, -42], [-17, -27], [-15, -21], [-19, -17], [-14, -18], [-15, -14], [-12, -18], [-11, -14], [-11, -22], [-11, -38]], 1.1)}
+          ${dfur([[9, -54], [15, -42], [17, -27], [17, -21], [21, -17], [17, -18], [18, -14], [14, -18], [13, -14], [13, -22], [10, -38]], 1.1)}
+          <g class="dhead">
+            ${dfur([[-6, -58], [-8, -68], [-6, -73], [-7, -86], [-1, -75], [2, -75], [5, -87], [7, -73], [10, -69], [22, -66], [23, -62], [11, -59], [5, -57]], 1)}
+            <path d="M14,-62 L16,-60 L18,-62 L20,-60 L22,-62" stroke="#E8E0D0" stroke-width=".6" fill="none" opacity=".7"/>
+            <circle class="deye" cx="6" cy="-69" r="1.2" fill="#FFB347"/>
+            <g class="howl" opacity="0" fill="none" stroke="rgba(232,238,242,.65)" stroke-width="1.1"><path d="M27,-70 q5,5 0,10"/><path d="M33,-74 q9,9 0,18"/><path d="M40,-78 q13,13 0,26"/></g>
+          </g>
+        </g>
+      </g>
+      <g class="fours" opacity="0">
+        ${dfur([[-22, -16], [-14, -24], [4, -25], [14, -22], [20, -26], [26, -24], [30, -20], [24, -16], [14, -14], [10, -12], [-12, -12], [-24, -12]], 1.6)}
+        ${dfur([[22, -27], [24, -34], [26, -27]], .8)}${dfur([[-18, -13], [-20, 0], [-16, 0], [-13, -12]], 1)}${dfur([[8, -13], [10, 0], [14, 0], [13, -13]], 1)}
+        ${dfur([[-24, -14], [-34, -20], [-30, -12]], 1)}
+        <circle cx="25" cy="-22" r="1" fill="#FFB347"/>
+      </g>
+      <g class="eyesonly" opacity="0"><circle cx="6" cy="-69" r="1.4" fill="#FFB347"/><circle cx="11" cy="-69" r="1.4" fill="#FFB347"/></g>
+    </g>
+    <g class="radio" opacity="0">
+      <rect x="0" y="0" width="300" height="46" rx="10" fill="rgba(20,14,10,.92)" stroke="#B4745A" stroke-width="1"/>
+      <rect x="12" y="10" width="60" height="26" rx="4" fill="#2A1E16" stroke="#6A4A36"/>
+      <g stroke="#E8C38A" stroke-width=".8">${Array.from({ length: 11 }, (_, i) => `<line x1="${16 + i * 5}" y1="${i % 2 ? 30 : 27}" x2="${16 + i * 5}" y2="33"/>`).join('')}</g>
+      <line class="needle" x1="40" y1="13" x2="40" y2="34" stroke="#FF6A3D" stroke-width="1.6"/>
+      <text x="84" y="20" font-family="'Archivo Expanded',sans-serif" font-weight="700" font-size="11" fill="#F4E6CC">&#9835; &#8220;The Legend&#8221;</text>
+      <text x="84" y="35" font-family="'JetBrains Mono',monospace" font-size="8" letter-spacing=".8" fill="#C9A57A">WTCM-FM &#183; TRAVERSE CITY &#183; APR 1, 1987</text>
+    </g>`;
+  svg.append(dm);
+  const dogman = dm.querySelector('.dogman'), upright = dm.querySelector('.upright'), fours = dm.querySelector('.fours'), eyesonly = dm.querySelector('.eyesonly');
+  const dhead = dm.querySelector('.dhead'), howl = dm.querySelector('.howl'), dmdim = dm.querySelector('.dmdim'), radio = dm.querySelector('.radio'), needle = dm.querySelector('.needle');
+  const playDogman = (done) => {
+    size();
+    const phone = W < 700, x0 = W * (phone ? 0.16 : 0.2), ds = (phone ? 0.95 : 1.15) * scale;
+    const T = { eyes: 1700, rise: 900, stand: 500, howl: 1900, drop: 300, run: 1800, radio: 3600 };
+    const t1 = T.eyes, t2 = t1 + T.rise, t3 = t2 + T.stand, t4 = t3 + T.howl, t5 = t4 + T.drop, t6 = t5 + T.run;
+    const t0 = performance.now();
+    dogman.setAttribute('opacity', 1);
+    radio.setAttribute('transform', `translate(${phone ? 12 : 24},${phone ? 64 : 84}) scale(${phone ? 0.95 : 1.1})`);
+    const step = (now) => {
+      const k = now - t0; let x = x0, y = horizon - 1;
+      // 1. two eyes on the dark shore, blinking
+      const blink = k < t1 && (Math.floor(k / 120) % 9 === 4 || Math.floor(k / 120) % 9 === 6);
+      eyesonly.setAttribute('opacity', k < t1 ? (blink ? 0 : Math.min(1, k / 400)).toFixed(2) : 0);
+      dmdim.setAttribute('opacity', (k < t4 ? Math.min(0.35, k / 2000) : Math.max(0, 0.35 - (k - t4) / 1500)).toFixed(2));
+      // 2. he rises out of the dark
+      const rise = Math.min(1, Math.max(0, (k - t1) / T.rise));
+      upright.setAttribute('opacity', k < t5 ? rise.toFixed(2) : 0);
+      // 3. the howl
+      const hk = (k - t3) / T.howl, howling = hk > 0 && hk < 1;
+      dhead.setAttribute('transform', `rotate(${(howling ? -48 * Math.sin(Math.min(1, hk * 3) * Math.PI / 2) * (hk > .85 ? (1 - hk) / .15 : 1) : 0).toFixed(1)} 2 -58)`);
+      howl.setAttribute('opacity', howling ? (0.5 + 0.5 * Math.sin(k / 70)).toFixed(2) : 0);
+      if (howling && hk > .15 && hk < .2 && !stack.classList.contains('quake')) { stack.classList.add('quake'); setTimeout(() => stack.classList.remove('quake'), 260); }
+      // 4. down on all fours, and gone into the dark
+      if (k > t4) { const r = Math.min(1, (k - t5) / T.run); fours.setAttribute('opacity', (k < t5 ? (k - t4) / T.drop : r > .85 ? (1 - r) / .15 : 1).toFixed(2));
+        x = x0 - Math.max(0, r) * Math.max(0, r) * (x0 + 80 * ds); y = horizon - 1 - Math.abs(Math.sin(k / 70)) * 2 * (r > 0 ? 1 : 0); }
+      dogman.setAttribute('transform', `translate(${x.toFixed(1)},${y.toFixed(1)}) scale(${(k > t4 ? -ds : ds).toFixed(3)},${ds.toFixed(3)})`);
+      // 5. and somewhere, a Traverse City radio station plays the song
+      const rk = k - (t3 + 400);
+      radio.setAttribute('opacity', (rk < 0 ? 0 : rk < 400 ? rk / 400 : rk > T.radio + 2400 ? Math.max(0, 1 - (rk - T.radio - 2400) / 500) : 1).toFixed(2));
+      needle.setAttribute('x1', (20 + 40 * Math.min(1, Math.max(0, rk / 1200))).toFixed(1)); needle.setAttribute('x2', needle.getAttribute('x1'));
+      if (k < t3 + 400 + T.radio + 2900) requestAnimationFrame(step);
+      else { dogman.setAttribute('opacity', 0); upright.setAttribute('opacity', 0); fours.setAttribute('opacity', 0); radio.setAttribute('opacity', 0); dmdim.setAttribute('opacity', 0); done(); }
+    };
+    requestAnimationFrame(step);
+  };
+
   // ---------------------------------------------------------------- the show: the saucer first, then the monster, then whatever you tap for
   let busy = false;
   const run = (fn) => { if (busy) return; busy = true; fn(() => { busy = false; }); };
   const ufoAct = (done) => { play(); const wait = () => (playing ? setTimeout(wait, 300) : done()); setTimeout(wait, 300); };
-  const ACTS = [playComet, playBigfoot, ufoAct];
+  const ACTS = [playComet, playBigfoot, ufoAct, playDogman];
   let next = 0;
   const session = (k) => { try { if (sessionStorage.getItem(k) === '1') return false; sessionStorage.setItem(k, '1'); } catch (e) {} return true; };
   const heroVisible = () => hero.getBoundingClientRect().bottom > innerHeight * 0.4 && !document.hidden;
@@ -289,5 +366,5 @@
   const sign = document.getElementById('neon');
   const orbit = sign && sign.closest('.orbit');
   if (orbit) { orbit.style.pointerEvents = 'auto'; orbit.style.cursor = 'pointer'; orbit.addEventListener('click', () => { if (busy) return; const act = ACTS[next]; next = (next + 1) % ACTS.length; run(act); }); }
-  window.__acts = { ufo: () => run(ufoAct), comet: () => run(playComet), ship: () => run(playComet), bigfoot: () => run(playBigfoot) };
+  window.__acts = { dogman: () => run(playDogman), ufo: () => run(ufoAct), comet: () => run(playComet), ship: () => run(playComet), bigfoot: () => run(playBigfoot) };
 })();
