@@ -972,3 +972,10 @@ a.post:hover{border-color:rgba(61,242,176,.4);transform:translateY(-3px)}
 .wx i.mine{background:#B7AEFF;box-shadow:0 0 8px #B7AEFF}
 @media (max-width:560px){.sk-grid{grid-template-columns:1fr;gap:6px;padding:4px 14px}.sk-foot{padding:8px 14px 12px}}
 .sk-grid .sk-k{order:1}.sk-grid output{order:2}.sk-grid input[type=range]{order:3}
+/* invisible native switch over the sign: its tap gives iPhones a haptic tick */
+.orbit .haptic-tap{position:absolute;left:18%;top:18%;width:64%;height:64%;margin:0;opacity:.001;z-index:5;cursor:pointer;-webkit-appearance:none;appearance:none;-webkit-tap-highlight-color:transparent;clip-path:inset(0 round 24px)}
+@media (prefers-reduced-motion:reduce){.orbit .haptic-tap{display:none}}
+/* tap the sign: it sputters hard, like a tube taking a jolt */
+@keyframes zap{0%{opacity:1}6%{opacity:.08}11%{opacity:1}17%{opacity:.25}22%{opacity:.95}27%{opacity:.05}36%{opacity:.05}40%{opacity:1}48%{opacity:.45}52%{opacity:1}64%{opacity:.7}68%{opacity:1}100%{opacity:1}}
+.orbit.zap .neon,.orbit.zap .neon-t{animation:zap .9s steps(1,end) both!important}
+.orbit.zap .neon-bloom{animation:zap .9s steps(1,end) both!important}
