@@ -193,44 +193,79 @@
     requestAnimationFrame(step);
   };
 
-  // ---------------------------------------------------------------- Bigfoot, the 1967 stroll
+  // ---------------------------------------------------------------- Bigfoot: shaggy, hunched, caught on film
+  // shag(): walk a polygon, add fur tufts along every edge
+  const shag = (pts, step = 2.2, amp = 1.5) => {
+    const out = [];
+    for (let i = 0; i < pts.length; i++) {
+      const [x1, y1] = pts[i], [x2, y2] = pts[(i + 1) % pts.length];
+      const len = Math.hypot(x2 - x1, y2 - y1), n = Math.max(1, Math.round(len / step)), nx = (y2 - y1) / len, ny = -(x2 - x1) / len;
+      for (let k = 0; k < n; k++) { const t = k / n, j = k % 2 ? amp * (0.6 + ((i * 7 + k * 3) % 5) / 8) : 0;
+        out.push(`${(x1 + (x2 - x1) * t + nx * j).toFixed(1)},${(y1 + (y2 - y1) * t + ny * j).toFixed(1)}`); }
+    }
+    return 'M' + out.join(' L') + 'Z';
+  };
+  const FUR = '#2A1B12', TIP = '#5A3E2A';
+  const fur = (pts, cls = '', amp) => `<path class="${cls}" d="${shag(pts, 2.2, amp)}" fill="${FUR}" stroke="${TIP}" stroke-width=".7" stroke-linejoin="round"/>`;
   const bf = document.createElementNS(NS, 'g');
-  bf.innerHTML = `<g class="bigfoot" opacity="0" fill="#05070B">
+  bf.innerHTML = `<g class="bfprints"></g>
+    <g class="bigfoot" opacity="0">
       <g class="side">
-        <g class="bleg b1"><rect x="-1.8" y="0" width="3.6" height="9.5" rx="1.6"/></g>
-        <path d="M-5,-30 C-9,-24 -8,-13 -5,-8 L5,-8 C8,-14 8,-24 4,-31 Z"/>
-        <path d="M-1,-39 C-5,-39 -6,-34 -4,-30 L4,-30 C6,-34 5,-39 1,-40 Z"/>
-        <g class="barm r1"><rect x="-1.3" y="0" width="2.6" height="15" rx="1.3"/></g>
-        <g class="bleg b2"><rect x="-1.8" y="0" width="3.6" height="9.5" rx="1.6"/></g>
+        <g class="bleg b1">${fur([[-3, 0], [3, 0], [3.4, 10], [5.5, 11.5], [-3, 11.5]], '', 1)}</g>
+        ${fur([[-6, -10], [-9, -22], [-7, -33], [-2, -37], [3, -36], [7, -31], [8, -22], [6, -12], [3, -8], [-3, -8]], 'torso', 1.8)}
+        ${fur([[-2, -36], [-2, -43], [2, -46], [6, -44], [7.5, -39], [5, -36]], 'head', 1.4)}
+        <path d="M6.2,-41 L8,-40.4 L6.6,-39.6Z" fill="${TIP}"/>
+        <g class="barm r1">${fur([[-2.2, 0], [2.2, 0], [2.6, 20], [4, 23], [-1, 23], [-2.6, 20]], '', 1.2)}</g>
+        <g class="bleg b2">${fur([[-3, 0], [3, 0], [3.4, 10], [5.5, 11.5], [-3, 11.5]], '', 1)}</g>
       </g>
       <g class="front" opacity="0">
-        <path d="M-7,-30 C-9,-20 -7,-12 -5,-8 L5,-8 C7,-12 9,-20 7,-30 C4,-32 -4,-32 -7,-30 Z"/>
-        <ellipse cx="0" cy="-34.5" rx="4.2" ry="4.6"/>
-        <rect x="-9.6" y="-29" width="2.8" height="16" rx="1.4"/><rect x="6.8" y="-29" width="2.8" height="16" rx="1.4"/>
-        <rect x="-4.6" y="-9" width="3.6" height="9.5" rx="1.6"/><rect x="1" y="-9" width="3.6" height="9.5" rx="1.6"/>
-        <circle class="eyes" cx="-1.6" cy="-35" r=".7" fill="#FFB060"/><circle class="eyes" cx="1.6" cy="-35" r=".7" fill="#FFB060"/>
-      </g></g>`;
+        ${fur([[-9, -10], [-11, -24], [-8, -33], [8, -33], [11, -24], [9, -10], [4, -8], [-4, -8]], '', 1.8)}
+        ${fur([[-5, -33], [-5.5, -42], [0, -46], [5.5, -42], [5, -33]], '', 1.4)}
+        ${fur([[-12, -31], [-9, -31], [-9, -9], [-13, -8]], '', 1.2)}${fur([[9, -31], [12, -31], [13, -8], [9, -9]], '', 1.2)}
+        ${fur([[-6, -10], [-1, -10], [-1, 3], [-7, 3]], '', 1)}${fur([[1, -10], [6, -10], [7, 3], [1, 3]], '', 1)}
+        <circle class="eyes" cx="-2" cy="-39.5" r=".9" fill="#FFB060"/><circle class="eyes" cx="2" cy="-39.5" r=".9" fill="#FFB060"/>
+      </g>
+    </g>
+    <rect class="bfflash" x="-4000" y="-4000" width="9000" height="9000" fill="#FFFDF4" opacity="0"/>
+    <g class="polaroid" opacity="0">
+      <rect x="-40" y="-74" width="80" height="74" fill="#FFD9A0" opacity=".14"/>
+      <path fill-rule="evenodd" d="M-46,-80 H46 V24 H-46 Z M-40,-74 V0 H40 V-74 Z" fill="#F4EFE4" stroke="rgba(0,0,0,.25)" stroke-width=".6"/>
+      <text x="0" y="15" text-anchor="middle" font-family="'Archivo Expanded',sans-serif" font-weight="700" font-size="9" fill="#2A2420" letter-spacing=".5">IS THAT HIM?</text>
+    </g>`;
   svg.append(bf);
   const big = bf.querySelector('.bigfoot'), side = bf.querySelector('.side'), front = bf.querySelector('.front');
   const bl = { b1: bf.querySelector('.b1'), b2: bf.querySelector('.b2'), r1: bf.querySelector('.r1') };
+  const prints = bf.querySelector('.bfprints'), bfflash = bf.querySelector('.bfflash'), polaroid = bf.querySelector('.polaroid');
   const playBigfoot = (done) => {
     size();
-    const stopX = W * (W < 700 ? 0.15 : 0.22), bs = 1.25;
-    const T = { walk1: 4200, look: 1700, walk2: 5200 };
-    const t0 = performance.now();
+    const stopX = W * (W < 700 ? 0.17 : 0.22), bs = W < 700 ? 1.05 : 1.25;
+    const T = { walk1: 4400, look: 2600, walk2: 5200 };
+    const t0 = performance.now(); let lastStep = 0, snapped = false;
     big.setAttribute('opacity', 1);
     const step = (now) => {
       const k = now - t0; let x, walking = true;
-      if (k < T.walk1) x = lerp(-30, stopX, k / T.walk1);
+      if (k < T.walk1) x = lerp(-40, stopX, k / T.walk1);
       else if (k < T.walk1 + T.look) { x = stopX; walking = false; }
-      else x = lerp(stopX, W + 40, Math.min(1, (k - T.walk1 - T.look) / T.walk2));
-      const lookK = k - T.walk1, looking = lookK > 250 && lookK < T.look - 250;
+      else x = lerp(stopX, W + 50, Math.min(1, (k - T.walk1 - T.look) / T.walk2));
+      const lookK = k - T.walk1, looking = lookK > 250 && lookK < T.look - 300;
       side.setAttribute('opacity', looking ? 0 : 1); front.setAttribute('opacity', looking ? 1 : 0);
-      const st = walking ? Math.sin(k / 170) : 0;
-      bl.b1.setAttribute('transform', `translate(-1,-9) rotate(${st * 26})`);
-      bl.b2.setAttribute('transform', `translate(1,-9) rotate(${-st * 26})`);
-      bl.r1.setAttribute('transform', `translate(1,-28) rotate(${-st * 32 - 6})`);
-      big.setAttribute('transform', `translate(${x.toFixed(1)},${(horizon - Math.abs(st) * 0.5).toFixed(1)}) scale(${(bs * scale).toFixed(3)})`);
+      const st = walking ? Math.sin(k / 190) : 0, sc = bs * scale;
+      bl.b1.setAttribute('transform', `translate(-2,-10) rotate(${st * 24})`);
+      bl.b2.setAttribute('transform', `translate(2,-10) rotate(${-st * 24})`);
+      bl.r1.setAttribute('transform', `translate(1,-31) rotate(${-st * 30 - 4})`);
+      big.setAttribute('transform', `translate(${x.toFixed(1)},${(horizon - 2 - Math.abs(st) * 0.8).toFixed(1)}) scale(${sc.toFixed(3)})`);
+      // footprints in the sand, fading behind him
+      if (walking && Math.abs(st) > 0.97 && now - lastStep > 260) { lastStep = now;
+        const fp = document.createElementNS(NS, 'ellipse'); fp.setAttribute('cx', (x + (st > 0 ? 3 : -2) * sc).toFixed(1)); fp.setAttribute('cy', (horizon + 3).toFixed(1));
+        fp.setAttribute('rx', (3.2 * sc).toFixed(1)); fp.setAttribute('ry', (0.9 * sc).toFixed(1)); fp.setAttribute('fill', 'rgba(0,0,0,.45)'); prints.append(fp);
+        const born = now; (function fade(t2) { const a = 1 - (t2 - born) / 3200; if (a <= 0) { fp.remove(); return; } fp.setAttribute('opacity', a.toFixed(2)); requestAnimationFrame(fade); })(now); }
+      // he turns, the flash goes off, and the evidence develops
+      if (looking && !snapped && lookK > 700) { snapped = true;
+        polaroid.setAttribute('transform', `translate(${x.toFixed(1)},${(horizon - 4).toFixed(1)}) scale(${(sc * 0.95).toFixed(3)}) rotate(-6)`);
+        (function shot(t2) { const f = (t2 - now) / 1900;
+          bfflash.setAttribute('opacity', Math.max(0, 0.7 - f * 6).toFixed(2));
+          polaroid.setAttribute('opacity', (f < 0.1 ? f * 10 : f > 0.75 ? Math.max(0, (1 - f) / 0.25) : 1).toFixed(2));
+          if (f < 1) requestAnimationFrame(shot); else polaroid.setAttribute('opacity', 0); })(now); }
       if (k < T.walk1 + T.look + T.walk2) requestAnimationFrame(step); else { big.setAttribute('opacity', 0); done(); }
     };
     requestAnimationFrame(step);
@@ -245,7 +280,7 @@
   const session = (k) => { try { if (sessionStorage.getItem(k) === '1') return false; sessionStorage.setItem(k, '1'); } catch (e) {} return true; };
   const heroVisible = () => hero.getBoundingClientRect().bottom > innerHeight * 0.4 && !document.hidden;
   const when = (ms, fn) => setTimeout(function go() { if (!heroVisible() || busy) { setTimeout(go, 2000); return; } fn(); }, ms);
-  if (session('ufo')) when(600, () => run(ufoAct));
+  when(600, () => run(ufoAct)); // the saucer opens the show on every load
   if (session('comet')) when(25000, () => { next = 1; run(playComet); });
   const sign = document.getElementById('neon');
   const orbit = sign && sign.closest('.orbit');
