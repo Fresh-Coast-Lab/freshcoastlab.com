@@ -1,0 +1,112 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>How This Site Was Built | Jason Myers</title>
+<meta name="description" content="A build log: one person, Claude Code, and a team of AI agents built this site in about a day. The real numbers, the agents, and the bugs they caught.">
+<meta name="theme-color" content="#060A12">
+<script>document.documentElement.classList.add('js')</script>
+<link rel="canonical" href="https://freshcoastlab.com/built/">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://freshcoastlab.com/built/">
+<meta property="og:title" content="How this site was built">
+<meta property="og:description" content="One person, Claude Code and a team of agents. 39 commits in 22 hours, every one approved by a human.">
+<meta property="og:image" content="https://freshcoastlab.com/assets/og-card.jpg?v=1">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="The Fresh Coast Lab neon sign over Lake Michigan at night. Jason Myers.">
+<meta name="twitter:image" content="https://freshcoastlab.com/assets/og-card.jpg?v=1">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="preload" href="/assets/fonts/archivo-expanded-latin.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="/assets/fonts/space-grotesk-latin-a57c94.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="stylesheet" href="/assets/site.css">
+</head>
+<body data-here="BUILD LOG">
+<a class="skip" href="#main">Skip to content</a>
+<div class="dock" id="dock" aria-label="Site">
+  <a class="home" href="/" aria-label="Home"><svg width="22" height="22" viewBox="0 0 30 30" aria-hidden="true"><g stroke="#FF6A3D" stroke-width="2.4" stroke-linecap="round"><line x1="15" y1="2" x2="15" y2="28"/><line x1="2" y1="15" x2="28" y2="15"/><line x1="5.8" y1="5.8" x2="24.2" y2="24.2"/><line x1="24.2" y1="5.8" x2="5.8" y2="24.2"/></g></svg><span class="here" id="here"></span></a>
+  <nav aria-label="Sections"><a href="/#house" data-s="house">House</a><a href="/#lab" data-s="lab">Lab</a><a href="/#stage" data-s="stage">Stage</a><a href="/#playbooks" data-s="playbooks">Playbooks</a><a href="/#writing" data-s="writing">Writing</a><a href="/#about" data-s="about">About</a></nav>
+  <button class="menu-btn" type="button" aria-controls="menu" aria-expanded="false" aria-label="Open menu"><span></span><span></span></button>
+  <i class="prog" aria-hidden="true"></i>
+</div>
+<div class="menu" id="menu" role="dialog" aria-modal="true" aria-label="Menu">
+  <div class="top"><a class="brand" href="/"><svg width="22" height="22" viewBox="0 0 30 30" aria-hidden="true"><g stroke="#FF6A3D" stroke-width="2.4" stroke-linecap="round"><line x1="15" y1="2" x2="15" y2="28"/><line x1="2" y1="15" x2="28" y2="15"/><line x1="5.8" y1="5.8" x2="24.2" y2="24.2"/><line x1="24.2" y1="5.8" x2="5.8" y2="24.2"/></g></svg><span>FRESH COAST LAB</span></a><button class="x" type="button" aria-label="Close menu">&times;</button></div>
+  <ol><li style="transition-delay:0.04s"><a href="/#house" data-s="house">House <small>watch it think</small></a></li><li style="transition-delay:0.08s"><a href="/#lab" data-s="lab">Lab <small>the system map</small></a></li><li style="transition-delay:0.11s"><a href="/#stage" data-s="stage">Stage <small>talks and awards</small></a></li><li style="transition-delay:0.15s"><a href="/#playbooks" data-s="playbooks">Playbooks <small>work and life</small></a></li><li style="transition-delay:0.18s"><a href="/#writing" data-s="writing">Writing <small>opinions</small></a></li><li style="transition-delay:0.22s"><a href="/archive/" data-s="archive">Archive <small>ninety years</small></a></li><li style="transition-delay:0.25s"><a href="/stack/" data-s="stack">Stack <small>the toolbox</small></a></li><li style="transition-delay:0.29s"><a href="/#about" data-s="about">About <small>the human</small></a></li><li style="transition-delay:0.32s"><a href="#contact" data-s="contact">Contact <small>say hello</small></a></li></ol>
+  <div class="reach">
+    <a class="btn btn-glow" href="mailto:jason@freshcoastlab.com"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="M3.5 6.5l8.5 6.5 8.5-6.5"/></svg>Email</a>
+    <a class="btn btn-ghost" href="https://www.linkedin.com/in/jasonmyers/" target="_blank" rel="noopener"><svg class="li" viewBox="0 0 24 24" aria-hidden="true"><rect x="2" y="2" width="20" height="20" rx="2" fill="#fff"/><path fill="#0A66C2" d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433c-1.144 0-2.063-.926-2.063-2.065 0-1.138.92-2.063 2.063-2.063 1.14 0 2.064.925 2.064 2.063 0 1.139-.925 2.065-2.064 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/></svg>LinkedIn</a>
+  </div>
+  <div class="fine2">TRAVERSE CITY &middot; 44.76&deg;N 85.62&deg;W</div>
+</div>
+
+<main id="main">
+  <header class="wrap page-hd">
+    <a class="back" href="/"><span aria-hidden="true">&larr;</span> FRESH COAST LAB</a>
+    <div class="eyebrow">Build log</div>
+    <h1>How this site was built.</h1>
+    <p class="sec-sub">One person, Claude Code, and a small team of AI agents, over about a day. I set the direction and approved every change. The agents did the typing, the testing and a lot of the arguing. Here&rsquo;s what that actually looked like.</p>
+  </header>
+  <section class="wrap" style="padding-top:8px">
+    <div class="bl-stats">
+      <span><b>39</b>commits, each one reviewed</span>
+      <span><b>~22 h</b>first commit to this page</span>
+      <span><b>7,007</b>lines of hand-written code</span>
+      <span><b>23</b>helper agents</span>
+      <span><b>0</b>frameworks, build steps or trackers</span>
+      <span><b>95 / 100</b>Lighthouse on a phone, perf / a11y</span>
+    </div>
+
+    <h2 class="bl-h">The team</h2>
+    <div class="bl-team">
+      <div><b>Me</b><p>Direction, taste, and the final yes. Every commit went through a secret scan and a human look before it shipped.</p></div>
+      <div><b>Claude Code</b><p>The main pair: wrote and refactored the site, ran the browser tests, and kept a running list of everything still open.</p></div>
+      <div><b>Research agents</b><p>Studied what the best mobile storytelling sites do, then a 100-agent fact-check on whether 3D holds up on mid-range phones.</p></div>
+      <div><b>A 3D builder</b><p>Modeled the house in Blender, baked its lighting, and wrote the three.js engine with its own performance monitor.</p></div>
+      <div><b>Reviewers</b><p>An adversarial code reviewer and a test-matrix agent tried to break the house on every screen size, network failure and lifecycle edge.</p></div>
+      <div><b>Collectors</b><p>Read my LinkedIn history (read-only) to rebuild a timeline of talks and awards, and inventoried every tool I actually use.</p></div>
+    </div>
+
+    <h2 class="bl-h">Things the agents caught before you did</h2>
+    <ol class="bl-bugs">
+      <li><b>Black squares in the sky.</b><span>The 3D glow shaders wrote solid alpha, so every light in the yard punched a dark tile through the aurora. Fixed with premultiplied alpha.</span></li>
+      <li><b>One bad moment, banned for life.</b><span>A dropped connection or a phone switching apps could mark a device as &ldquo;can&rsquo;t do 3D&rdquo; forever. Now only a measured struggle counts, and it expires.</span></li>
+      <li><b>A 1,051-pixel house on a 390-pixel screen.</b><span>Turn a phone sideways and the house grew taller than the screen. The test matrix found it; the stage now fits.</span></li>
+      <li><b>A sign that vanished in Safari.</b><span>Four stacked glow effects made WebKit silently drop the whole image. Chrome rendered it fine, which is exactly why we test in Safari&rsquo;s engine.</span></li>
+      <li><b>A &ldquo;g&rdquo; that wasn&rsquo;t cut off.</b><span>Two CSS fixes did nothing, because nothing was clipping it: the original font draws a short tail. Rendering it at triple line height proved it. New typeface.</span></li>
+      <li><b>A stat that wasn&rsquo;t true.</b><span>A draft cited Gartner for a number Gartner never published. Checked, sourced, and corrected to the study that did.</span></li>
+    </ol>
+
+    <h2 class="bl-h">How it&rsquo;s made</h2>
+    <ul class="bl-stack mono">
+      <li>Hand-written HTML, CSS and JavaScript. No framework, no bundler.</li>
+      <li>A live WebGL2 shader for the sky, driven by Traverse City&rsquo;s real sun, wind and Lake Michigan waves.</li>
+      <li>three.js with lighting baked in Blender for the 3D house, and an SVG fallback for devices that can&rsquo;t carry it.</li>
+      <li>Cloudflare Workers: the site, a weather endpoint cached at the edge, and per-branch preview URLs.</li>
+      <li>gitleaks before every commit. A human approves every push to production.</li>
+    </ul>
+    <p class="bl-note">The point isn&rsquo;t that AI built a website. It&rsquo;s that one person with good agents, clear standards and a habit of checking the work can ship something this careful in a day. That&rsquo;s the same thing I tell businesses about AI.</p>
+    <div class="page-next"><span class="mono" style="color:var(--dim);font-size:12px;letter-spacing:.14em">TRY</span><span class="mono" style="color:var(--muted);font-size:13px">Press <b style="color:var(--aurora)">`</b> anywhere on the home page.</span></div>
+  </section>
+</main>
+
+<footer id="contact">
+  <div class="wrap">
+    <div class="cta">
+      <div class="eyebrow">Contact</div>
+      <h2>Say hello.</h2>
+      <p>Comparing notes on something you&rsquo;re building, or just curious how any of this works? I&rsquo;m easy to find.</p>
+      <div class="btns">
+        <a class="btn btn-ghost" href="mailto:jason@freshcoastlab.com"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="M3.5 6.5l8.5 6.5 8.5-6.5"/></svg>jason@freshcoastlab.com</a>
+        <a class="btn btn-ghost" href="https://www.linkedin.com/in/jasonmyers/" target="_blank" rel="noopener" aria-label="LinkedIn: Jason Myers"><svg class="li" viewBox="0 0 24 24" aria-hidden="true"><rect x="2" y="2" width="20" height="20" rx="2" fill="#fff"/><path fill="#0A66C2" d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433c-1.144 0-2.063-.926-2.063-2.065 0-1.138.92-2.063 2.063-2.063 1.14 0 2.064.925 2.064 2.063 0 1.139-.925 2.065-2.064 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/></svg>LinkedIn</a>
+      </div>
+    </div>
+    <div class="fine"><span>FRESH COAST LAB &middot; TRAVERSE CITY, MICHIGAN</span><a class="built-link" href="/built/">BUILT WITH AI, BY A HUMAN WITH OPINIONS &rarr;</a></div>
+  </div>
+</footer>
+
+<script src="/assets/nav.js" defer></script>
+<script src="/assets/terms.js" defer></script>
+</body>
+</html>
