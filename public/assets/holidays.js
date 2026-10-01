@@ -46,7 +46,7 @@
     sx = signCv.getContext('2d'); fx = frontCv.getContext('2d'); bx = backCv.getContext('2d');
   };
   // which layers a theme draws on; the rest are hidden and emptied
-  const USES = { christmas: 's', halloween: 'f', thanksgiving: 'sf', easter: 'f', july4: 'b' };
+  const USES = { christmas: 'sf', halloween: 'f', thanksgiving: 'sf', easter: 'f', july4: 'b' };
   let W = 0, H = 0, horizon = 0, phone = false;
   const fit = (cv, w, h, d, on) => { const a = on ? Math.max(1, Math.round(w * d)) : 0, b = on ? Math.max(1, Math.round(h * d)) : 0; if (cv.width !== a || cv.height !== b) { cv.width = a; cv.height = b; } };
   let dprF = 1, dprB = 1, dprS = 1;
@@ -263,6 +263,100 @@
       if (dark > .2) { const r2 = 50; ctx.globalAlpha = A * b * .26 * dark; ctx.drawImage(g, L.x - L.nx * 6 - r2, L.y - L.ny * 6 - r2, r2 * 2, r2 * 2); }
     });
     ctx.globalCompositeOperation = 'source-over'; ctx.globalAlpha = 1;
+  };
+
+  // =====================================================================================================
+  // CHRISTMAS TREE: a 1960s aluminum tree on a tripod stand beside the post, glass balls, an atomic star on top,
+  // and at night the turning color wheel that every aluminum tree of the era stood under
+  // =====================================================================================================
+  const TREE = { x: 36, k: 1.32 }; // ground centre in sign pixels, left of the post; scale against the sign
+  const TIERS = 7, tierAt = (i) => { const yB = -24 - i * 14.2, w = 6 + 42 * Math.pow(1 - i / (TIERS + .4), 1.08); return { yB, yT: yB - 25, w }; };
+  const ORN = [[-30, 0, 0], [8, 0, 2], [34, 0, 3], [-20, 1, 1], [16, 1, 0], [-6, 2, 3], [24, 2, 4], [-16, 3, 2], [10, 3, 1], [-4, 4, 0], [9, 5, 3]]; // x, tier, colour
+  const WARM = [[-38, 0], [-8, 0], [22, 0], [-28, 1], [4, 1], [29, 1], [-14, 2], [12, 2], [-20, 3], [20, 3], [-3, 3], [-10, 4], [13, 4], [1, 5], [-5, 6]]; // the tree's own little bulbs
+  const tierPath = (g, t) => {
+    const { yB, yT, w } = t; g.beginPath(); g.moveTo(0, yT);
+    g.quadraticCurveTo(-w * .42, yB - 9, -w, yB + 1.5); // a bough fanning out and drooping at the tip
+    const n = Math.max(5, Math.round(w / 3.2)); for (let j = 1; j <= n; j++) { const x = -w + 2 * w * j / n; g.quadraticCurveTo(x - w / n, yB + 4.2, x, yB + (j === n ? 1.5 : 0)); } // scalloped tinsel hem
+    g.quadraticCurveTo(w * .42, yB - 9, 0, yT); g.closePath();
+  };
+  const ornament = (g, x, y, r, c) => {
+    g.strokeStyle = 'rgba(200,205,212,.8)'; g.lineWidth = .4; g.beginPath(); g.moveTo(x, y - r - 3.2); g.lineTo(x, y - r); g.stroke();
+    g.fillStyle = '#C9A85A'; g.fillRect(x - r * .32, y - r - 1.4, r * .64, 1.6); // the cap
+    const gr = g.createRadialGradient(x - r * .38, y - r * .4, r * .08, x, y, r * 1.05); gr.addColorStop(0, rgba(tint(c, .7), 1)); gr.addColorStop(.35, rgba(tint(c, .15), 1)); gr.addColorStop(.8, rgba(c, 1)); gr.addColorStop(1, rgba(shade(c, .45), 1));
+    g.beginPath(); g.arc(x, y, r, 0, TAU); g.fillStyle = gr; g.fill();
+    g.beginPath(); g.ellipse(x - r * .38, y - r * .42, r * .26, r * .17, -.6, 0, TAU); g.fillStyle = 'rgba(255,255,255,.85)'; g.fill(); // window glint
+    g.beginPath(); g.arc(x, y, r * .78, .4, 1.6); g.strokeStyle = 'rgba(255,255,255,.22)'; g.lineWidth = r * .14; g.stroke(); // reflected tree along the lower curve
+  };
+  const atomicStar = (g, y) => { // the topper: the sign's orange star in miniature, rays tipped with dots
+    g.save(); g.translate(0, y);
+    const ray = (a, L, w) => { g.save(); g.rotate(a); g.beginPath(); g.moveTo(-w, 0); g.lineTo(0, -L); g.lineTo(w, 0); g.closePath(); g.fill(); g.beginPath(); g.arc(0, -L - 1.3, 1.15, 0, TAU); g.fill(); g.restore(); };
+    g.fillStyle = '#FF6A3D'; for (let k = 0; k < 4; k++) ray(k * Math.PI / 2, k % 2 ? 9 : 12.5, 1.9);
+    g.fillStyle = '#FF8A5C'; for (let k = 0; k < 4; k++) ray(Math.PI / 4 + k * Math.PI / 2, 6.2, 1.3);
+    g.beginPath(); g.arc(0, 0, 2.6, 0, TAU); g.fillStyle = '#FFD7B8'; g.fill();
+    g.restore();
+  };
+  const treeTopY = () => tierAt(TIERS - 1).yT;
+  const treeBody = (g, snow) => {
+    const sh = g.createRadialGradient(0, 0, 0, 0, 0, 52); sh.addColorStop(0, 'rgba(0,0,0,.42)'); sh.addColorStop(1, 'rgba(0,0,0,0)');
+    g.save(); g.scale(1, .16); g.fillStyle = sh; g.beginPath(); g.arc(0, 0, 52, 0, TAU); g.fill(); g.restore();
+    // tripod stand and pole
+    g.strokeStyle = '#2E343C'; g.lineCap = 'round'; g.lineWidth = 1.6;
+    g.beginPath(); g.moveTo(0, -15); g.lineTo(-13, 0); g.moveTo(0, -15); g.lineTo(13, 0); g.moveTo(0, -15); g.lineTo(2, 2.5); g.stroke();
+    g.lineWidth = 2.6; g.strokeStyle = '#59626C'; g.beginPath(); g.moveTo(0, -12); g.lineTo(0, -30); g.stroke();
+    // the boughs, bottom tier first; each a fan of silver tinsel
+    for (let i = 0; i < TIERS; i++) {
+      const t = tierAt(i);
+      tierPath(g, t);
+      const gr = g.createLinearGradient(-t.w, 0, t.w, 0); gr.addColorStop(0, '#7D8995'); gr.addColorStop(.32, '#E9EEF3'); gr.addColorStop(.5, '#F8FAFC'); gr.addColorStop(.75, '#B3BEC9'); gr.addColorStop(1, '#6A7581');
+      g.fillStyle = gr; g.fill();
+      g.save(); tierPath(g, t); g.clip();
+      const n = Math.round(t.w * 1.6);
+      for (let j = 0; j <= n; j++) { // tinsel strands raking down from the pole
+        const f = j / n * 2 - 1, x = f * t.w, light = j % 3 !== 1;
+        g.beginPath(); g.moveTo(f * 2, t.yT + 3); g.quadraticCurveTo(x * .55, t.yB - 8, x * 1.02, t.yB + 4.5);
+        g.strokeStyle = light ? `rgba(255,255,255,${.35 + .3 * Math.abs(Math.sin(j * 7.1))})` : 'rgba(60,72,86,.35)'; g.lineWidth = light ? .45 : .35; g.stroke();
+      }
+      const sg = g.createLinearGradient(0, t.yT, 0, t.yB + 4); sg.addColorStop(0, 'rgba(40,50,62,.35)'); sg.addColorStop(.35, 'rgba(40,50,62,0)'); sg.addColorStop(.8, 'rgba(255,255,255,0)'); sg.addColorStop(1, 'rgba(255,255,255,.25)');
+      g.fillStyle = sg; g.fillRect(-t.w - 2, t.yT, t.w * 2 + 4, t.yB - t.yT + 6); // under the tier above it's in shadow; the hem catches light
+      g.restore();
+    }
+    if (snow) { // snow along each tier's shoulders, where the tier above doesn't cover it
+      g.lineCap = 'round'; g.lineJoin = 'round';
+      for (let i = 0; i < TIERS; i++) {
+        const t = tierAt(i), up = i + 1 < TIERS ? tierAt(i + 1).w * .92 : 0;
+        for (const sg of [-1, 1]) {
+          g.beginPath(); let first = true;
+          for (let k = 0; k <= 16; k++) { const u = k / 16, v = 1 - u, px = sg * (2 * v * u * t.w * .42 + u * u * t.w), py = v * v * t.yT + 2 * v * u * (t.yB - 9) + u * u * (t.yB + 1.5) - 1.2; if (Math.abs(px) < up || u > .93) continue; first ? g.moveTo(px, py) : g.lineTo(px, py); first = false; }
+          g.strokeStyle = '#F2F6FC'; g.lineWidth = 2.6; g.stroke(); g.strokeStyle = 'rgba(255,255,255,.9)'; g.lineWidth = 1.2; g.stroke();
+        }
+      }
+    }
+    // the tree's little warm bulbs (their glow is drawn live)
+    for (const [x, ti] of WARM) { const t = tierAt(ti), y = t.yB - 3 - (Math.abs(x) / t.w) * -1.5; g.beginPath(); g.ellipse(x, y, 1.15, 1.7, 0, 0, TAU); g.fillStyle = '#FFE1A0'; g.fill(); }
+    for (const [x, ti, c] of ORN) { const t = tierAt(ti); ornament(g, x, t.yB + 6.5, ti < 2 ? 4.8 : ti < 4 ? 4.2 : 3.6, BULB[c]); }
+    atomicStar(g, treeTopY() - 6);
+  };
+  const WHEEL = [hex('#FF3B3B'), hex('#2FE07A'), hex('#4F86FF'), hex('#FFB42E')]; // the color wheel's four gels
+  const drawTree = (t, A, dark, B, snow) => {
+    const S = B.s * dprF * TREE.k, x = (B.x + TREE.x * B.s) * dprF, y = (B.y + ((geo ? geo.ground : 392) + 22) * B.s) * dprF;
+    const base = sprite('tree', 120, 178, 60, 166, S, (g, cv) => { treeBody(g, snow); g.setTransform(1, 0, 0, 1, 0, 0); nightify(g, cv.width, cv.height, dark, .22, .38); });
+    if (!cache.wheel || cache.wheel.base !== base) { // the same tree washed in each gel, made once per scale and darkness
+      cache.wheel = { base, list: WHEEL.map((c) => { const v = off(base.cv.width, base.cv.height), g = v.getContext('2d'); g.drawImage(base.cv, 0, 0); g.globalCompositeOperation = 'source-atop'; g.fillStyle = rgba(c, .5); g.fillRect(0, 0, v.width, v.height); return v; }) };
+      cache.treeGlow = { warm: glowSprite([255, 200, 120], 48, true), star: glowSprite([255, 120, 60], 64, false), gel: WHEEL.map((c) => glowSprite(c, 64, false)) };
+    }
+    const wl = cache.wheel.list, gl = cache.treeGlow, ph = reduce ? .3 : t / 2.2, i0 = Math.floor(ph) % 4, i1 = (i0 + 1) % 4, f = ph - Math.floor(ph), mix = clamp((f - .7) / .3), wash = .15 + .55 * dark;
+    const L = x - base.oxU * S, T = y - base.oyU * S, w = base.wU * S, h = base.hU * S;
+    fx.globalAlpha = A; fx.drawImage(base.cv, L, T, w, h);
+    fx.globalAlpha = A * wash * (1 - mix); fx.drawImage(wl[i0], L, T, w, h);
+    fx.globalAlpha = A * wash * mix; fx.drawImage(wl[i1], L, T, w, h);
+    fx.globalCompositeOperation = 'lighter';
+    const at = (sp, ux, uy, r, a) => { fx.globalAlpha = clamp(a); fx.drawImage(sp, x + (ux - r) * S, y + (uy - r) * S, r * 2 * S, r * 2 * S); };
+    // the gel's light on the ground around the stand
+    for (const [k, m] of [[i0, 1 - mix], [i1, mix]]) if (m > .01) { fx.globalAlpha = A * m * .5 * dark; fx.drawImage(gl.gel[k], x - 70 * S, y - 16 * S, 140 * S, 26 * S); }
+    // warm bulbs, each on its own slow twinkle; the star topper glows
+    WARM.forEach(([bxu, ti], k) => { const tt = tierAt(ti), tw = reduce ? 1 : .7 + .3 * Math.sin(t * (1.3 + (k % 5) * .37) + k * 2.1); at(gl.warm, bxu, tt.yB - 3, 3.2 + 3.4 * dark, A * tw * (.35 + .65 * dark)); });
+    at(gl.star, 0, treeTopY() - 6, 16 + 12 * dark, A * (.25 + .55 * dark) * (reduce ? 1 : .9 + .1 * Math.sin(t * 2.3)));
+    fx.globalCompositeOperation = 'source-over'; fx.globalAlpha = 1;
   };
 
   // =====================================================================================================
@@ -770,6 +864,297 @@
     flashes = []; far = [];
   };
 
+  // =====================================================================================================
+  // SANTA: the sleigh and nine reindeer cross the sky once, the first thing Christmas does
+  // Silhouettes like everyone else on the shore (ink with a faint moonlit rim); Rudolph's nose is the only light.
+  // Drawn in "team units": a reindeer is about 30 long, the whole team about 180.
+  // =====================================================================================================
+  const INK = '#05070B';
+  const DEER_LAG = [0, 28, 54, 80, 106], SLEIGH_LAG = 146; // how far behind Rudolph each row and the sleigh ride
+  const sf = { on: false, cv: null, ctx: null, off: null, raf: 0, t: 0, last: 0, dur: 8, fade: 1, ending: false, sparks: [], emit: 0, W: 0, H: 0, hz: 0, d: 1, s: 1, yPeak: 0, yEdge: 0, x0: 0, x1: 0, nose: null, core: null, glit: null };
+  // a reindeer, side on, facing right: a light deer build with jointed legs (elbow, knee, fetlock; stifle, hock), a slim neck and a muzzle
+  const deer = (g, ph) => {
+    g.fillStyle = INK; g.strokeStyle = INK; g.lineCap = 'round'; g.lineJoin = 'round';
+    const leg = (x, y, segs) => { // segs: [angle from straight down (positive reaches forward), length, width]
+      for (const [a, l, w] of segs) { const nx = x + Math.sin(a) * l, ny = y + Math.cos(a) * l; g.lineWidth = w; g.beginPath(); g.moveTo(x, y); g.lineTo(nx, ny); g.stroke(); x = nx; y = ny; }
+      g.beginPath(); g.ellipse(x, y, .75, .5, segs[segs.length - 1][0], 0, TAU); g.fill(); // hoof
+    };
+    // the flying gallop: forelegs reach out then fold up under the chest, hind legs drive back then gather
+    for (const side of [.5, 0]) {
+      const p = ph + side, reach = Math.sin(p), fold = Math.max(0, -Math.sin(p + .6)), qh = Math.sin(p + Math.PI * .85), gather = Math.max(0, Math.sin(p + Math.PI * .85 + .8));
+      const f1 = .35 + .75 * reach, f2 = f1 - .1 - 1.7 * fold, f3 = f2 + .5 * fold - .2;
+      leg(4.6, 1.4, [[f1, 4.2, 1.5], [f2, 4.4, .95], [f3, 1.5, .8]]);
+      const h1 = .55 + .55 * qh, h2 = h1 - 1.45 - .3 * gather, h3 = h2 + .95 + .9 * gather;
+      leg(-5.4, .6, [[h1, 3.8, 2.1], [h2, 3.6, 1.3], [h3, 4.4, .9], [h3 + .25, 1.4, .75]]);
+    }
+    g.beginPath(); g.moveTo(-8.6, -1.4); g.bezierCurveTo(-8.2, -4.2, -3, -4.1, 1, -3.5); g.bezierCurveTo(4, -3.2, 6.4, -3.6, 7.2, -1.2); g.bezierCurveTo(7.8, 1.2, 6.2, 3, 4, 3); // back, withers, chest
+    g.bezierCurveTo(1.5, 2.6, -1.5, 2.2, -3.4, 2.4); g.bezierCurveTo(-6.4, 3, -9, 1.6, -8.6, -1.4); g.closePath(); g.fill(); // tucked belly, haunch
+    g.beginPath(); g.moveTo(3.4, -3.6); g.bezierCurveTo(5.6, -5, 7.4, -6.6, 8.6, -9); g.lineTo(10.8, -8.4); g.bezierCurveTo(9.8, -5.6, 8.8, -2.4, 7.2, .4); g.closePath(); g.fill(); // a slim, arched neck
+    g.save(); g.translate(10.3, -9.1); g.rotate(.5);
+    g.beginPath(); g.ellipse(0, 0, 2.5, 1.75, 0, 0, TAU); g.fill(); // the head
+    g.beginPath(); g.moveTo(1.2, -1.3); g.quadraticCurveTo(4.6, -.9, 5.4, .2); g.quadraticCurveTo(4.6, 1.1, 1, 1.5); g.closePath(); g.fill(); // tapering muzzle
+    g.restore();
+    g.beginPath(); g.moveTo(9.4, -10.4); g.quadraticCurveTo(6.8, -12.2, 6.1, -11.3); g.quadraticCurveTo(7.6, -10.3, 9, -9.3); g.closePath(); g.fill(); // ear, laid back
+    g.beginPath(); g.moveTo(-8.4, -2.6); g.quadraticCurveTo(-10.6, -4.6, -10.4, -3); g.quadraticCurveTo(-9.8, -1.6, -8.4, -1.4); g.fill(); // tail flicked up
+    for (const [o, w] of [[1.3, .7], [0, .85]]) { // antlers, far and near: a sweeping beam with three tines
+      g.lineWidth = w; g.beginPath(); g.moveTo(10 - o, -10.4); g.bezierCurveTo(9.2 - o, -13.6, 7.6 - o, -16.2, 4.6 - o, -18.2);
+      g.moveTo(9.5 - o, -12.8); g.quadraticCurveTo(11.4 - o, -14, 12 - o, -15.8); g.moveTo(8.2 - o, -15.2); g.quadraticCurveTo(9.8 - o, -17.2, 9.8 - o, -19.2); g.moveTo(6.5 - o, -17); g.quadraticCurveTo(7 - o, -18.9, 6.6 - o, -20.6);
+      g.stroke();
+    }
+  };
+  const NOSE_TIP = [10.3 + Math.cos(.5) * 5.4 - Math.sin(.5) * .2, -9.1 + Math.sin(.5) * 5.4 + Math.cos(.5) * .2]; // muzzle tip in deer units
+  const sleighShape = (g, t) => {
+    g.fillStyle = INK; g.strokeStyle = INK; g.lineCap = 'round'; g.lineJoin = 'round';
+    g.lineWidth = 1.7; g.beginPath(); g.moveTo(-29, -3); g.quadraticCurveTo(-29, 0, -25, 0); g.lineTo(16, 0); g.bezierCurveTo(25, 0, 28, -7, 22, -10); g.bezierCurveTo(19, -11.5, 17.5, -8.5, 20, -7.5); g.stroke(); // runner, scrolled up in front
+    g.lineWidth = 1.4; g.beginPath(); g.moveTo(-15, 0); g.lineTo(-15, -6); g.moveTo(9, 0); g.lineTo(9, -6); g.stroke();
+    g.beginPath(); g.moveTo(-25, -5.5); g.lineTo(13, -5.5); g.bezierCurveTo(20, -5.5, 22, -13, 17, -17); g.bezierCurveTo(14.5, -19, 12, -16.5, 14, -15); g.lineTo(-8, -15);
+    g.bezierCurveTo(-14, -15, -16, -19, -19, -27); g.bezierCurveTo(-21, -31, -27, -30, -26.5, -26); g.bezierCurveTo(-26, -18, -27, -10, -25, -5.5); g.closePath(); g.fill(); // the body, high at the back
+    g.beginPath(); g.ellipse(-17.5, -22, 7.5, 8.5, -.15, 0, TAU); g.fill(); // the sack of toys
+    g.beginPath(); g.moveTo(-20, -29); g.lineTo(-17.5, -33); g.lineTo(-14.5, -29.5); g.closePath(); g.fill();
+    g.save(); g.translate(-23, -31); g.rotate(-.35); g.fillRect(-2.7, -2.7, 5.4, 5.4); g.fillRect(-.5, -4.6, 1, 2); g.restore(); // a present, bow and all
+    g.beginPath(); g.arc(-12.8, -31, 2.2, 0, TAU); g.moveTo(-13.2, -33.2); g.arc(-14.1, -33.2, .95, 0, TAU); g.moveTo(-10.4, -33.2); g.arc(-11.3, -33.2, .95, 0, TAU); g.fill(); // a teddy peeking out
+    g.beginPath(); g.ellipse(-4.5, -20, 7.6, 7.3, 0, 0, TAU); g.fill(); // Santa
+    g.beginPath(); g.arc(-1.4, -30, 3.7, 0, TAU); g.fill();
+    g.beginPath(); g.ellipse(1.3, -27, 3, 3.7, .3, 0, TAU); g.fill(); // beard
+    const flop = Math.sin(t * 5.2) * .9; // the cap flops back in the wind, pompom bouncing
+    g.beginPath(); g.moveTo(-5.6, -31.4); g.lineTo(2, -32.4); g.quadraticCurveTo(-1, -38.5, -9.6, -36.6 + flop); g.quadraticCurveTo(-6.5, -34, -5.6, -31.4); g.fill();
+    g.beginPath(); g.ellipse(-1.8, -32, 4.7, 1.35, -.08, 0, TAU); g.fill();
+    g.beginPath(); g.arc(-10.2, -36.4 + flop, 1.75, 0, TAU); g.fill();
+    g.lineWidth = 3.2; g.beginPath(); g.moveTo(-2.5, -23.5); g.quadraticCurveTo(2, -20, 6.2, -21.6); g.stroke(); // arms out, holding the reins
+    g.beginPath(); g.arc(7, -21.8, 1.9, 0, TAU); g.fill();
+  };
+  // where the team flies: a soft arc above the skyline, low at the edges, highest mid-sky
+  const fy = (x) => { const q = x / sf.W; return sf.yEdge - (sf.yEdge - sf.yPeak) * Math.sin(Math.PI * clamp(q, -.25, 1.25)) + 3 * sf.s * Math.sin(q * 7 + .5); };
+  const fa = (x) => Math.atan2(fy(x + 4) - fy(x - 4), 8);
+  const santaDims = () => {
+    const r = hero.getBoundingClientRect(), W2 = r.width, H2 = r.height, ph = W2 < 700;
+    sf.W = W2; sf.H = H2; sf.hz = H2 * (1 - HZ); sf.d = Math.min(devicePixelRatio || 1, 1.5);
+    sf.s = (ph ? W2 * .56 : Math.min(W2 * .24, 340)) / 180;
+    const sk = document.querySelector('.hero > .skybox'), kb = sk ? sk.getBoundingClientRect().bottom - r.top : H2 * .12;
+    sf.yPeak = Math.max(kb + 20 + 31 * sf.s, H2 * .16); sf.yEdge = Math.max(sf.yPeak + H2 * .05, sf.hz - H2 * .36); // Santa's cap clears the sky controls
+    sf.x0 = -26 * sf.s; sf.x1 = W2 + (SLEIGH_LAG + 34) * sf.s; sf.dur = ph ? 6.6 : 8.2;
+    if (sf.cv) { const a = Math.round(W2 * sf.d), b = Math.round(H2 * sf.d); if (sf.cv.width !== a || sf.cv.height !== b) { sf.cv.width = a; sf.cv.height = b; } }
+  };
+  // seconds from take-off until the sleigh passes behind the middle of the sign
+  const santaPassTime = () => { const B = signBox(), xc = B.x + IW * B.s / 2; return clamp((xc + SLEIGH_LAG * sf.s - sf.x0) / (sf.x1 - sf.x0), 0, 1) * sf.dur; };
+  const santaStart = () => {
+    if (sf.on || reduce || window.__tornado) return false;
+    sf.on = true; sf.t = 0; sf.last = 0; sf.fade = 1; sf.ending = false; sf.sparks = []; sf.emit = 0;
+    sf.cv = document.createElement('canvas'); sf.cv.className = 'santa-layer'; sf.cv.setAttribute('aria-hidden', 'true');
+    const sky = hero.querySelector(':scope > .skyline-layer'); if (sky) sky.after(sf.cv); else hero.prepend(sf.cv); // above the skyline, under the sign
+    sf.ctx = sf.cv.getContext('2d'); sf.off = document.createElement('canvas');
+    sf.nose = glowSprite([255, 46, 32], 64, false); sf.core = glowSprite([255, 70, 50], 32, true); sf.glit = glowSprite([255, 226, 170], 24, true);
+    santaDims(); santaKick(); return true;
+  };
+  const santaEnd = () => {
+    cancelAnimationFrame(sf.raf); sf.raf = 0; sf.on = false; sf.ending = false; sf.sparks = [];
+    if (sf.cv) { sf.cv.width = sf.cv.height = 0; sf.cv.remove(); }
+    if (sf.off) sf.off.width = sf.off.height = 0;
+    sf.cv = sf.ctx = sf.off = sf.nose = sf.core = sf.glit = null;
+  };
+  const santaStop = () => { if (sf.on) sf.ending = true; }; // fade out over a moment, then clean up
+  const santaKick = () => { if (sf.on && !sf.raf && onScreen && !document.hidden) sf.raf = requestAnimationFrame(santaFrame); };
+  const santaFrame = (now) => {
+    sf.raf = 0;
+    if (!sf.on) return;
+    if (!onScreen || document.hidden) { sf.last = 0; return; } // paused; the observers kick it back on
+    const dt = sf.last ? Math.min(.05, (now - sf.last) / 1000) : 1 / 60; sf.last = now; sf.t += dt;
+    if (window.__tornado) sf.ending = true; // the twister wins; Santa slips away
+    if (sf.ending) { sf.fade -= dt / .45; if (sf.fade <= 0) { santaEnd(); return; } }
+    const u = sf.t / sf.dur; if (u >= 1) { santaEnd(); return; }
+    const { ctx, d, s } = sf, t = sf.t, xl = lerp(sf.x0, sf.x1, u);
+    const wx = window.__wx || {}, dark = clamp(1 - (wx.day || 0) * 1.15 + (wx.cloud || 0) * .15);
+    // each row and the sleigh ride the same arc, Rudolph leading
+    const rows = DEER_LAG.map((lag, i) => { const x = xl - lag * s; return { x, y: fy(x), a: fa(x), ph: t * TAU / .62 + i * .9 }; });
+    const sx_ = xl - SLEIGH_LAG * s, sl = { x: sx_, y: fy(sx_) + 8 * s + 1.4 * s * Math.sin(t * 2.6), a: fa(sx_) * .8 + .04 * Math.sin(t * 2.1) };
+    const P = (e, ux, uy) => { const c = Math.cos(e.a), n = Math.sin(e.a); return [e.x + s * (ux * c - uy * n), e.y + s * (ux * n + uy * c)]; };
+    // a deer's own sway: bob and pitch with the stride
+    const sway = (ph) => ({ bob: -1.3 * Math.cos(ph), pitch: .07 * Math.sin(ph + .5) });
+    const inDeer = (e, ph, ox, oy, ux, uy) => { const w = sway(ph), c = Math.cos(w.pitch), n = Math.sin(w.pitch); return P(e, ox + ux * c - uy * n, oy + w.bob + ux * n + uy * c); };
+    // the silhouettes go into a scratch canvas first so the rim light falls only on the outside edge
+    const pad = 44 * s, xs = [sl.x, rows[0].x], ys = [sl.y, ...rows.map((r) => r.y)];
+    const bx0 = Math.min(...xs) - pad, by0 = Math.min(...ys) - pad, bw = Math.max(...xs) - Math.min(...xs) + pad * 2, bh = Math.max(...ys) - Math.min(...ys) + pad * 2;
+    const ow = Math.ceil(bw * d), oh = Math.ceil(bh * d), off = sf.off;
+    if (off.width < ow || off.height < oh) { off.width = Math.max(off.width, ow); off.height = Math.max(off.height, oh); }
+    const g = off.getContext('2d'); g.setTransform(1, 0, 0, 1, 0, 0); g.clearRect(0, 0, off.width, off.height);
+    const place = (e) => { const c = Math.cos(e.a) * s * d, n = Math.sin(e.a) * s * d; g.setTransform(c, n, -n, c, (e.x - bx0) * d, (e.y - by0) * d); };
+    // harness: the gangline from the sleigh to Rudolph, and Santa's reins
+    const gang = [P(sl, 21, -8)], reins = [P(sl, 7, -21.8)];
+    for (let i = rows.length - 1; i >= 0; i--) { gang.push(inDeer(rows[i], rows[i].ph, 0, 0, 5.5, .5)); reins.push(inDeer(rows[i], rows[i].ph, 0, 0, 8.4, -6)); }
+    g.setTransform(d, 0, 0, d, -bx0 * d, -by0 * d); g.strokeStyle = INK; g.lineCap = 'round';
+    for (const [pts, lw, sag] of [[gang, .9, 1.5], [reins, .6, 3]]) {
+      g.beginPath(); g.moveTo(pts[0][0], pts[0][1]);
+      for (let i = 1; i < pts.length; i++) { const a = pts[i - 1], b = pts[i]; g.quadraticCurveTo((a[0] + b[0]) / 2, (a[1] + b[1]) / 2 + sag * s, b[0], b[1]); }
+      g.lineWidth = lw * s; g.stroke();
+    }
+    place(sl); sleighShape(g, t);
+    for (let i = rows.length - 1; i >= 0; i--) {
+      const e = rows[i], pair = i ? [[-4.5, -7.6, .55, .86], [0, 0, 0, 1]] : [[0, 0, 0, 1]]; // the far deer smaller, up and back, so a pair reads as two animals; Rudolph leads alone
+      for (const [ox, oy, dp, k] of pair) { const w = sway(e.ph + dp); place(e); g.translate(ox, oy + w.bob); g.rotate(w.pitch); g.scale(k, k); deer(g, e.ph + dp); }
+    }
+    // on to the sky: the team with its moonlit rim
+    ctx.setTransform(1, 0, 0, 1, 0, 0); ctx.clearRect(0, 0, sf.cv.width, sf.cv.height);
+    ctx.globalAlpha = sf.fade;
+    ctx.shadowColor = 'rgba(160,200,222,.75)'; ctx.shadowBlur = .9 * d; // the same rim as the CSS drop-shadow(0 0 .9px) on the other figures
+    ctx.drawImage(off, 0, 0, ow, oh, bx0 * d, by0 * d, ow, oh);
+    ctx.shadowColor = 'transparent'; ctx.shadowBlur = 0;
+    ctx.setTransform(d, 0, 0, d, 0, 0); ctx.globalCompositeOperation = 'lighter';
+    // a faint trail of sparkle behind the sleigh
+    sf.emit += dt * 38; const tail = P(sl, -28, -6);
+    while (sf.emit >= 1 && sf.sparks.length < 140) { sf.emit--; sf.sparks.push({ x: tail[0] + (rnd() - .5) * 6 * s, y: tail[1] + (rnd() - .5) * 8 * s, vx: -(8 + rnd() * 18), vy: 4 + rnd() * 14, age: 0, life: .8 + rnd() * .9, z: (1 + rnd() * 1.4) * s }); }
+    sf.emit = Math.min(sf.emit, 1);
+    let j = 0;
+    for (const p of sf.sparks) {
+      p.age += dt; if (p.age >= p.life) continue; p.x += p.vx * dt; p.y += p.vy * dt; sf.sparks[j++] = p;
+      const k = Math.pow(1 - p.age / p.life, 1.5) * (.6 + .4 * Math.sin(p.age * 30 + p.x)) * (.35 + .55 * dark) * sf.fade;
+      ctx.globalAlpha = clamp(k); ctx.drawImage(sf.glit, p.x - p.z, p.y - p.z, p.z * 2, p.z * 2);
+    }
+    sf.sparks.length = j;
+    // Rudolph's nose: the only light in the team, pulsing, and glinting on the water at night
+    const r0 = rows[0], N = inDeer(r0, r0.ph, 0, 0, NOSE_TIP[0], NOSE_TIP[1]), pulse = .82 + .18 * Math.sin(t * 4.2), hr = 9 * s * (.75 + .55 * dark) * pulse;
+    ctx.globalAlpha = clamp((.4 + .6 * dark) * pulse) * sf.fade; ctx.drawImage(sf.nose, N[0] - hr, N[1] - hr, hr * 2, hr * 2);
+    const cr = 2.4 * s; ctx.globalAlpha = sf.fade; ctx.drawImage(sf.core, N[0] - cr, N[1] - cr, cr * 2, cr * 2);
+    if (dark > .15 && N[1] < sf.hz) {
+      const ry = sf.hz + (sf.hz - N[1]) * .38, k = clamp(1 - (sf.hz - N[1]) / (sf.H * .5)) * dark * pulse * sf.fade;
+      if (ry < sf.H && k > .01) { const jx = Math.sin(t * 7) * 1.5 * s; ctx.globalAlpha = clamp(.7 * k); ctx.drawImage(sf.nose, N[0] + jx - 3 * s, ry - 10 * s, 6 * s, 20 * s); ctx.globalAlpha = clamp(.3 * k); ctx.drawImage(sf.nose, N[0] - 9 * s, ry - 3 * s, 18 * s, 6 * s); }
+    }
+    ctx.globalCompositeOperation = 'source-over'; ctx.globalAlpha = 1;
+    santaKick();
+  };
+
+  // =====================================================================================================
+  // THE WITCH: Halloween's first act. She rides her broom across the sky, cat on the back, and at night her
+  // path crosses the moon so she's framed against it. Same ink and moonlit rim as everyone else.
+  // Drawn in "witch units", broom along the x axis, facing right; she is about 100 long.
+  // =====================================================================================================
+  const wf = { on: false, cv: null, ctx: null, off: null, raf: 0, t: 0, last: 0, dur: 7.5, fade: 1, ending: false, W: 0, H: 0, d: 1, s: 1, knots: null, moon: null, halo: null };
+  const witchShape = (g, t) => {
+    g.fillStyle = INK; g.strokeStyle = INK; g.lineCap = 'round'; g.lineJoin = 'round';
+    const wv = (k, a = 1) => Math.sin(t * 9 + k) * a; // the wind in her cape and hair
+    // the cape, billowing back from her shoulders, its trailing edge rippling
+    g.beginPath(); g.moveTo(10, -18.6); g.bezierCurveTo(3, -20 + wv(0, .5), -6, -22.5 + wv(.8, .8), -16, -27 + wv(1.6, 1.6)); // flowing up and back, clear of the cat
+    g.quadraticCurveTo(-13.6, -24.6 + wv(2, 1), -15.4, -22.2 + wv(2.6, 1.3)); g.quadraticCurveTo(-12, -21 + wv(3.2, 1), -12.8, -18.6 + wv(3.8, 1.1)); g.quadraticCurveTo(-9.4, -18 + wv(4.4, .8), -9.6, -15.8 + wv(5, .8)); // a rippling hem
+    g.bezierCurveTo(-4, -15.2, 1.5, -13.8, 6.5, -12.6); g.closePath(); g.fill();
+    // the broom: a long handle with a knob, the bristles bound in two bands and fanning out behind
+    g.lineWidth = 1.5; g.beginPath(); g.moveTo(-31, .4); g.lineTo(35, -3.2); g.stroke();
+    g.beginPath(); g.arc(35.4, -3.25, 1.1, 0, TAU); g.fill();
+    g.beginPath(); g.moveTo(-28, -1.9); g.lineTo(-34.5, -2.6); g.lineTo(-34.5, 3.6); g.lineTo(-28, 2.6); g.closePath(); g.fill();
+    g.lineWidth = .62;
+    for (let k = 0; k < 17; k++) { const f = k / 16 - .5, sw = Math.sin(t * 7 + k * 1.7) * .9; g.beginPath(); g.moveTo(-33.5, .5 + f * 5); g.quadraticCurveTo(-42, f * 11 + sw * .4, -55 - Math.abs(Math.sin(k * 3.3)) * 4, f * 19 + sw); g.stroke(); }
+    // the cat on the back of the broom, sitting up, tail curled
+    g.beginPath(); g.ellipse(-20, -5.4, 3.3, 4.6, -.15, 0, TAU); g.fill();
+    g.beginPath(); g.arc(-17.6, -11, 2.4, 0, TAU); g.fill();
+    g.beginPath(); g.moveTo(-19.3, -12.4); g.lineTo(-19.8, -15.4); g.lineTo(-17.9, -13.3); g.moveTo(-16.6, -13.2); g.lineTo(-15.4, -15.6); g.lineTo(-15.3, -12.4); g.fill(); // ears
+    g.lineWidth = 1.05; g.beginPath(); g.moveTo(-22.6, -3); g.bezierCurveTo(-27.5, -4, -28.5, -11 + wv(1, .6), -25.6, -13.5 + wv(1.5, .6)); g.quadraticCurveTo(-24.2, -14.4, -24.8, -12.4); g.stroke();
+    g.lineWidth = .9; g.beginPath(); g.moveTo(-18.6, -1.6); g.lineTo(-18.2, .2); g.moveTo(-21.4, -1.4); g.lineTo(-21.6, .3); g.stroke(); // paws on the handle
+    // the witch: skirt draped over the broom, one leg tucked with a pointed boot
+    g.beginPath(); g.moveTo(.5, -8.5); g.bezierCurveTo(-3, -4, -5.5, 1.5, -8 + wv(2, .5), 6 + wv(2.5, .5)); g.lineTo(-3, 4.6 + wv(3, .4)); g.lineTo(1.5, 7 + wv(3.5, .4)); g.bezierCurveTo(4.6, 3, 6.4, -1, 7.2, -5.4); g.closePath(); g.fill(); // the skirt, draped over the broom
+    g.lineWidth = 2.1; g.beginPath(); g.moveTo(6, -2.5); g.lineTo(11.5, 3.2); g.lineTo(8.6, 9.2); g.stroke(); // thigh forward, shin tucked back
+    g.beginPath(); g.moveTo(7.2, 8.4); g.lineTo(10.6, 8.6); g.quadraticCurveTo(13.6, 8.8, 14.6, 7.2); g.quadraticCurveTo(13.6, 10.6, 9.6, 10.6); g.lineTo(7.2, 10.4); g.closePath(); g.fill(); // the boot, toe curled up
+    g.beginPath(); g.moveTo(.5, -8.5); g.bezierCurveTo(2.5, -13, 6, -17.6, 9.6, -19.4); g.lineTo(12, -17.2); g.bezierCurveTo(10.2, -13.4, 8.2, -9.4, 6.6, -5.6); g.closePath(); g.fill(); // a slim torso, leaning in
+    g.lineWidth = 1.5; g.beginPath(); g.moveTo(11, -17.2); g.lineTo(16.6, -10.6); g.lineTo(21.2, -4.2); g.stroke(); // arm reaching to the handle
+    g.beginPath(); g.arc(21.6, -3.8, 1.2, 0, TAU); g.fill();
+    // hair streaming back under the hat
+    g.lineWidth = .75;
+    for (let k = 0; k < 6; k++) { const y0 = -23.4 + k * .75; g.beginPath(); g.moveTo(11, y0); g.bezierCurveTo(7, y0 - 1.2 + wv(k, .6), 3, y0 - 2 + wv(k + 1, .9), -1.5 - k * .9, y0 - 3.2 + k * .35 + wv(k + 2, 1.3)); g.stroke(); } // streaming up and back on the wind
+    // head: a sharp nose and chin
+    g.beginPath(); g.arc(13.4, -21.8, 3, 0, TAU); g.fill();
+    g.beginPath(); g.moveTo(15.6, -23); g.lineTo(19.4, -21); g.lineTo(15.8, -20.6); g.closePath(); g.fill();
+    g.beginPath(); g.moveTo(14.6, -19.4); g.lineTo(16.6, -17.7); g.lineTo(13.4, -18.9); g.closePath(); g.fill();
+    // the hat: a wide brim and a tall cone whose tip has bent over and trails behind
+    g.beginPath(); g.ellipse(12.6, -24.6, 8.6, 1.25, -.12, 0, TAU); g.fill();
+    const tip = wv(.4, .7);
+    g.beginPath(); g.moveTo(8.6, -24.6); g.lineTo(16.4, -25.6); g.bezierCurveTo(14, -30, 11.5, -34, 9.6, -36.6); g.quadraticCurveTo(6, -38 + tip, 1.6, -35.6 + tip); g.quadraticCurveTo(5.6, -35.4, 7.6, -33.6); g.bezierCurveTo(8.4, -30, 8.7, -27, 8.6, -24.6); g.closePath(); g.fill();
+  };
+  // the moon, where the sky shader puts it (index.html: uMoon), in hero pixels; null when it isn't up
+  const moonAt = (W2, H2) => {
+    const wx = window.__wx || {}; if (wx.sx == null) return null;
+    const hy = Math.max(-.05, Math.min(.42, -(wx.sun || 0) * 1.5 + .12));
+    const dark = clamp(1 - (wx.day || 0) * 1.15 + (wx.cloud || 0) * .15);
+    if (hy < .05 || dark < .55 || (wx.cloud || 0) > .6) return null;
+    return { x: W2 * (1 - wx.sx * .8 - .1), y: H2 * (1 - HZ - hy), r: H2 * .028 };
+  };
+  // monotone cubic through the knots: y as a smooth function of x, no overshoot
+  const spline = (K, x) => {
+    if (x <= K[0][0]) return K[0][1]; if (x >= K[K.length - 1][0]) return K[K.length - 1][1];
+    let i = 0; while (x > K[i + 1][0]) i++;
+    const sl = (j) => { if (j <= 0 || j >= K.length - 1) return (K[Math.min(j + 1, K.length - 1)][1] - K[Math.max(j - 1, 0)][1]) / (K[Math.min(j + 1, K.length - 1)][0] - K[Math.max(j - 1, 0)][0]); const a = (K[j][1] - K[j - 1][1]) / (K[j][0] - K[j - 1][0]), b = (K[j + 1][1] - K[j][1]) / (K[j + 1][0] - K[j][0]); return a * b <= 0 ? 0 : 2 / (1 / a + 1 / b); };
+    const [x0, y0] = K[i], [x1, y1] = K[i + 1], h = x1 - x0, u = (x - x0) / h, m0 = sl(i) * h, m1 = sl(i + 1) * h;
+    return (2 * u * u * u - 3 * u * u + 1) * y0 + (u * u * u - 2 * u * u + u) * m0 + (-2 * u * u * u + 3 * u * u) * y1 + (u * u * u - u * u) * m1;
+  };
+  // the sky she may use: below the header and the sky controls, above the skyline
+  const skyRoom = (r) => {
+    const sk = document.querySelector('.hero > .skybox'), nav = document.querySelector('.hero nav.top');
+    const pr = sk ? sk.getBoundingClientRect() : null, nr = nav ? nav.getBoundingClientRect() : null;
+    return { navB: nr ? nr.bottom - r.top : 60, pillL: pr ? pr.left - r.left : r.width * .4, pillR: pr ? pr.right - r.left : r.width * .6, pillB: pr ? pr.bottom - r.top : r.height * .15 };
+  };
+  const witchDims = () => {
+    const r = hero.getBoundingClientRect(), W2 = r.width, H2 = r.height, ph = W2 < 700, room = skyRoom(r);
+    wf.W = W2; wf.H = H2; wf.d = Math.min(devicePixelRatio || 1, 1.5); wf.s = (ph ? W2 * .3 : Math.min(W2 * .12, 170)) / 100; wf.dur = ph ? 6 : 7.5;
+    const s = wf.s, top = 40 * s, hz = H2 * (1 - HZ), low = hz - H2 * .3; // the hat tip rides ~40 units above the broom; stay over the skyline
+    // the highest the broom may ride at x, part by part: hat and head ahead of x, cape and cat just behind, bristles further back
+    const ov = (l, r) => r > room.pillL - 8 && l < room.pillR + 8;
+    const clearAt = (x) => { let c = room.navB + 8 + top; if (ov(x, x + 20 * s)) c = Math.max(c, room.pillB + 8 + top); if (ov(x - 16 * s, x)) c = Math.max(c, room.pillB + 8 + 28 * s); if (ov(x + 20 * s, x + 37 * s)) c = Math.max(c, room.pillB + 8 + 4 * s); if (ov(x - 59 * s, x - 16 * s)) c = Math.max(c, room.pillB + 8 + 12 * s); return c; };
+    // sample it, widen it a little and smooth it, so the path eases over the pill instead of stepping
+    const N = 72, xa = -80 * s, xb = W2 + 80 * s, env = Array.from({ length: N + 1 }, (_, i) => clearAt(xa + (xb - xa) * i / N));
+    let e2 = env.map((_, i) => Math.max(...env.slice(Math.max(0, i - 3), i + 4)));
+    for (let pass = 0; pass < 3; pass++) e2 = e2.map((_, i) => { const w = e2.slice(Math.max(0, i - 3), i + 4); return w.reduce((p, v) => p + v, 0) / w.length; });
+    wf.env = (x) => { const f = clamp((x - xa) / (xb - xa)) * N, i = Math.min(N - 1, Math.floor(f)); return lerp(e2[i], e2[i + 1], f - i); };
+    const m = moonAt(W2, H2); wf.moon = null;
+    let K;
+    const yb = m ? Math.max(m.y + 15 * s, wf.env(m.x)) : 0;
+    if (m && yb <= m.y + 26 * s && yb < low) { // she can cross the moon: it sits behind her hat, head and shoulders
+      wf.moon = m;
+      K = m.x < W2 / 2 ? [[xa, yb + H2 * .1], [m.x, yb], [m.x + (W2 - m.x) * .5, Math.min(low, yb + H2 * .16)], [xb, yb + H2 * .02]]
+        : [[xa, yb + H2 * .02], [m.x * .5, Math.min(low, yb + H2 * .16)], [m.x, yb], [xb, yb + H2 * .1]];
+    } else { const yh = room.navB + 8 + top; K = [[xa, yh + H2 * .12], [W2 * .26, yh + H2 * .04], [W2 * .6, Math.min(low, yh + H2 * .17)], [xb, yh + H2 * .05]]; }
+    wf.knots = K; wf.low = low;
+    if (wf.cv) { const a = Math.round(W2 * wf.d), b = Math.round(H2 * wf.d); if (wf.cv.width !== a || wf.cv.height !== b) { wf.cv.width = a; wf.cv.height = b; } }
+  };
+  const wy = (x) => { const a = spline(wf.knots, x), b = wf.env(x), k = 6 * wf.s; return (a + b + Math.sqrt((a - b) * (a - b) + k * k)) / 2; }; // the swoop, eased over (never into) the header and the sky controls
+  const witchStart = () => {
+    if (wf.on || reduce || window.__tornado) return false;
+    wf.on = true; wf.t = 0; wf.last = 0; wf.fade = 1; wf.ending = false;
+    wf.cv = document.createElement('canvas'); wf.cv.className = 'witch-layer'; wf.cv.setAttribute('aria-hidden', 'true');
+    const sky = hero.querySelector(':scope > .skyline-layer'); if (sky) sky.after(wf.cv); else hero.prepend(wf.cv);
+    wf.ctx = wf.cv.getContext('2d'); wf.off = document.createElement('canvas'); wf.halo = glowSprite([214, 226, 255], 96, false);
+    witchDims(); witchKick(); return true;
+  };
+  const witchEnd = () => {
+    cancelAnimationFrame(wf.raf); wf.raf = 0; wf.on = false; wf.ending = false;
+    if (wf.cv) { wf.cv.width = wf.cv.height = 0; wf.cv.remove(); }
+    if (wf.off) wf.off.width = wf.off.height = 0;
+    wf.cv = wf.ctx = wf.off = wf.halo = null;
+  };
+  const witchStop = () => { if (wf.on) wf.ending = true; };
+  const witchKick = () => { if (wf.on && !wf.raf && onScreen && !document.hidden) wf.raf = requestAnimationFrame(witchFrame); };
+  const witchFrame = (now) => {
+    wf.raf = 0;
+    if (!wf.on) return;
+    if (!onScreen || document.hidden) { wf.last = 0; return; }
+    const dt = wf.last ? Math.min(.05, (now - wf.last) / 1000) : 1 / 60; wf.last = now; wf.t += dt;
+    if (window.__tornado) wf.ending = true;
+    if (wf.ending) { wf.fade -= dt / .45; if (wf.fade <= 0) { witchEnd(); return; } }
+    const u = wf.t / wf.dur; if (u >= 1) { witchEnd(); return; }
+    const { ctx, d, s } = wf, t = wf.t, x0 = -70 * s, x1 = wf.W + 60 * s;
+    const ue = u < .5 ? 2 * u * u * .3 + u * .7 : u; // a touch of ease as she sweeps in
+    const x = lerp(x0, x1, ue), bob = Math.sin(t * 2.3) * 2.2 * s, y = wy(x) + bob, a = Math.atan2(wy(x + 6) - wy(x - 6), 12) * .9 + .05 * Math.sin(t * 1.7 + .5);
+    wf.x = x; wf.y = y;
+    ctx.setTransform(1, 0, 0, 1, 0, 0); ctx.clearRect(0, 0, wf.cv.width, wf.cv.height);
+    // moonlight gathers behind her as she crosses the moon
+    if (wf.moon) { const m = wf.moon, k = clamp(1 - Math.abs(x + 10 * s - m.x) / (wf.W * .35)); if (k > .01) { const R = m.r * 4.2; ctx.globalCompositeOperation = 'lighter'; ctx.globalAlpha = .55 * k * k * wf.fade; ctx.drawImage(wf.halo, (m.x - R) * d, (m.y - R) * d, R * 2 * d, R * 2 * d); ctx.globalCompositeOperation = 'source-over'; } }
+    // the silhouette goes into a scratch canvas so the rim falls only on the outside edge
+    const pad = 62 * s, ow = Math.ceil(pad * 2 * d), oh = Math.ceil(pad * 1.4 * d), off = wf.off;
+    if (off.width < ow || off.height < oh) { off.width = ow; off.height = oh; }
+    const g = off.getContext('2d'); g.setTransform(1, 0, 0, 1, 0, 0); g.clearRect(0, 0, off.width, off.height);
+    const c = Math.cos(a) * s * d, n = Math.sin(a) * s * d; g.setTransform(c, n, -n, c, pad * d, pad * .8 * d);
+    witchShape(g, t);
+    ctx.globalAlpha = wf.fade; ctx.shadowColor = 'rgba(160,200,222,.75)'; ctx.shadowBlur = .9 * d;
+    ctx.drawImage(off, 0, 0, ow, oh, (x - pad) * d, (y - pad * .8) * d, ow, oh);
+    ctx.shadowColor = 'transparent'; ctx.shadowBlur = 0; ctx.globalAlpha = 1;
+    witchKick();
+  };
+
   // ---------- state and the render loop ----------
   let manual = null, auto = dateTheme(), shown = null, A = 0, onAt = 0, raf = 0, last = 0, onScreen = true, still = 0;
   const T0 = performance.now();
@@ -784,7 +1169,10 @@
     if (signCv) { const u = USES[name] || ''; signCv.hidden = !u.includes('s'); frontCv.hidden = !u.includes('f'); backCv.hidden = !u.includes('b'); size(); }
     if (!name) return;
     if (reduce) still = setInterval(kick, 2500); // nothing moves, but day turns to night: repaint now and then
-    if (name === 'christmas') { makeBulbs(); buildLights(); }
+    if (name !== 'christmas') santaStop();
+    if (name !== 'halloween') witchStop();
+    if (name === 'halloween') witchStart(); // she flies first
+    if (name === 'christmas') { makeBulbs(); buildLights(); if (santaStart()) onAt = t + Math.max(0, santaPassTime() - .3); } // Santa flies over first; the bulbs come on in his wake
     if (name === 'thanksgiving') buildRest();
     if (name === 'easter') bunny.nextTwitch = t + 2;
     if (name === 'july4') { fwSprites(); nextLaunch = t + .3; nextFar = t + 2.5; finaleAt = t + 16; if (reduce) stillFW(); else launch(t); }
@@ -815,6 +1203,7 @@
     }
     if (!frontCv.hidden) { // the ground layer, in front of the post
       fx.setTransform(1, 0, 0, 1, 0, 0); fx.clearRect(0, 0, frontCv.width, frontCv.height);
+      if (shown === 'christmas') drawTree(t, A, dq, B, snow);
       if (shown === 'halloween') drawPumpkin(t, A, dq, B, snow);
       if (shown === 'thanksgiving') drawHorn(t, dt, A, dq, B);
       if (shown === 'easter') drawEaster(t, dt, A, dq, B);
@@ -827,9 +1216,9 @@
     else last = 0;
   };
   const kick = () => { if (!raf && onScreen && !document.hidden && (target() || shown)) raf = requestAnimationFrame(frame); };
-  new IntersectionObserver((es) => { onScreen = es[0].isIntersecting; kick(); }).observe(hero);
-  document.addEventListener('visibilitychange', kick);
-  addEventListener('resize', () => { if (!shown) return; size(); if (reduce && shown === 'july4') stillFW(); kick(); });
+  new IntersectionObserver((es) => { onScreen = es[0].isIntersecting; kick(); santaKick(); witchKick(); }).observe(hero);
+  document.addEventListener('visibilitychange', () => { kick(); santaKick(); witchKick(); });
+  addEventListener('resize', () => { if (sf.on) santaDims(); if (wf.on) witchDims(); if (!shown) return; size(); if (reduce && shown === 'july4') stillFW(); kick(); });
   setInterval(() => { const a = dateTheme(); if (a !== auto) { auto = a; publish(); kick(); } }, 10 * 60 * 1000); // past midnight, the calendar may say otherwise
   scan().then(() => { if (shown === 'christmas') buildLights(); if (shown === 'thanksgiving') buildRest(); kick(); });
 
@@ -857,7 +1246,10 @@
   window.__holiday = {
     set(name) { const n = name == null ? null : String(name).toLowerCase(); manual = n ? (THEMES.includes(n) ? n : ALIAS[n] || null) : null; publish(); kick(); return target(); },
     get current() { return target(); },
-    get stats() { return { cap: cap(), far: far.length, parts: parts.length, shells: shells.length, flashes: flashes.length, smokes: smokes.length, Q }; },
+    santa() { return santaStart(); }, // fly Santa over now (false if he's already up, motion is reduced, or a tornado is on)
+    witch() { return witchStart(); }, // fly the witch over now (same rules as santa())
+    get busy() { return sf.on || wf.on; },
+    get stats() { return { witch: wf.on ? { x: Math.round(wf.x || 0), y: Math.round(wf.y || 0), s: +wf.s.toFixed(2), moon: wf.moon && { x: Math.round(wf.moon.x), y: Math.round(wf.moon.y) } } : null, cap: cap(), far: far.length, parts: parts.length, shells: shells.length, flashes: flashes.length, smokes: smokes.length, Q }; },
   };
   publish(); kick();
 })();

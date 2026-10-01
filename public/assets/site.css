@@ -1123,6 +1123,8 @@ body.screenquake > .hero,body.screenquake > main,body.screenquake > footer{anima
 .hero .hol-front{position:absolute;inset:0;width:100%;height:100%;z-index:2;pointer-events:none}
 .hero .hol-back{position:absolute;inset:0;width:100%;height:100%;z-index:0;pointer-events:none}
 .hol-sign[hidden],.hol-front[hidden],.hol-back[hidden]{display:none}
+/* Santa's and the witch's flyovers: above the skyline (it's inserted right after it), under the sign */
+.hero .santa-layer,.hero .witch-layer{position:absolute;inset:0;width:100%;height:100%;z-index:0;pointer-events:none}
 /* the compass star cycles the holidays */
 .hero nav.top .brand{position:relative}
 .hero nav.top .brand svg{cursor:pointer;-webkit-tap-highlight-color:transparent}
