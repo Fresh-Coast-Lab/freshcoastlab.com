@@ -81,7 +81,11 @@
     const dt = Math.min(.1, (now - last) / 1000); last = now;
     const wx = window.__wx || {}, temp = typeof window.__tempF === 'number' ? window.__tempF : 50;
     const snowing = wx.snow || 0;
-    if (snowing > .02 && temp <= 34) depth = Math.min(1, depth + snowing * dt / 35); // a full foot in ~35 s of heavy snow
+    // heavier snow piles up faster and deeper: a dusting tops out at a couple of inches, a blizzard reaches the full foot
+    if (snowing > .02 && temp <= 34) {
+      const cap = Math.min(1, .15 + snowing * .9), rate = snowing * snowing * 1.6 / 35; // ~22 s to a foot at 100%, minutes for a light snow
+      if (depth < cap) depth = Math.min(cap, depth + rate * dt);
+    }
     if (temp > 33 && depth > 0) {
       const rate = (temp - 32) / 300; // 40F: ~40 s to melt a foot; 95F: ~5 s
       depth = Math.max(0, depth - rate * dt);
