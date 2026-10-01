@@ -941,3 +941,5 @@ a.post:hover{border-color:rgba(61,242,176,.4);transform:translateY(-3px)}
 .hero .wx{margin-top:-6px}
 .intro{padding-top:0}
 @media (max-width:560px){.hero-stack .orbit{width:min(340px,86vw)}.hero-stack{padding-bottom:10px}}
+.intro .coords{font-size:.72em;letter-spacing:.08em;color:var(--aqua);white-space:nowrap;vertical-align:.08em}
+.intro .coords{font-weight:400;opacity:.85}

@@ -1,9 +1,9 @@
 /* freshcoast-os: the hidden terminal (assets/terminal.js). Nothing here matches until it is opened, except the kicker hint. */
 
 /* the hint: the coordinates line wears a faint block cursor */
-.intro .kicker.fct-kick{cursor:pointer;align-items:center}
-.intro .kicker.fct-kick::after{content:"";width:.62em;height:1.15em;background:var(--aurora,#3DF2B0);opacity:.38;margin-left:-6px;animation:fct-blink 1.1s steps(1) infinite}
-.intro .kicker.fct-kick:hover::after{opacity:.8}
+.intro .coords.fct-kick{cursor:pointer}
+.intro .coords.fct-kick::after{content:"";display:inline-block;width:.55em;height:1.05em;vertical-align:-.15em;margin-left:3px;background:var(--aurora,#3DF2B0);opacity:.38;animation:fct-blink 1.1s steps(1) infinite}
+.intro .coords.fct-kick:hover::after{opacity:.8}
 
 .fct{--g:#3DF2B0;--g2:#A9FFE0;--aq:#7CD3E0;--vi:#9B8CFF;--em:#FF6A3D;--dim:#4E8C76;
   position:fixed;inset:0;z-index:90;font-family:'JetBrains Mono',ui-monospace,SFMono-Regular,Menlo,monospace}

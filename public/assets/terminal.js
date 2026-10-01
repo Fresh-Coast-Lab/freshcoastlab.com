@@ -467,7 +467,7 @@
     }
   });
 
-  const kick = document.querySelector('.intro .kicker');
+  const kick = document.querySelector('.intro .coords');
   if (kick) {
     kick.classList.add('fct-kick');
     kick.title = 'psst. there is a terminal in here. tap, or press ` on a keyboard';
