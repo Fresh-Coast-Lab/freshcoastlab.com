@@ -112,7 +112,7 @@
   const portholes = (y, x0, x1, step) => { let o = ''; for (let x = x0; x <= x1; x += step) o += `<rect class="pw" x="${x}" y="${y}" width="2.2" height="1.6" rx=".5"/>`; return o; };
   sea.innerHTML = `
     <defs>
-      <linearGradient id="comet-tail" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#9FE8FF" stop-opacity="0"/><stop offset=".85" stop-color="#E8FBFF" stop-opacity=".75"/><stop offset="1" stop-color="#FFFFFF"/></linearGradient>
+      <linearGradient id="comet-tail" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#C8321E" stop-opacity="0"/><stop offset=".45" stop-color="#FF5A1F" stop-opacity=".55"/><stop offset=".8" stop-color="#FFB040" stop-opacity=".9"/><stop offset="1" stop-color="#FFF4C8"/></linearGradient><radialGradient id="comet-glow"><stop offset="0" stop-color="#FFF6D0"/><stop offset=".35" stop-color="#FFB040" stop-opacity=".85"/><stop offset="1" stop-color="#FF4A1A" stop-opacity="0"/></radialGradient>
       <radialGradient id="flash"><stop offset="0" stop-color="#FFF6E0"/><stop offset=".4" stop-color="#FFC27A" stop-opacity=".55"/><stop offset="1" stop-color="#FF8A3D" stop-opacity="0"/></radialGradient>
     </defs>
     <clipPath id="sea-clip"><rect class="seaclip" x="-2000" y="-4000" width="8000" height="4000"/></clipPath>
@@ -126,12 +126,13 @@
     </g></g>
     <g class="splash" opacity="0" fill="none" stroke="#E8F6FF" stroke-width="1.6" stroke-linecap="round"><path d="M-14,0 Q-18,-26 -26,-34"/><path d="M-4,0 Q-4,-34 -6,-46"/><path d="M8,0 Q12,-30 20,-38"/><path d="M16,0 Q26,-18 34,-20"/></g>
     <circle class="flash" r="60" fill="url(#flash)" opacity="0"/>
-    <g class="comet" opacity="0"><rect x="-150" y="-1.6" width="150" height="3.2" rx="1.6" fill="url(#comet-tail)"/><circle r="4.2" fill="#FFFFFF"/><circle r="9" fill="#BFF4FF" opacity=".35"/></g>
+    <g class="comet" opacity="0"><path d="M0,-7 C-60,-7 -150,-2 -190,0 C-150,2 -60,7 0,7 Z" fill="url(#comet-tail)"/><path class="flick" d="M0,-3.5 C-40,-5 -95,-1 -120,0 C-95,1 -40,5 0,3.5 Z" fill="#FFD27A" opacity=".75"/><circle r="15" fill="url(#comet-glow)"/><circle r="4.6" fill="#FFF8E0"/></g><g class="embers"></g>
     <g class="lifeboat" opacity="0"><ellipse cx="0" cy="-5" rx="5" ry="4" fill="#FFD27A" opacity=".25"/><path d="M-8,0 L8,0 L6,3 L-6,3 Z" fill="#E0703F"/><path d="M-8,0 L8,0" stroke="#FFF3E0" stroke-width=".6"/><circle cx="-2" cy="-2.2" r="1.3" fill="#AFC3CF"/><circle cx="2.5" cy="-2.2" r="1.3" fill="#AFC3CF"/><path class="oar" stroke="#AFC3CF" stroke-width=".9" d="M0,-1 L-9,3"/><circle cx="0" cy="-5" r="1.1" fill="#FFE9A8"/><rect x="-1" y="3.5" width="2" height="5" rx="1" fill="#FFD27A" opacity=".3"/></g>
     <g class="sripples" fill="none" stroke="rgba(207,230,242,.55)" stroke-width="1.1"><ellipse rx="0" ry="0"/><ellipse rx="0" ry="0"/><ellipse rx="0" ry="0"/></g>`;
   svg.append(sea);
   const liner = sea.querySelector('.liner'), comet = sea.querySelector('.comet'), flash = sea.querySelector('.flash'), splash = sea.querySelector('.splash');
   const lifeboat = sea.querySelector('.lifeboat'), oar = sea.querySelector('.oar'), seaclip = sea.querySelector('.seaclip'), refl = sea.querySelector('.liner-refl');
+  const flick = sea.querySelector('.flick'), embers = sea.querySelector('.embers');
   const pws = [...sea.querySelectorAll('.pw')], mast = sea.querySelector('.mast'), sripples = [...sea.querySelectorAll('.sripples ellipse')];
   // reflections of the lit decks, as short streaks on the water
   refl.innerHTML = '<linearGradient id="refl-g" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#FFD27A" stop-opacity=".45"/><stop offset="1" stop-color="#FFD27A" stop-opacity="0"/></linearGradient>' + [-44, -30, -16, -2, 12, 26, 40].map((x, i) => `<rect x="${x}" y="${3 + (i % 2)}" width="5" height="${5 + (i % 3) * 2}" rx="1" fill="url(#refl-g)"/>`).join('');
@@ -139,11 +140,11 @@
     size(); seaclip.setAttribute('height', String(4000 + horizon + 1));
     const phone = W < 700, dir = phone ? -1 : 1; // phones: the sign tilts up to the right, so the clear water is on the right
     const ss = Math.max(0.8, Math.min(1.8, W / 700)), hitX = W * (phone ? 0.8 : 0.28);
-    const T = { sail: 5200, fall: 900, dark: 900, sink: 2200, row: 4200 };
+    const T = { sail: 5600, fall: 1500, dark: 900, sink: 2200, row: 4200 };
     const fallStart = T.sail - T.fall, hit = T.sail, sinkStart = hit + T.dark, rowStart = hit + 1400;
     const t0 = performance.now(); let boomed = false;
     liner.setAttribute('opacity', 1); refl.setAttribute('opacity', 1);
-    const cx0 = phone ? W * 0.02 : W * 0.98, cy0 = horizon - 260 * ss;
+    const cx0 = phone ? W * 0.05 : W * 0.92, cy0 = Math.max(70, horizon * 0.22);
     const step = (now) => {
       const k = now - t0;
       // the liner glides in from the left and is hit just as it reaches the clear water left of the sign
@@ -160,9 +161,13 @@
       // the comet
       if (k > fallStart && k < hit + 60) {
         const f = Math.min(1, (k - fallStart) / T.fall), e = f * f;
-        const hx = lerp(cx0, x, e), hy = lerp(cy0, horizon - 8 * ss, e), ang = Math.atan2(horizon - cy0, x - cx0) * 180 / Math.PI;
+        const hx = lerp(cx0, x, e), hy = lerp(cy0, horizon - 8 * ss, e), ang = Math.atan2(horizon - 8 * ss - cy0, x - cx0) * 180 / Math.PI;
         comet.setAttribute('opacity', 1);
         comet.setAttribute('transform', `translate(${hx.toFixed(1)},${hy.toFixed(1)}) rotate(${ang.toFixed(1)}) scale(${(ss * (0.6 + 0.6 * e)).toFixed(3)})`);
+        flick.setAttribute('opacity', (0.5 + 0.4 * Math.random()).toFixed(2));
+        if (Math.random() < 0.6) { const em = document.createElementNS(NS, 'circle'); em.setAttribute('cx', (hx + (Math.random() - 0.5) * 6).toFixed(1)); em.setAttribute('cy', (hy + (Math.random() - 0.5) * 6).toFixed(1));
+          em.setAttribute('r', (0.8 + Math.random() * 1.6) * ss); em.setAttribute('fill', Math.random() < 0.5 ? '#FFB040' : '#FF5A1F'); embers.append(em);
+          const born = now; (function fade(t2) { const a = 1 - (t2 - born) / 700; if (a <= 0) { em.remove(); return; } em.setAttribute('opacity', a.toFixed(2)); em.setAttribute('cy', (+em.getAttribute('cy') + 0.25).toFixed(1)); requestAnimationFrame(fade); })(now); }
       } else comet.setAttribute('opacity', 0);
       // impact
       if (k >= hit && !boomed) { boomed = true; disturb(); stack.classList.add('quake'); setTimeout(() => stack.classList.remove('quake'), 380); }
