@@ -1022,3 +1022,18 @@ a.post:hover{border-color:rgba(61,242,176,.4);transform:translateY(-3px)}
 .sk-sheet .sk-foot{display:flex;padding:4px 4px 10px;gap:8px}
 .sk-sheet .sk-foot .mono:first-child{display:none}
 .sk-sheet .sk-foot button{flex:1}
+
+/* STORM: lightning bolts and the tornado ride above the sign */
+.storm-layer{position:absolute;inset:0;width:100%;height:100%;z-index:3;pointer-events:none;overflow:visible}
+/* the tornado rips the sign off its post and spins it up into the sky */
+@keyframes torn{0%{transform:none}15%{transform:translate(-8px,-6px) rotate(-8deg)}30%{transform:translate(6px,-30px) rotate(40deg)}100%{transform:translate(120vw,-140vh) rotate(1080deg) scale(.2);opacity:0}}
+.hero .orbit.torn{animation:torn 2.4s cubic-bezier(.5,0,.8,.6) forwards;pointer-events:none}
+@keyframes returning{0%{transform:translateY(-110vh) rotate(-8deg)}70%{transform:translateY(12px) rotate(2deg)}85%{transform:translateY(-6px)}100%{transform:none}}
+.hero .orbit.returning{animation:returning 1.1s cubic-bezier(.3,1.3,.5,1) both}
+/* the skyline gets torn apart and sucked up */
+.skyline-layer .city{transition:opacity .9s ease}
+.skyline-layer.wiped .city{opacity:0;transition:opacity 1.6s ease .2s}
+.skyline-layer.wiped .mass rect,.skyline-layer.wiped .mass polygon{animation:sucked 1.8s cubic-bezier(.5,0,.9,.5) both;transform-box:fill-box;transform-origin:50% 100%}
+.skyline-layer.wiped .mass > :nth-child(3n){animation-delay:.15s}.skyline-layer.wiped .mass > :nth-child(3n+1){animation-delay:.35s}
+@keyframes sucked{to{transform:translate(-60px,-220px) rotate(-260deg) scale(.3)}}
+@media (prefers-reduced-motion:reduce){.hero .orbit.torn,.hero .orbit.returning{animation:none}}
