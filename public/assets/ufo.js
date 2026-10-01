@@ -230,7 +230,7 @@
     <g class="polaroid" opacity="0">
       <rect x="-40" y="-74" width="80" height="74" fill="#FFD9A0" opacity=".14"/>
       <path fill-rule="evenodd" d="M-46,-80 H46 V24 H-46 Z M-40,-74 V0 H40 V-74 Z" fill="#F4EFE4" stroke="rgba(0,0,0,.25)" stroke-width=".6"/>
-      <text x="0" y="15" text-anchor="middle" font-family="'Archivo Expanded',sans-serif" font-weight="700" font-size="9" fill="#2A2420" letter-spacing=".5">IS THAT HIM?</text>
+      <text x="0" y="15" text-anchor="middle" font-family="'Archivo Expanded',sans-serif" font-weight="700" font-size="7.6" fill="#2A2420" letter-spacing=".4">COULD IT BE HIM?</text>
     </g>`;
   svg.append(bf);
   const big = bf.querySelector('.bigfoot'), side = bf.querySelector('.side'), front = bf.querySelector('.front');
