@@ -226,11 +226,12 @@
         <circle class="eyes" cx="-2" cy="-39.5" r=".9" fill="#FFB060"/><circle class="eyes" cx="2" cy="-39.5" r=".9" fill="#FFB060"/>
       </g>
     </g>
+    <filter id="bf-blur" x="-50%" y="-50%" width="200%" height="200%"><feGaussianBlur stdDeviation="2.2 1"/></filter>
     <rect class="bfflash" x="-4000" y="-4000" width="9000" height="9000" fill="#FFFDF4" opacity="0"/>
     <g class="polaroid" opacity="0">
       <rect x="-40" y="-74" width="80" height="74" fill="#FFD9A0" opacity=".14"/>
       <path fill-rule="evenodd" d="M-46,-80 H46 V24 H-46 Z M-40,-74 V0 H40 V-74 Z" fill="#F4EFE4" stroke="rgba(0,0,0,.25)" stroke-width=".6"/>
-      <text x="0" y="15" text-anchor="middle" font-family="'Archivo Expanded',sans-serif" font-weight="700" font-size="11" fill="#2A2420" letter-spacing=".6">BIGFOOT?</text>
+      <text x="0" y="15" text-anchor="middle" font-family="'Archivo Expanded',sans-serif" font-weight="700" font-size="9" fill="#2A2420" letter-spacing=".5">IS THAT HIM?</text>
     </g>`;
   svg.append(bf);
   const big = bf.querySelector('.bigfoot'), side = bf.querySelector('.side'), front = bf.querySelector('.front');
@@ -262,6 +263,8 @@
       // he turns, the flash goes off, and the evidence develops
       if (looking && !snapped && lookK > 700) { snapped = true;
         polaroid.setAttribute('transform', `translate(${x.toFixed(1)},${(horizon - 4).toFixed(1)}) scale(${(sc * 0.95).toFixed(3)}) rotate(-6)`);
+        big.setAttribute('filter', 'url(#bf-blur)'); // nobody ever gets a clear picture
+        setTimeout(() => big.removeAttribute('filter'), 1900);
         (function shot(t2) { const f = (t2 - now) / 1900;
           bfflash.setAttribute('opacity', Math.max(0, 0.7 - f * 6).toFixed(2));
           polaroid.setAttribute('opacity', (f < 0.1 ? f * 10 : f > 0.75 ? Math.max(0, (1 - f) / 0.25) : 1).toFixed(2));
@@ -280,8 +283,9 @@
   const session = (k) => { try { if (sessionStorage.getItem(k) === '1') return false; sessionStorage.setItem(k, '1'); } catch (e) {} return true; };
   const heroVisible = () => hero.getBoundingClientRect().bottom > innerHeight * 0.4 && !document.hidden;
   const when = (ms, fn) => setTimeout(function go() { if (!heroVisible() || busy) { setTimeout(go, 2000); return; } fn(); }, ms);
-  when(600, () => run(ufoAct)); // the saucer opens the show on every load
-  if (session('comet')) when(25000, () => { next = 1; run(playComet); });
+  const first = Math.floor(Math.random() * ACTS.length); next = (first + 1) % ACTS.length;
+  when(600, () => run(ACTS[first])); // a random act opens the show on every load
+  if (ACTS[first] !== playComet && session('comet')) when(25000, () => run(playComet));
   const sign = document.getElementById('neon');
   const orbit = sign && sign.closest('.orbit');
   if (orbit) { orbit.style.pointerEvents = 'auto'; orbit.style.cursor = 'pointer'; orbit.addEventListener('click', () => { if (busy) return; const act = ACTS[next]; next = (next + 1) % ACTS.length; run(act); }); }
