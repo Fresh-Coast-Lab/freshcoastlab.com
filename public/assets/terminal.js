@@ -62,7 +62,7 @@
         ['ls', 'list sections'], ['cd &lt;section&gt;', 'go there'], ['cat &lt;file&gt;', FILES.join(', ')],
         ['open &lt;page&gt;', Object.keys(PAGES).join(', ')], ['neofetch', 'system info, with a logo'],
         ['date', 'Traverse City time'], ['weather', 'ask the lake'], ['history', 'what you typed'],
-        ['clear', 'wipe the screen'], ['ufo, comet, bigfoot, dogman', 'summon a visitor'],
+        ['clear', 'wipe the screen'], ['ufo, dino, triangle, bigfoot, dogman', 'summon a visitor'],
         ['matrix', 'three seconds of green rain'], ['exit', 'back to the website'],
       ]);
       say('there are others. there are always others.', 'dim');
@@ -187,6 +187,8 @@
     bigfoot: ['', () => act('bigfoot')],
     comet: ['', () => act('comet')],
     dogman: ['', () => act('dogman')],
+    dino: ['', () => act('dino')],
+    triangle: ['', () => act('triangle')],
     sudo: ['', () => say('nice try. this incident has been logged (to a watchdog that actually checks).', 'err')],
     rm: ['', () => say("rm: permission denied. nothing gets deleted without a human's yes.", 'err')],
     matrix: ['', () => matrix()],
