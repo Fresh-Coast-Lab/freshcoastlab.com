@@ -9,7 +9,7 @@
   cv.className = 'snowpile'; cv.setAttribute('aria-hidden', 'true');
   orbit.append(cv);
   const ctx = cv.getContext('2d');
-  let surface = null, bottom = null, W = 0, H = 0; // surface[x] = y of the top edge in image pixels (or -1 where there's no shelf)
+  let surface = null, bottom = null, base = null, W = 0, H = 0; // surface[x] = y of the top edge in image pixels (or -1 where there's no shelf)
   const FOOT = 26; // a foot of snow, in image pixels (the panel is roughly 180 px tall: a sign ~7 ft tall)
   const noise = (x) => Math.sin(x * .11) * .5 + Math.sin(x * .037 + 1.3) * .35 + Math.sin(x * .23 + 4.1) * .15;
 
@@ -37,6 +37,12 @@
         if (nb.length < 2) s2[i] = -1; else s2[i] = (surface[i] + nb.reduce((p, v) => p + v, 0)) / (nb.length + 1);
       }
       surface = s2;
+      // the foot of the post: the lowest solid row and how wide it is there, so a drift can bank up around it
+      for (let y = H - 1; y > H * .6 && !base; y--) {
+        let x0 = -1, x1 = -1;
+        for (let i = 0; i < W; i++) if (a[(y * W + i) * 4 + 3] > 200) { if (x0 < 0) x0 = i; x1 = i; }
+        if (x1 - x0 > 20) base = { y, x0, x1 };
+      }
       cv.width = W; cv.height = H;
       draw(depth, true);
     }).catch(() => {});
@@ -75,6 +81,17 @@
         ctx.lineTo(i, top);
       }
       flush(W - 1);
+      // and a drift banked up around the foot of the post: wider than the base, highest against it, a little lopsided from the wind
+      if (base) {
+        const y0 = Math.min(H - 1, base.y + 2), half = (base.x1 - base.x0) / 2 + 26 + 30 * d, mid = (base.x0 + base.x1) / 2 + 6 * d;
+        const peak = Math.min(y0 - 2, h * 1.15 + 3 * d);
+        ctx.moveTo(mid - half, y0);
+        for (let i = -half; i <= half; i += 2) {
+          const u = i / half, bump = Math.pow(Math.max(0, 1 - u * u), .7) * (1 - .18 * u);
+          ctx.lineTo(mid + i, y0 - peak * bump * (.9 + .1 * noise(mid + i + 40)));
+        }
+        ctx.lineTo(mid + half, y0); ctx.closePath();
+      }
       const g = ctx.createLinearGradient(0, 0, 0, H * .7);
       g.addColorStop(0, '#FFFFFF'); g.addColorStop(1, '#D6E4F0');
       ctx.fillStyle = g; ctx.shadowColor = 'rgba(180,215,255,.55)'; ctx.shadowBlur = 6; ctx.fill();
@@ -97,7 +114,8 @@
     if (snowing > .02 && temp <= 34) {
       // it always builds toward a full foot; precipitation sets the pace (~20 s in a blizzard, a couple of minutes for flurries)
       const rate = .0015 + Math.pow(snowing, 1.4) * 1.6 / 35;
-      depth = Math.min(1, depth + rate * dt);
+      // past a foot it keeps coming, slower, as long as nobody stops it (the bank in lakesnow.js eventually buries the sign anyway)
+      depth = Math.min(2.4, depth + rate * (depth < 1 ? 1 : .2) * dt);
     }
     if (temp > 33 && depth > 0) {
       const heat = Math.min(1, (temp - 32) / 63);           // 0 at freezing, 1 at 95F

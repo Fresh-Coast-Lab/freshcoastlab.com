@@ -334,10 +334,32 @@
     if (state === 'twister' || reduce) return;
     size(); state = 'twister'; T = 0; RT = 0; gone = false; signGone = cityGone = false;
     tx = W * (W < 700 ? .12 : .1); gx = tx; build(); kick();
+    clearTimeout(blowTimer); blowTimer = setTimeout(blowActs, 2200);
   };
+  // anything else on stage when the twister touches down (the UFO, Bigfoot, the sled team...) gets sucked into it
+  const LAYERS = '.ufo-layer, .ice-layer, .bf-layer, .yeti-layer';
+  let blowTimer = 0, blown = [];
+  const blowActs = () => {
+    if (state !== 'twister') return;
+    const ox = gx, oy = horizon;
+    blown = [...hero.querySelectorAll(LAYERS)].map((el) => {
+      el.style.transformOrigin = `${ox.toFixed(0)}px ${oy.toFixed(0)}px`;
+      return el.animate([
+        { transform: 'none', opacity: 1 },
+        { transform: 'scale(.5) rotate(18deg)', opacity: 1, offset: .4 },
+        { transform: `translate(0,${(-H * .2).toFixed(0)}px) scale(.22) rotate(-24deg)`, opacity: .9, offset: .7 },
+        { transform: `translate(0,${(-H * .5).toFixed(0)}px) scale(.03) rotate(30deg)`, opacity: 0 },
+      ], { duration: 1700, easing: 'cubic-bezier(.45,0,.7,.6)', fill: 'forwards' });
+    });
+    // once they're gone, end whatever act was running so nothing pops back mid-scene
+    setTimeout(() => { try { window.__acts && window.__acts.abort && window.__acts.abort(); } catch (e) { /* act not running */ }
+      try { window.__iceAbort && window.__iceAbort(); } catch (e) { /* no crossing */ } }, 1750);
+  };
+  const unblow = () => { clearTimeout(blowTimer); blown.forEach((a) => a.cancel()); blown = []; };
   const endTornado = () => {
     if (state !== 'twister') return;
     state = gone ? 'calm' : 'roping'; RT = 0; // it ropes out and dissipates instead of vanishing
+    setTimeout(unblow, 1200);
     if (orbit) { orbit.classList.remove('torn'); orbit.classList.add('returning'); setTimeout(() => orbit.classList.remove('returning'), 1200); }
     const sk = skyline(); if (sk) sk.classList.remove('wiped');
     kick();

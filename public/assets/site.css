@@ -1105,3 +1105,12 @@ a.post:hover{border-color:rgba(61,242,176,.4);transform:translateY(-3px)}
 @keyframes screenquake{0%,100%{transform:none}10%{transform:translate(-9px,5px) rotate(-.4deg)}20%{transform:translate(8px,-6px) rotate(.35deg)}30%{transform:translate(-7px,-4px)}40%{transform:translate(6px,6px) rotate(-.25deg)}50%{transform:translate(-5px,3px)}60%{transform:translate(4px,-3px)}70%{transform:translate(-3px,2px)}80%{transform:translate(2px,-1px)}}
 body.screenquake > .hero,body.screenquake > main,body.screenquake > footer{animation:screenquake .85s cubic-bezier(.3,0,.3,1) both}
 @media (prefers-reduced-motion:reduce){body.screenquake > *{animation:none!important}}
+
+/* FROST: the window ices over below freezing (frost.js) */
+.hero .frost-layer{position:absolute;inset:0;z-index:5;pointer-events:none;opacity:0;transition:opacity .4s linear}
+.ice-layer{z-index:0}
+/* LAKE SNOW: snow lying on the ice (under the sign) and the blowing snow plus the rising bank (over it) */
+.hero .lakesnow-layer{position:absolute;inset:0;width:100%;height:100%;pointer-events:none}
+.hero .lakesnow-layer.back{z-index:0}
+.hero .lakesnow-layer.front{z-index:4}
+.yeti-layer{position:absolute;inset:0;width:100%;height:100%;z-index:3;pointer-events:none;overflow:visible}
