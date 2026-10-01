@@ -530,10 +530,10 @@ void main(){
   c = mix(c, mix(vec3(.10, .12, .14), vec3(.62, .66, .70), uDay), uFog * exp(-hzd * 6.) * .85);
   // rain: slanted streaks falling, plus rings on the water
   if (uRain > 0.) {
-    vec2 rp = vec2(uv.x * uR.x / uR.y + uv.y * .18, uv.y);
+    vec2 rp = vec2(uv.x * uR.x / uR.y + uv.y * (.06 + uWind * .75), uv.y);
     float drop = 0.;
     for (int L = 0; L < 2; L++) { float fl = float(L);
-      vec2 g2 = vec2(rp.x * (110. + fl * 70.), rp.y * (5. + fl * 3.) + t * (7. + fl * 3.));
+      vec2 g2 = vec2(rp.x * (110. + fl * 70.), rp.y * (5. + fl * 3.) * (1. + uWind * .8) + t * (7. + fl * 3.) * (1. + uWind * .7));
       vec2 id2 = floor(g2); float rh = h(id2 + fl * 13.);
       drop += step(.7, rh) * smoothstep(.5, .0, abs(fract(g2.x) - .5) * 3.) * smoothstep(0., .15, fract(g2.y)) * smoothstep(1., .35, fract(g2.y)) * (1. - fl * .4); }
     c += mix(vec3(.5, .62, .75), vec3(.92, .95, 1.), uDay) * drop * (.38 + .2 * (1. - uDay)) * uRain;
@@ -545,7 +545,8 @@ void main(){
   // snow: soft drifting flakes
   if (uSnow > 0.) {
     for (int L = 0; L < 2; L++) { float fl = float(L);
-      vec2 sp2 = vec2(uv.x * uR.x / uR.y * (40. + fl * 30.) + sin(t * .6 + uv.y * 6. + fl) * .8, uv.y * (40. + fl * 30.) + t * (1.2 + fl * .6));
+      float gust = uWind * (6. + 4. * sin(t * .4 + fl));
+      vec2 sp2 = vec2(uv.x * uR.x / uR.y * (40. + fl * 30.) + sin(t * .6 + uv.y * 6. + fl) * .8 * (1. - uWind * .5) - t * gust * (1. + fl * .5), uv.y * (40. + fl * 30.) + t * (1.2 + fl * .6) * (1. + uWind * .8));
       vec2 is2 = floor(sp2); float sh2 = h(is2 + fl * 7.);
       c += vec3(.92, .95, 1.) * step(.88, sh2) * smoothstep(.22, .0, length(fract(sp2) - .5)) * uSnow * .7; } }
   // lightning lights the whole sky for an instant
