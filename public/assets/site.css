@@ -900,3 +900,8 @@ a.post:hover{border-color:rgba(61,242,176,.4);transform:translateY(-3px)}
 .hero-stack.quake{animation:quake .12s linear infinite}
 @keyframes quake{0%{transform:translate(0,0)}25%{transform:translate(1.5px,-1px)}50%{transform:translate(-1.5px,1px)}75%{transform:translate(1px,1.5px)}100%{transform:translate(0,0)}}
 .ufo-layer .monster,.ufo-layer .bigfoot{transition:none}
+
+/* hero is the sign alone now: no headline, the sign takes the stage */
+.hero-stack{padding-block:6px 40px}
+.hero-stack .orbit{width:min(560px,92vw);margin:0 auto}
+@media (max-width:560px){.hero-stack .orbit{width:min(420px,96vw)}.hero-stack{padding-bottom:24px}}
