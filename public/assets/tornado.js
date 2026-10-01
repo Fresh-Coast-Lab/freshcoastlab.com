@@ -30,7 +30,7 @@
   const stack = document.querySelector('.hero-stack');
   let W = 0, H = 0, horizon = 0, dpr = 1;
   const size = () => { const r = hero.getBoundingClientRect(); W = r.width; H = r.height; horizon = H * (1 - HZ); svg.setAttribute('viewBox', `0 0 ${W} ${H}`); };
-  size(); addEventListener('resize', size);
+  size(); addEventListener('resize', size); new ResizeObserver(size).observe(hero); // not per frame: reading the hero's box every frame forced a layout each time
   const fit = () => {
     dpr = Math.min(devicePixelRatio || 1, 1.5);
     const w = Math.max(1, Math.round(W * dpr)), h = Math.max(1, Math.round(H * dpr));
@@ -110,7 +110,7 @@
     raf = 0;
     if (!onScreen || document.hidden) { last = 0; return; }
     const dt = last ? Math.min(.05, (now - last) / 1000) : 1 / 60; last = now;
-    size(); fit();
+    fit();
     ctx.setTransform(dpr, 0, 0, dpr, 0, 0); ctx.clearRect(0, 0, W, H);
     paint(Math.min(1, Math.max(0, (window.__wx && window.__wx.day) || 0)));
     let alive = false; const c0 = performance.now();
@@ -338,11 +338,11 @@
     if (state === 'twister' || reduce) return;
     size(); state = 'twister'; T = 0; RT = 0; gone = false; signGone = cityGone = false;
     tx = W * (W < 700 ? .12 : .1); gx = tx; build(); kick();
-    clearTimeout(blowTimer); blowTimer = setTimeout(blowActs, 2200);
+    clearTimeout(unblowTimer); unblow(); blowTimer = setTimeout(blowActs, 2200); // a quick restart must not let the last ending's unblow cancel this blow
   };
   // anything else on stage when the twister touches down (the UFO, Bigfoot, the sled team...) gets sucked into it
   const LAYERS = '.ufo-layer, .ice-layer, .bf-layer, .yeti-layer';
-  let blowTimer = 0, blown = [];
+  let blowTimer = 0, unblowTimer = 0, abortTimer = 0, blown = [];
   const blowActs = () => {
     if (state !== 'twister') return;
     const ox = gx, oy = horizon;
@@ -356,14 +356,14 @@
       ], { duration: 1700, easing: 'cubic-bezier(.45,0,.7,.6)', fill: 'forwards' });
     });
     // once they're gone, end whatever act was running so nothing pops back mid-scene
-    setTimeout(() => { try { window.__acts && window.__acts.abort && window.__acts.abort(); } catch (e) { /* act not running */ }
+    clearTimeout(abortTimer); abortTimer = setTimeout(() => { try { window.__acts && window.__acts.abort && window.__acts.abort(); } catch (e) { /* act not running */ }
       try { window.__iceAbort && window.__iceAbort(); } catch (e) { /* no crossing */ } }, 1750);
   };
-  const unblow = () => { clearTimeout(blowTimer); blown.forEach((a) => a.cancel()); blown = []; };
+  const unblow = () => { clearTimeout(blowTimer); clearTimeout(abortTimer); blown.forEach((a) => a.cancel()); blown = []; };
   const endTornado = () => {
     if (state !== 'twister') return;
     state = gone ? 'calm' : 'roping'; RT = 0; // it ropes out and dissipates instead of vanishing
-    setTimeout(unblow, 1200);
+    clearTimeout(unblowTimer); unblowTimer = setTimeout(unblow, 1200);
     if (orbit) { orbit.classList.remove('torn'); orbit.classList.add('returning'); setTimeout(() => orbit.classList.remove('returning'), 1200); }
     const sk = skyline(); if (sk) sk.classList.remove('wiped');
     kick();
@@ -374,7 +374,7 @@
   const OUTLINE = [[30, 102], [120, 80], [250, 68], [400, 80], [428, 96], [420, 160], [408, 246], [300, 258], [200, 268], [110, 279], [70, 196], [30, 102]];
   const POST = [[222, 280], [226, 378], [168, 386], [378, 392], [250, 376], [246, 272]];
   const TUBES = [[52, 70, 34, 44], [105, 95, 65, 70], [170, 95, 130, 70], [100, 165, 70, 85], [170, 165, 120, 85], [310, 160, 100, 92]]; // starburst, FR, ESH, CO, AST, LAB
-  let fried = false, fryTimer = 0, fz = null;
+  let fried = false, fryTimer = 0, friedTimer = 0, fz = null;
   const flashScreen = (x, y) => {
     const f = document.createElement('div'); f.className = 'fry-flash'; f.setAttribute('aria-hidden', 'true');
     f.style.setProperty('--fx', x.toFixed(0) + 'px'); f.style.setProperty('--fy', y.toFixed(0) + 'px');
@@ -404,7 +404,7 @@
       fz.sparks.push({ x: p[0], y: p[1], vx: Math.cos(a) * v, vy: Math.sin(a) * v, age: 0, life: .7 + rnd() * 1.1, ember: rnd() < .22, rest: 0 }); } }
     fz.burst = burst;
     kick();
-    setTimeout(() => { orbit.classList.remove('zapped'); orbit.classList.add('fried'); }, 1900);
+    friedTimer = setTimeout(() => { if (!fried) return; orbit.classList.remove('zapped'); orbit.classList.add('fried'); }, 1900);
   };
   const arcLine = (pts, wide) => { // a crackling arc: a blue haze, a bright body and a white-hot thread
     if (pts.length < 2) return;
@@ -475,18 +475,18 @@
       const r = (5 + 30 * q) * fs * p.s; put(spr.smoke, p.x, p.y, r * 2, r * 2, .55 * Math.sin(Math.PI * Math.min(1, q * 1.6)) * (1 - q * .5)); }
     return true;
   };
-  const unfry = () => { if (!fried) return; fried = false; if (orbit) { orbit.classList.remove('zapped', 'fried'); orbit.classList.add('relit'); setTimeout(() => orbit.classList.remove('relit'), 1600); } };
+  const unfry = () => { clearTimeout(friedTimer); if (!fried) return; fried = false; if (orbit) { orbit.classList.remove('zapped', 'fried'); orbit.classList.add('relit'); setTimeout(() => orbit.classList.remove('relit'), 1600); } };
 
   // ---------- the loop ----------
   let next = 0;
-  const loop = (now) => {
-    const level = reduce ? 0 : (window.__storm || 0);
-    if (level > 0 && now > next) { strike(level); next = now + (5200 - 4400 * level) * (.6 + rnd() * .8); } // ~5 s apart at 75%, under a second near 100%
+  const loop = () => { // weather changes are slider-paced, so 5 checks a second is plenty (and timers sleep in hidden tabs)
+    const now = performance.now(), level = reduce ? 0 : (window.__storm || 0);
+    if (level > 0 && now > next && onScreen && !document.hidden) { strike(level); next = now + (5200 - 4400 * level) * (.6 + rnd() * .8); } // ~5 s apart at 75%, under a second near 100%; none while scrolled away
     if (window.__tornado) startTornado(); else endTornado();
     const rain = window.__stormRain || 0; // the fry follows the rain, not the lightning rate, so it still happens at 60°F
-    if (rain >= .97 && !window.__tornado) { if (!fryTimer) fryTimer = setTimeout(fry, 1600); } else { clearTimeout(fryTimer); fryTimer = 0; if (rain < .9) unfry(); }
-    requestAnimationFrame(loop);
+    // the fry waits until someone is looking
+    if (rain >= .97 && !window.__tornado) { if (!fryTimer && onScreen && !document.hidden) fryTimer = setTimeout(fry, 1600); } else { clearTimeout(fryTimer); fryTimer = 0; if (rain < .9) unfry(); }
   };
-  requestAnimationFrame(loop);
+  setInterval(loop, 200);
   window.__storm_debug = { strike, startTornado, endTornado, fry, unfry, get T() { return T; }, get state() { return state; }, get Q() { return Q; }, get cost() { return cost; }, set Q(v) { fixQ = v; } };
 })();

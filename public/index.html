@@ -691,7 +691,7 @@ void main(){
     window.__tornado = v.w >= 42 && v.p >= 95 && v.t >= 90; // 'maxed' with a little slack: thumbs rarely land on the exact end of a slider
     wxT.ice = Math.min(1, Math.max(0, (32 - v.t) / 42)); // starts at freezing, fully frozen at -10°F
     window.__tempF = v.t;
-    if (instant) Object.assign(wx, wxT);
+    if (instant || reduce) Object.assign(wx, wxT); // with reduced motion nothing eases, so jump straight there
     const el = document.getElementById('wx');
     if (el) { const sky = p < .05 ? (v.w > 25 ? 'BLUSTERY' : 'CLEAR') : cold ? (p > .6 ? 'BLIZZARD' : 'SNOW') : (p > .6 ? 'DOWNPOUR' : 'RAIN');
       el.innerHTML = `<i class="mine"></i>YOUR SKY &middot; ${fmtH(v.h)} &middot; ${Math.round(v.t)}&deg;F &middot; WIND ${Math.round(v.w)} MPH &middot; ${sky}`; el.hidden = false; }
@@ -704,6 +704,7 @@ void main(){
     window.__storm = d.code >= 95 ? .45 : 0; window.__stormRain = 0; window.__tornado = false;
     setWx([sunAt(now), dayOf(sunAt(now)), d.cloud / 100, ...real, pr.rain, pr.snow, pr.fog]); wxT.sx = sunXAt(now); wxT.ice = Math.min(1, Math.max(0, (10 - d.temp_f) / 25)); window.__tempF = d.temp_f; storm = d.code >= 95 && !reduce;
     showWx(d);
+    if (reduce) { Object.assign(wx, wxT); if (!raf) draw(lastT); }
   }
   // the panel
   const skyBox = document.getElementById('skybox');

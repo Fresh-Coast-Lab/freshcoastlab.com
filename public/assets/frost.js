@@ -95,9 +95,10 @@
     cv.style.opacity = Math.min(1, .15 + level * 1.1).toFixed(2);
   };
 
-  let lastW = 0, lastH = 0;
+  // the hero's size comes from a ResizeObserver, not a getBoundingClientRect every frame (that forced a layout per frame)
+  let lastW = 0, lastH = 0, r = hero.getBoundingClientRect();
+  new ResizeObserver(() => { r = hero.getBoundingClientRect(); }).observe(hero);
   const tick = () => {
-    const r = hero.getBoundingClientRect();
     if (Math.abs(r.width - lastW) > 2 || Math.abs(r.height - lastH) > 40) { lastW = r.width; lastH = r.height; grow(); }
     const t = typeof window.__tempF === 'number' ? window.__tempF : 50;
     const target = Math.max(0, Math.min(1, (32 - t) / 42));

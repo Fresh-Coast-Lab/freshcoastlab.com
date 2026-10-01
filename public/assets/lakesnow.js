@@ -19,7 +19,7 @@
   size(); new ResizeObserver(size).observe(hero);
   const noise = (x) => Math.sin(x * .013) * .5 + Math.sin(x * .031 + 1.7) * .3 + Math.sin(x * .071 + 4.2) * .2;
 
-  let cover = 0, bank = 0, streams = [], last = performance.now(), T = 0, backDirty = true, frontDirty = true;
+  let cover = 0, bank = 0, streams = [], last = performance.now(), T = 0, backDirty = true, frontDirty = true, cap = .3, capAt = -9;
   // one wisp, drawn once and stretched per streamer (a gradient per streamer per frame was the expensive part)
   const wisp = document.createElement('canvas'); wisp.width = 128; wisp.height = 8;
   { const w = wisp.getContext('2d'), g = w.createLinearGradient(0, 0, 128, 0);
@@ -42,7 +42,7 @@
     if (snow > .02 && temp <= 34) {
       cover = Math.min(1, cover + (.006 + Math.pow(snow, 1.2) * .05) * ice * dt);          // the ice whitens in ~20 s of blizzard
       // a blizzard buries the view in ~5 min, flurries in half an hour; on live weather it stops at a modest drift
-      const cap = /(^|; )fcl_sky=/.test(document.cookie) ? 1.02 : .3;
+      if (T - capAt > 1) { capAt = T; cap = /(^|; )fcl_sky=/.test(document.cookie) ? 1.02 : .3; } // the cookie, once a second rather than every frame
       if (bank < cap) bank = Math.min(cap, bank + (.00035 + Math.pow(snow, 1.4) * .0028) * dt);
     }
     if (temp > 33) {

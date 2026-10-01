@@ -65,6 +65,9 @@
   };
   size(); addEventListener('resize', size); new ResizeObserver(size).observe(hero);
   const mix = (a, b, t) => a.map((v, i) => Math.round(v + (b[i] - v) * t));
+  // write an attribute or style only when it changes: the loop runs every frame, and most frames change nothing
+  const put = (el, k, v) => { v = String(v); if (el['_' + k] !== v) { el['_' + k] = v; el.setAttribute(k, v); } };
+  const css = (el, k, v) => { v = String(v); if (el['_s' + k] !== v) { el['_s' + k] = v; el.style[k] = v; } };
   let lastDark = -1, t0 = performance.now(), raf = 0, visible = true, outAt = 0;
   const orbitEl = document.querySelector('.hero .orbit');
   const frame = (now) => {
@@ -72,8 +75,8 @@
     const wx = window.__wx || { day: 0, sun: 0, cloud: 0 };
     const dark = Math.max(0, Math.min(1, 1 - wx.day * 1.15 + (wx.cloud || 0) * .15)); // 0 = full day, 1 = night
     // the masses: soft blue-grey in daylight, near-black against the night
-    mass.style.fill = `rgb(${mix([46, 62, 80], [10, 15, 24], Math.min(1, dark * 1.2)).join(',')})`; // slate by day, ink at night
-    mass.style.opacity = (0.88 + 0.12 * dark).toFixed(2);
+    css(mass, 'fill', `rgb(${mix([46, 62, 80], [10, 15, 24], Math.min(1, dark * 1.2)).join(',')})`); // slate by day, ink at night
+    css(mass, 'opacity', (0.88 + 0.12 * dark).toFixed(2));
     // windows switch on as it gets dark; a few blink now and then
     const t = (now - t0) / 1000;
     const fried = orbitEl && orbitEl.classList.contains('fried') || orbitEl && orbitEl.classList.contains('zapped');
@@ -84,20 +87,20 @@
         let on = dark > 0.25 + thr[i] * 0.55 ? 1 : 0;
         if (outK >= 0 && thr[i] < outK + (Math.random() < .02 ? .1 : 0)) on = 0;
         if (on && !reduce && i % 11 === 3 && Math.sin(t * .7 + i) > .97) on = 0;
-        w.setAttribute('opacity', on ? (0.65 + 0.35 * ((i * 31) % 7) / 7).toFixed(2) : 0);
+        put(w, 'opacity', on ? (0.65 + 0.35 * ((i * 31) % 7) / 7).toFixed(2) : 0);
       });
       lastDark = dark;
     }
-    marq.style.fill = dark > .35 && outK < .3 ? (Math.floor(t * 3) % 2 ? '#FFD27A' : '#FFB85A') : 'rgb(110,120,130)';
-    beacon.setAttribute('opacity', dark > .4 && outK < .6 ? (reduce ? .9 : (Math.sin(t * 3.2) > 0 ? 1 : .15)).toFixed(2) : 0);
-    lamp.setAttribute('opacity', dark > .35 ? 1 : .15);
+    css(marq, 'fill', dark > .35 && outK < .3 ? (Math.floor(t * 3) % 2 ? '#FFD27A' : '#FFB85A') : 'rgb(110,120,130)');
+    put(beacon, 'opacity', dark > .4 && outK < .6 ? (reduce ? .9 : (Math.sin(t * 3.2) > 0 ? 1 : .15)).toFixed(2) : 0);
+    put(lamp, 'opacity', dark > .35 ? 1 : .15);
     // the lighthouse beam swings out over the water and back
     if (dark > .4 && !reduce) {
       const a = Math.sin(t * .9);
-      beam.setAttribute('opacity', (0.35 + 0.45 * Math.max(0, a)).toFixed(2));
-      beam.setAttribute('transform', `rotate(${(-150 + 150 * (a * .5 + .5)).toFixed(1)} 214 -20.2)`);
-    } else beam.setAttribute('opacity', dark > .4 ? .4 : 0);
-    reflEls.forEach((r, i) => r.setAttribute('opacity', (dark > .45 && outK < 0 ? 0.18 + 0.12 * Math.sin(t * 2 + i * 1.7) : 0).toFixed(2)));
+      put(beam, 'opacity', (0.35 + 0.45 * Math.max(0, a)).toFixed(2));
+      put(beam, 'transform', `rotate(${(-150 + 150 * (a * .5 + .5)).toFixed(1)} 214 -20.2)`);
+    } else put(beam, 'opacity', dark > .4 ? .4 : 0);
+    reflEls.forEach((r, i) => put(r, 'opacity', (dark > .45 && outK < 0 ? 0.18 + 0.12 * Math.sin(t * 2 + i * 1.7) : 0).toFixed(2)));
     if (visible && !document.hidden && !reduce) raf = requestAnimationFrame(frame);
   };
   const wake = () => { if (!raf) raf = requestAnimationFrame(frame); };
