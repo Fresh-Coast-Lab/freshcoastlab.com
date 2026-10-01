@@ -467,11 +467,28 @@ vec3 sky(vec2 uv, float t){
     vec3 col = i == 0 ? vec3(.18, .98, .66) : (i == 1 ? vec3(.36, .82, .94) : vec3(.58, .47, 1.));
     c += col * (band + rays * .35) * str * (.62 - .14 * fi) * (1. - uDay) * (1. - .7 * uCloud);
   }
-  // clouds drift with the wind; overcast washes the sky out
-  float cl = smoothstep(.42, .78, fbm(vec2(uv.x * 2.6 + t * (.004 + uWind * .012), y * 5. + 3.)));
-  vec3 cloudCol = mix(vec3(.06, .08, .11), vec3(.86, .88, .9), uDay) + vec3(.5, .22, .1) * golden * .6;
-  c = mix(c, cloudCol, cl * uCloud * .75 * smoothstep(0., .25, y));
-  c = mix(c, mix(vec3(.05, .06, .08), vec3(.66, .7, .74), uDay), uCloud * uCloud * .45);
+  // clouds: fair-weather puffs when it's dry; heavy, dark, layered cumulonimbus decks with ragged bases for rain;
+  // a flat, soft, bright-grey blanket for snow. The more precipitation, the lower, thicker and darker the deck.
+  float precipAmt = max(uRain, uSnow), snowy = uSnow / max(.001, uRain + uSnow);
+  float drift = t * (.004 + uWind * .012);
+  // fair-weather and rain decks: billowy, with darker bellies
+  float cb = fbm(vec2(uv.x * 2.6 + drift, y * 5. + 3.));
+  float puff = smoothstep(.42 - precipAmt * .22, .78 - precipAmt * .3, cb);
+  float belly = smoothstep(.55, .95, fbm(vec2(uv.x * 4.2 + drift * 1.4, y * 9. + 11.)));   // darker underside lobes
+  float scud = smoothstep(.5, .8, fbm(vec2(uv.x * 7. + drift * 2.6, y * 18. + 5.))) * smoothstep(.35, 0., y); // low torn scud near the horizon
+  // snow deck: flat and featureless, a soft gradient that sits low
+  float sheet = smoothstep(.2, .7, fbm(vec2(uv.x * 1.3 + drift * .5, y * 2.2 + 7.))) * .6 + .4;
+  float cover = clamp(uCloud * (1. - precipAmt) * puff + precipAmt * mix(.55 + puff * .45, sheet, snowy), 0., 1.);
+  vec3 dayCloud = mix(vec3(.88, .9, .92), vec3(.34, .37, .42), precipAmt * (1. - snowy) * (.55 + .45 * belly)); // rain clouds go slate
+  dayCloud = mix(dayCloud, vec3(.78, .8, .84), precipAmt * snowy);                                              // snow clouds stay pale grey
+  vec3 nightCloud = mix(vec3(.06, .08, .11), vec3(.025, .03, .04), precipAmt * (1. - snowy));
+  nightCloud = mix(nightCloud, vec3(.09, .1, .13), precipAmt * snowy); // snow lights up the night a little
+  vec3 cloudCol = mix(nightCloud, dayCloud, uDay) + vec3(.5, .22, .1) * golden * .6 * (1. - precipAmt * .8);
+  c = mix(c, cloudCol, cover * (.75 + .2 * precipAmt) * smoothstep(0., .25 - precipAmt * .2, y));
+  c = mix(c, cloudCol * .8, scud * precipAmt * (1. - snowy) * .7);
+  // overcast and storms wash out the whole sky, heaviest toward the zenith for rain, evenly for snow
+  float wash = max(uCloud * uCloud * .45, precipAmt * mix(.55 + .25 * y, .7, snowy));
+  c = mix(c, mix(mix(vec3(.05, .06, .08), vec3(.03, .035, .045), precipAmt * (1. - snowy)), mix(vec3(.66, .7, .74), mix(vec3(.4, .43, .48), vec3(.8, .82, .86), snowy), precipAmt), uDay), wash);
   // the moon, in tonight's real phase, with a little earthshine on the dark side
   { vec2 mp = (uv - vec2(uMoon.x, HZ + uMoon.y)) * vec2(uR.x / uR.y, 1.); float mr = .028, md = length(mp);
     float vis = (1. - uDay) * (1. - .75 * uCloud) * smoothstep(-.02, .04, uMoon.y);
@@ -688,11 +705,13 @@ void main(){
     fill(saved || liveDefaults());
     skyBox.classList.toggle('custom', !!saved);
     let tmr = 0;
-    skyBox.addEventListener('input', () => {
+    // every slider drives the sky directly, wherever its panel happens to live (docked, sheet or dropdown)
+    const onSlide = () => {
       const v = { h: +rng.h.value, t: +rng.t.value, p: +rng.p.value, w: +rng.w.value };
       label(); applyCustom(v); skyBox.classList.add('custom');
       clearTimeout(tmr); tmr = setTimeout(() => writeSky(v), 250);
-    });
+    };
+    Object.values(rng).forEach((r) => { r.addEventListener('input', onSlide); r.addEventListener('change', onSlide); });
     const det = skyBox.querySelector('details'), panel = skyBox.querySelector('.sk-panel');
     // phones: the sheet lives directly under <body>, so nothing in the hero can ever draw over it
     const portal = matchMedia('(max-width: 760px)');
@@ -701,7 +720,6 @@ void main(){
     const place = () => { if (portal.matches) { if (panel.parentNode !== document.body) document.body.append(panel); panel.classList.add('sk-sheet'); panel.classList.remove('sk-dock'); panel.hidden = !det.open; }
       else { if (panel.parentNode !== intro.parentNode) intro.before(panel); panel.classList.remove('sk-sheet'); panel.classList.add('sk-dock'); panel.hidden = !det.open; } };
     det.addEventListener('toggle', place); portal.addEventListener('change', place); place();
-    panel.addEventListener('input', () => { if (portal.matches) skyBox.dispatchEvent(new Event('input')); });
     const closeSky = () => { det.open = false; panel.hidden = true; };
     document.getElementById('sk-done').addEventListener('click', closeSky);
     document.addEventListener('pointerdown', (e) => { if (det.open && !skyBox.contains(e.target) && !panel.contains(e.target)) closeSky(); });

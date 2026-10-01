@@ -1056,3 +1056,11 @@ a.post:hover{border-color:rgba(61,242,176,.4);transform:translateY(-3px)}
 .sk-dock .sk-grid label{display:grid;grid-template-columns:1fr auto;align-items:center;gap:4px 10px}
 .sk-dock .sk-k{order:1}.sk-dock .sk-grid output{order:2}.sk-dock .sk-grid input[type=range]{order:3}
 .sk-dock .sk-foot{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:8px 18px 14px}
+/* struck by lightning: a white-hot flash, a violent sputter, then dead and dark until the storm eases */
+@keyframes zapped{0%{filter:brightness(4) saturate(0)}8%{filter:brightness(.2)}14%{filter:brightness(3) saturate(0)}22%{filter:brightness(.3)}30%{filter:brightness(2)}40%{filter:brightness(.25)}55%{filter:brightness(1.4)}70%{filter:brightness(.3)}100%{filter:brightness(.35) saturate(.3)}}
+.hero .orbit.zapped .neon,.hero .orbit.zapped .neon-t{animation:zapped 1.1s steps(1,end) both!important}
+.hero .orbit.fried .neon,.hero .orbit.fried .neon-t{animation:none!important;filter:brightness(.32) saturate(.25) drop-shadow(0 0 0 transparent)!important;opacity:1!important}
+.hero .orbit.fried .neon-bloom,.hero .orbit.zapped .neon-bloom{opacity:0!important;animation:none!important}
+.hero .orbit.fried::after{content:"";position:absolute;left:30%;top:6%;width:40%;height:30%;background:radial-gradient(closest-side,rgba(120,120,120,.35),transparent);filter:blur(6px);animation:smoke 3s ease-in-out infinite;pointer-events:none}
+@keyframes smoke{0%{transform:translateY(0) scale(.8);opacity:.0}30%{opacity:.7}100%{transform:translateY(-40px) scale(1.4);opacity:0}}
+.hero .orbit.relit .neon{animation:neonO 1.4s steps(1,end) both!important}

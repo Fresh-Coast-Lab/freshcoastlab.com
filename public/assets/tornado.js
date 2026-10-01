@@ -36,11 +36,11 @@
   size(); addEventListener('resize', size);
 
   // ---------- lightning ----------
-  const strike = (level) => {
+  const strike = (level, target) => {
     size();
-    const x0 = W * (.08 + Math.random() * .84), y0 = 0, y1 = horizon - Math.random() * 8;
+    const x0 = target ? target[0] + (Math.random() - .5) * W * .12 : W * (.08 + Math.random() * .84), y0 = 0, y1 = target ? target[1] : horizon - Math.random() * 8;
     const pts = [[x0, y0]]; let x = x0, y = y0; const steps = 14;
-    for (let i = 1; i <= steps; i++) { y = y0 + (y1 - y0) * i / steps; x += (Math.random() - .5) * W * .05; pts.push([x, y]); }
+    for (let i = 1; i <= steps; i++) { y = y0 + (y1 - y0) * i / steps; x += (Math.random() - .5) * W * .05; if (target) x += (target[0] - x) * (i / steps) * .5; pts.push([x, y]); }
     const d = 'M' + pts.map((p) => p.map((v) => v.toFixed(1)).join(',')).join(' L');
     let br = ''; for (let b = 0; b < 2 + Math.floor(level * 3); b++) { const k = 3 + Math.floor(Math.random() * (steps - 6)); let [bx, by] = pts[k]; br += `M${bx.toFixed(1)},${by.toFixed(1)}`;
       for (let j = 0; j < 4; j++) { bx += (Math.random() - .3) * W * .04 * (Math.random() < .5 ? -1 : 1); by += (y1 - y0) / steps * (.8 + Math.random() * .6); br += ` L${bx.toFixed(1)},${by.toFixed(1)}`; } }
@@ -97,12 +97,30 @@
     const sk = skyline(); if (sk) sk.classList.remove('wiped');
   };
 
+  // ---------- full precipitation: a bolt finds the sign and fries it ----------
+  let fried = false, fryTimer = 0;
+  const fry = () => {
+    if (fried || !orbit || reduce) return; fried = true;
+    const r = orbit.getBoundingClientRect(), h = hero.getBoundingClientRect();
+    const target = [r.left - h.left + r.width * .5, r.top - h.top + r.height * .22];
+    strike(1, target); setTimeout(() => strike(1, target), 140);
+    orbit.classList.add('zapped');
+    // sparks shower off the sign
+    for (let i = 0; i < 26; i++) { const sp = document.createElementNS(NS, 'circle'); sp.setAttribute('r', 1 + Math.random() * 1.6); sp.setAttribute('fill', Math.random() < .5 ? '#FFE9A8' : '#FFB040'); bolts.append(sp);
+      const a = -Math.PI * Math.random(), v = 120 + Math.random() * 220, vx = Math.cos(a) * v, vy0 = Math.sin(a) * v, born = performance.now();
+      (function fall(t) { const k = (t - born) / 1000; sp.setAttribute('cx', (target[0] + vx * k).toFixed(1)); sp.setAttribute('cy', (target[1] + vy0 * k + 420 * k * k).toFixed(1)); sp.setAttribute('opacity', Math.max(0, 1 - k / 1.1).toFixed(2));
+        if (k < 1.1) requestAnimationFrame(fall); else sp.remove(); })(born); }
+    setTimeout(() => { orbit.classList.remove('zapped'); orbit.classList.add('fried'); }, 1100);
+  };
+  const unfry = () => { if (!fried) return; fried = false; if (orbit) { orbit.classList.remove('zapped', 'fried'); orbit.classList.add('relit'); setTimeout(() => orbit.classList.remove('relit'), 1600); } };
+
   // ---------- the loop ----------
   let next = 0;
   const loop = (now) => {
     const level = reduce ? 0 : (window.__storm || 0);
     if (level > 0 && now > next) { strike(level); next = now + (5200 - 4400 * level) * (.6 + Math.random() * .8); } // ~5 s apart at 75%, under a second near 100%
     if (window.__tornado) startTornado(); else endTornado();
+    if ((window.__storm || 0) >= .97 && !window.__tornado) { if (!fryTimer) fryTimer = setTimeout(fry, 1600); } else { clearTimeout(fryTimer); fryTimer = 0; if ((window.__storm || 0) < .9) unfry(); }
     requestAnimationFrame(loop);
   };
   requestAnimationFrame(loop);
