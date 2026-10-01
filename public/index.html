@@ -69,7 +69,7 @@
         <label><span class="sk-k mono">PRECIPITATION</span><input type="range" id="sk-p" min="0" max="100" step="1"><output id="sk-p-o" class="mono"></output></label>
         <label><span class="sk-k mono">WIND</span><input type="range" id="sk-w" min="0" max="45" step="1"><output id="sk-w-o" class="mono"></output></label>
       </div>
-      <div class="sk-foot"><span class="mono">Below freezing, rain turns to snow. Saved in a small cookie on this device; nothing is tracked.</span><button type="button" id="sk-live" class="mono">BACK TO LIVE</button></div>
+      <div class="sk-foot"><span class="mono">Below freezing, rain turns to snow. Saved in a small cookie on this device; nothing is tracked.</span><button type="button" id="sk-live" class="mono">BACK TO LIVE</button><button type="button" id="sk-done" class="mono">DONE</button></div>
       </div>
     </details>
   </section>
@@ -690,6 +690,11 @@ void main(){
       label(); applyCustom(v); skyBox.classList.add('custom');
       clearTimeout(tmr); tmr = setTimeout(() => writeSky(v), 250);
     });
+    const det = skyBox.querySelector('details');
+    const closeSky = () => { det.open = false; };
+    skyBox.querySelector('#sk-done').addEventListener('click', closeSky);
+    document.addEventListener('pointerdown', (e) => { if (det.open && !skyBox.contains(e.target)) closeSky(); });
+    addEventListener('keydown', (e) => { if (e.key === 'Escape' && det.open) closeSky(); });
     skyBox.querySelector('#sk-live').addEventListener('click', () => {
       clearSky(); skyBox.classList.remove('custom');
       if (model && model.d) { const d = model.d; fill({ h: +nowH().toFixed(2), t: d.temp_f, p: precip(d.code).rain || precip(d.code).snow ? 60 : 0, w: d.wind_mph }); }

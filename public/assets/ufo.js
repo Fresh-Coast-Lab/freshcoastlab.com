@@ -96,7 +96,7 @@
         const len = (horizon - shipY - 6 * scale) / 100;
         beam.setAttribute('transform', `translate(${sx.toFixed(1)},${(shipY + 6 * scale).toFixed(1)}) scale(${(scale * 1.1).toFixed(3)},${len.toFixed(3)})`);
         if (k < liftStart) { const u = on; pose('a1', -70 * u, -20 * u); pose('a2', -55 * u, -25 * u); }
-        if (!snapped && k > beamStart + 450) { snapped = true; snap([man, beam], stopX, horizon + 4, manH * 1.3 / 70, 'WEATHER BALLOON?'); }
+        /* only Bigfoot gets his picture taken */
       } else beam.setAttribute('opacity', 0);
       // 4. he floats up, flailing and kicking, shrinking into the ship; his hat doesn't come along
       if (k > liftStart) {
@@ -313,7 +313,7 @@
         chirp.setAttribute('transform', `translate(${(hx + (dir > 0 ? 4 : -4 - (talk.length > 1 ? 30 : 12)) * ss).toFixed(1)},${(hy - 7 * ds).toFixed(1)}) scale(${s.toFixed(3)})`);
         chirp.firstElementChild.setAttribute('transform', dir > 0 ? '' : `translate(${talk.length > 1 ? 30 : 12},0) scale(-1,1)`);
       } else chirp.setAttribute('opacity', 0);
-      if (!snapped && k > T.hit - 1450) { snapped = true; snap([dino], x + 6 * ds * dir, horizon + 4, 50 * ds / 70, "NESSIE'S COUSIN?"); }
+      /* only Bigfoot gets his picture taken */
       // 3. the comet
       if (k > fallStart && k < T.hit + 60) {
         const f = Math.min(1, (k - fallStart) / T.fall), fe = f * f;
@@ -406,7 +406,7 @@
       staticPat.setAttribute('patternTransform', `translate(0,${(Math.random() * 3).toFixed(1)})`);
       // 4. her lights stutter; the picture tears into slices with color ghosts; she stretches thin, shrinks to a point, and winks out
       const glitching = k > T.glitch && k < T.wink;
-      if (glitching && !snappedT && k > T.glitch + 350) { snappedT = true; snap([lglitch], lx, horizon + 6, Math.max(60 * ss, 1) / 70 * 1.25, 'DID YOU SEE THAT?'); }
+      /* only Bigfoot gets his picture taken */
       const stut = k > T.stutter && k < T.wink ? Math.min(1, (k - T.stutter) / 1000) : 0;
       pws.forEach((p, i) => p.setAttribute('opacity', (stut && Math.random() < stut * 0.5 ? 0.1 : 0.75 + 0.25 * ((i * 7) % 3 === 0 ? Math.sin(k / 400 + i) : 1)).toFixed(2)));
       mast.setAttribute('opacity', stut && Math.random() < stut * 0.5 ? 0.15 : Math.sin(k / 160) > 0 ? 1 : 0.3);
@@ -640,7 +640,7 @@
       // 2. he walks in like a dog: diagonal pairs, knees lifting, head and body bobbing, tail swaying
       if (k < t2) { const c = Math.max(0, (k - t1) / T.walk); x = lerp(xs, x0, c); ph = c * cycles * Math.PI * 2; amp = c > 0 && c < 1 ? 20 : 0; lift = 38;
         dside.setAttribute('opacity', Math.min(1, Math.max(0, (k - t1 + 250) / 500)).toFixed(2)); }
-      if (!snapped && k > t5 + 450) { snapped = true; snap([dogman], x0, horizon + 4, 56 * ds / 70, 'JUST A BIG DOG?'); }
+      /* only Bigfoot gets his picture taken */
       // 3. he stops and his head turns to you
       const lk = (k - t2) / T.look, lookP = lk <= 0 ? 0 : Math.min(1, lk);
       sprof.setAttribute('transform', `translate(18 0) scale(${k > t8 ? 1 : Math.max(0.05, 1 - lookP * 2).toFixed(3)},1) translate(-18 0)`);
