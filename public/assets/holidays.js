@@ -1031,10 +1031,14 @@
   const witchShape = (g, t) => {
     g.fillStyle = INK; g.strokeStyle = INK; g.lineCap = 'round'; g.lineJoin = 'round';
     const wv = (k, a = 1) => Math.sin(t * 9 + k) * a; // the wind in her cape and hair
-    // the cape, billowing back from her shoulders, its trailing edge rippling
-    g.beginPath(); g.moveTo(10, -18.6); g.bezierCurveTo(3, -20 + wv(0, .5), -6, -22.5 + wv(.8, .8), -16, -27 + wv(1.6, 1.6)); // flowing up and back, clear of the cat
-    g.quadraticCurveTo(-13.6, -24.6 + wv(2, 1), -15.4, -22.2 + wv(2.6, 1.3)); g.quadraticCurveTo(-12, -21 + wv(3.2, 1), -12.8, -18.6 + wv(3.8, 1.1)); g.quadraticCurveTo(-9.4, -18 + wv(4.4, .8), -9.6, -15.8 + wv(5, .8)); // a rippling hem
-    g.bezierCurveTo(-4, -15.2, 1.5, -13.8, 6.5, -12.6); g.closePath(); g.fill();
+    // the cape: narrow at her shoulders, billowing out behind into a ragged, scalloped tail that streams in the wind;
+    // its lower edge leaves her back at the shoulder, so the hunched back still shows beneath it
+    g.beginPath(); g.moveTo(9.4, -19.6);
+    g.bezierCurveTo(5, -25.5 + wv(0, .5), -3, -30.5 + wv(.7, 1), -11, -31 + wv(1.4, 1.4)); // the top edge, puffed up by the wind
+    const rag = [[-19.5, -33.4, 1.8], [-15.2, -29.6, 2.3], [-22.6, -29, 2.9], [-17, -26, 3.5], [-23.4, -23.8, 4.1], [-16.6, -22.6, 4.7], [-20.4, -19, 5.3], [-13.4, -19.6, 5.9]]; // a ragged tail fanning out
+    let px_ = -11, py_ = -31;
+    for (const [rx, ry, k] of rag) { const tip = rx < -18; const nx = rx + (tip ? wv(k, 1.3) : 0), ny = ry + wv(k + .5, tip ? 1.2 : .6); g.quadraticCurveTo((px_ + nx) / 2 + (tip ? -1 : 1.6), (py_ + ny) / 2 + .4, nx, ny); px_ = nx; py_ = ny; }
+    g.bezierCurveTo(-8, -15.6 + wv(6, .6), -1, -15.2 + wv(6.6, .4), 6.4, -15.8); g.closePath(); g.fill(); // the belly of the cape sags, then meets her shoulder
     // the broom: a long handle with a knob, the bristles bound in two bands and fanning out behind
     g.lineWidth = 1.5; g.beginPath(); g.moveTo(-31, .4); g.lineTo(35, -3.2); g.stroke();
     g.beginPath(); g.arc(35.4, -3.25, 1.1, 0, TAU); g.fill();
@@ -1048,15 +1052,22 @@
     g.lineWidth = 1.05; g.beginPath(); g.moveTo(-22.6, -3); g.bezierCurveTo(-27.5, -4, -28.5, -11 + wv(1, .6), -25.6, -13.5 + wv(1.5, .6)); g.quadraticCurveTo(-24.2, -14.4, -24.8, -12.4); g.stroke();
     g.lineWidth = .9; g.beginPath(); g.moveTo(-18.6, -1.6); g.lineTo(-18.2, .2); g.moveTo(-21.4, -1.4); g.lineTo(-21.6, .3); g.stroke(); // paws on the handle
     // the witch: skirt draped over the broom, one leg tucked with a pointed boot
-    g.beginPath(); g.moveTo(.5, -8.5); g.bezierCurveTo(-3, -4, -5.5, 1.5, -8 + wv(2, .5), 6 + wv(2.5, .5)); g.lineTo(-3, 4.6 + wv(3, .4)); g.lineTo(1.5, 7 + wv(3.5, .4)); g.bezierCurveTo(4.6, 3, 6.4, -1, 7.2, -5.4); g.closePath(); g.fill(); // the skirt, draped over the broom
+    g.beginPath(); g.moveTo(1, -7.4); g.bezierCurveTo(-2, -5 + wv(2, .4), -6, -3.6 + wv(2.4, .5), -10.5 + wv(2.8, .6), -3.4 + wv(3, .7)); // the skirt, blown back along the broom
+    g.quadraticCurveTo(-7, -1.6, -9.4 + wv(3.4, .6), .8 + wv(3.8, .7)); g.quadraticCurveTo(-5.4, .2, -5.6 + wv(4.2, .5), 2.6 + wv(4.6, .6)); g.quadraticCurveTo(-1.6, 1, -.4, 2.8 + wv(5, .5));
+    g.bezierCurveTo(2.6, 1.2, 5.6, -1.6, 7.2, -5.6); g.closePath(); g.fill();
     g.lineWidth = 2.1; g.beginPath(); g.moveTo(6, -2.5); g.lineTo(11.5, 3.2); g.lineTo(8.6, 9.2); g.stroke(); // thigh forward, shin tucked back
     g.beginPath(); g.moveTo(7.2, 8.4); g.lineTo(10.6, 8.6); g.quadraticCurveTo(13.6, 8.8, 14.6, 7.2); g.quadraticCurveTo(13.6, 10.6, 9.6, 10.6); g.lineTo(7.2, 10.4); g.closePath(); g.fill(); // the boot, toe curled up
-    g.beginPath(); g.moveTo(.5, -8.5); g.bezierCurveTo(2.5, -13, 6, -17.6, 9.6, -19.4); g.lineTo(12, -17.2); g.bezierCurveTo(10.2, -13.4, 8.2, -9.4, 6.6, -5.6); g.closePath(); g.fill(); // a slim torso, leaning in
-    g.lineWidth = 1.5; g.beginPath(); g.moveTo(11, -17.2); g.lineTo(16.6, -10.6); g.lineTo(21.2, -4.2); g.stroke(); // arm reaching to the handle
-    g.beginPath(); g.arc(21.6, -3.8, 1.2, 0, TAU); g.fill();
+    // a slim, hunched torso: the back curves up to a round shoulder, the chest falls away under it
+    g.beginPath(); g.moveTo(1.8, -4.6); g.bezierCurveTo(-.8, -10, .4, -17.4, 6.4, -19.4); g.quadraticCurveTo(10.6, -20.6, 12, -17.4); // a rounded, hunched back up to the shoulder
+    g.bezierCurveTo(10.4, -14.6, 8, -11.6, 7, -9); g.quadraticCurveTo(6, -6.6, 5.8, -4.4); g.closePath(); g.fill(); // the chest falls away to a narrow waist
+    // the arm: from the shoulder out to the elbow and down to the handle, a little sleeve flaring at the wrist
+    g.lineWidth = 1.75; g.beginPath(); g.moveTo(10.6, -17.2); g.lineTo(15.6, -12.4); g.stroke();
+    g.lineWidth = 1.25; g.beginPath(); g.moveTo(15.6, -12.4); g.lineTo(20.6, -5.2); g.stroke();
+    g.beginPath(); g.moveTo(18.6, -8.4); g.lineTo(20.8, -6.9); g.lineTo(19.4, -5.4); g.closePath(); g.fill();
+    g.beginPath(); g.arc(21.4, -4.1, 1.15, 0, TAU); g.fill();
     // hair streaming back under the hat
     g.lineWidth = .75;
-    for (let k = 0; k < 6; k++) { const y0 = -23.4 + k * .75; g.beginPath(); g.moveTo(11, y0); g.bezierCurveTo(7, y0 - 1.2 + wv(k, .6), 3, y0 - 2 + wv(k + 1, .9), -1.5 - k * .9, y0 - 3.2 + k * .35 + wv(k + 2, 1.3)); g.stroke(); } // streaming up and back on the wind
+    for (let k = 0; k < 6; k++) { const y0 = -23.6 + k * .6; g.beginPath(); g.moveTo(11.2, y0); g.bezierCurveTo(7.5, y0 - 1.6 + wv(k, .6), 3.5, y0 - 3 + wv(k + 1, .9), -1 - k * 1.1, y0 - 4.6 + k * .2 + wv(k + 2, 1.3)); g.stroke(); } // streaming up and back on the wind
     // head: a sharp nose and chin
     g.beginPath(); g.arc(13.4, -21.8, 3, 0, TAU); g.fill();
     g.beginPath(); g.moveTo(15.6, -23); g.lineTo(19.4, -21); g.lineTo(15.8, -20.6); g.closePath(); g.fill();
