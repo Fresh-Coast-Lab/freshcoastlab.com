@@ -58,8 +58,9 @@
   const size = () => {
     const r = hero.getBoundingClientRect(); W = r.width; H = r.height; horizon = H * (1 - HZ);
     svg.setAttribute('viewBox', `0 0 ${W} ${H}`);
-    const phone = W < 700, s = phone ? Math.min(.72, W / 520) : Math.min(2.2, W / 620);
-    const x = phone ? W - 236 * s - 6 : W * 0.62;
+    const phone = W < 700, s = phone ? Math.min(1.25, W / 310) : Math.min(2.2, W / 620);
+    // phones: the sign covers the middle, so the Park Place tower (x 69 to 82 in city units) sits in the open sky to the right of it
+    const x = phone ? W - 34 - 82 * s : W * 0.62;
     city.setAttribute('transform', `translate(${x.toFixed(1)},${(horizon + .5).toFixed(1)}) scale(${s.toFixed(3)})`);
   };
   size(); addEventListener('resize', size); new ResizeObserver(size).observe(hero);
