@@ -1134,3 +1134,8 @@ body.screenquake > .hero,body.screenquake > main,body.screenquake > footer{anima
 .hero nav.top .brand > span:not(.hol-chip){transition:opacity .25s ease}
 .hero nav.top .brand:has(.hol-chip.on) > span:not(.hol-chip){opacity:0}
 @media (prefers-reduced-motion:reduce){.hero nav.top .brand svg.hol-spin{animation:none}.hol-chip{transition:none}}
+
+/* LIGHTNING SHAKE: over 90% rain in a lightning storm, each strike jolts the page (--bq scales it with the heat) */
+@keyframes boltquake{0%,100%{transform:none}12%{transform:translate(calc(-6px * var(--bq,1)),calc(3px * var(--bq,1))) rotate(calc(-.25deg * var(--bq,1)))}28%{transform:translate(calc(5px * var(--bq,1)),calc(-4px * var(--bq,1)))}46%{transform:translate(calc(-3px * var(--bq,1)),calc(2px * var(--bq,1)))}66%{transform:translate(calc(2px * var(--bq,1)),calc(-1px * var(--bq,1)))}84%{transform:translate(calc(-1px * var(--bq,1)),0)}}
+body.boltquake > .hero,body.boltquake > main,body.boltquake > footer{animation:boltquake .5s cubic-bezier(.3,0,.3,1) both}
+@media (prefers-reduced-motion:reduce){body.boltquake > *{animation:none!important}}

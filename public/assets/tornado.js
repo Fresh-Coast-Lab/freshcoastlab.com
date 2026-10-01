@@ -95,6 +95,10 @@
     window.__flashReq = .7 + level * .5;
     litAt = performance.now(); litX = x0; // the tornado lights up with it
     if (level > .5 && stack) { stack.classList.remove('quake'); void stack.offsetWidth; stack.classList.add('quake'); setTimeout(() => stack.classList.remove('quake'), 160); }
+    // over 90% rain in a lightning storm, every strike shakes the screen; harder the hotter it is
+    if (!reduce && (window.__stormRain || 0) >= .6 && !document.body.classList.contains('screenquake')) {
+      const b = document.body; b.style.setProperty('--bq', (.45 + .55 * Math.min(1, level / Math.max(.01, window.__stormRain))).toFixed(2));
+      b.classList.remove('boltquake'); void b.offsetWidth; b.classList.add('boltquake'); clearTimeout(strike.qt); strike.qt = setTimeout(() => b.classList.remove('boltquake'), 520); }
     const t0 = performance.now();
     (function fade(t) { const k = (t - t0) / 260; g.setAttribute('opacity', k < .15 ? 1 : k < .3 ? .2 : k < .45 ? 1 : Math.max(0, 1 - (k - .45) / .55)); if (k < 1) requestAnimationFrame(fade); else g.remove(); })(t0);
   };
