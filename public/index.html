@@ -554,7 +554,10 @@ void main(){
       vec3 snowCol = mix(vec3(.3, .34, .4), vec3(.94, .96, .98), uDay);
       vec3 frozen = mix(iceCol, snowCol, drift * .8) - crack * mix(.05, .18, uDay);
       frozen += sky(ruv, t) * .12 * (1. - dp); // a faint sheen of the sky
-      c = mix(c, frozen, uIce);
+      // thin skim first, then plates, then a solid sheet: coverage grows from the far shore and patches inward
+      float plates = smoothstep(.15, .85, fbm(vec2(uv.x * 7., (HZ - uv.y) * 25.)) + uIce * 1.1 - .55 + (1. - dp) * .25 * (1. - uIce));
+      float coverage = clamp(mix(plates * .7, 1., smoothstep(.75, 1., uIce)), 0., 1.) * smoothstep(0., .12, uIce);
+      c = mix(c, frozen, coverage * (.55 + .45 * uIce));
     }
   }
   // fog swallows the horizon
@@ -675,7 +678,7 @@ void main(){
     wxT.sx = M.sunXAt(t); storm = false;
     window.__storm = p > .75 && !cold ? (p - .75) / .25 : 0; // lightning from 75% precipitation (rain, not snow), more and more toward 100%
     window.__tornado = v.w >= 42 && v.p >= 95 && v.t >= 90; // 'maxed' with a little slack: thumbs rarely land on the exact end of a slider
-    wxT.ice = Math.min(1, Math.max(0, (15 - v.t) / 20)); // fully frozen at -5°F and below
+    wxT.ice = Math.min(1, Math.max(0, (32 - v.t) / 42)); // starts at freezing, fully frozen at -10°F
     window.__tempF = v.t;
     if (instant) Object.assign(wx, wxT);
     const el = document.getElementById('wx');
@@ -782,6 +785,7 @@ void main(){
 <script src="/assets/skyline.js" defer></script>
 <script src="/assets/snowpile.js" defer></script>
 <script src="/assets/tornado.js" defer></script>
+<script src="/assets/icecross.js" defer></script>
 <script src="/assets/terms.js" defer></script>
 <script src="/assets/house.js" defer></script>
 <script src="/assets/house-switch.js" defer></script>
