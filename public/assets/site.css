@@ -1114,3 +1114,23 @@ body.screenquake > .hero,body.screenquake > main,body.screenquake > footer{anima
 .hero .lakesnow-layer.back{z-index:0}
 .hero .lakesnow-layer.front{z-index:4}
 .yeti-layer{position:absolute;inset:0;width:100%;height:100%;z-index:3;pointer-events:none;overflow:visible}
+
+/* HOLIDAYS: seasonal decorations (holidays.js) */
+/* the sign layer: the sign's own box grown by 1.24 so bulb glow has room; same centre as the sign image */
+.orbit .hol-sign{position:absolute;left:50%;top:50%;width:calc(66% * 1.24);aspect-ratio:440/411;height:auto;transform:translate(-50%,-51.613%);z-index:4;pointer-events:none}
+.orbit.toppled .hol-sign{opacity:0}
+/* ground pieces stand in front of the post; fireworks burst behind the skyline and the sign */
+.hero .hol-front{position:absolute;inset:0;width:100%;height:100%;z-index:2;pointer-events:none}
+.hero .hol-back{position:absolute;inset:0;width:100%;height:100%;z-index:0;pointer-events:none}
+.hol-sign[hidden],.hol-front[hidden],.hol-back[hidden]{display:none}
+/* the compass star cycles the holidays */
+.hero nav.top .brand{position:relative}
+.hero nav.top .brand svg{cursor:pointer;-webkit-tap-highlight-color:transparent}
+.hero nav.top .brand svg.hol-spin{animation:holSpin .8s cubic-bezier(.2,.9,.25,1.15)}
+@keyframes holSpin{from{transform:rotate(0)}to{transform:rotate(405deg)}}
+/* the label sits over the wordmark beside the star for a moment, clear of the sky controls below */
+.hol-chip{position:absolute;left:30px;top:50%;white-space:nowrap;pointer-events:none;font-size:10px;letter-spacing:.16em;text-transform:uppercase;color:var(--text);background:rgba(10,18,32,.94);border:1px solid rgba(255,106,61,.45);border-radius:999px;padding:6px 11px;opacity:0;transform:translate(-4px,-50%);transition:opacity .25s ease,transform .25s ease;z-index:7}
+.hol-chip.on{opacity:1;transform:translate(0,-50%)}
+.hero nav.top .brand > span:not(.hol-chip){transition:opacity .25s ease}
+.hero nav.top .brand:has(.hol-chip.on) > span:not(.hol-chip){opacity:0}
+@media (prefers-reduced-motion:reduce){.hero nav.top .brand svg.hol-spin{animation:none}.hol-chip{transition:none}}

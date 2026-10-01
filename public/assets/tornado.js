@@ -1,5 +1,5 @@
-// Weather with consequences. Above 75% precipitation, lightning: real branching bolts, more often as it
-// approaches 100%. Max out wind, precipitation and temperature together and a tornado drops out of the
+// Weather with consequences. Above 75% precipitation and 60°F, lightning: real branching bolts, more often
+// the harder it rains and the hotter it is. Max out wind, precipitation and temperature together and a tornado drops out of the
 // clouds, rips the sign off its post and tears through the skyline. Ease off and everything comes back.
 // The tornado and the fried sign are drawn on one 2D canvas from soft pre-rendered sprites: no filters,
 // no per-frame gradients on the hot path, a capped particle count, and a rAF that only runs while
@@ -479,7 +479,8 @@
     const level = reduce ? 0 : (window.__storm || 0);
     if (level > 0 && now > next) { strike(level); next = now + (5200 - 4400 * level) * (.6 + rnd() * .8); } // ~5 s apart at 75%, under a second near 100%
     if (window.__tornado) startTornado(); else endTornado();
-    if ((window.__storm || 0) >= .97 && !window.__tornado) { if (!fryTimer) fryTimer = setTimeout(fry, 1600); } else { clearTimeout(fryTimer); fryTimer = 0; if ((window.__storm || 0) < .9) unfry(); }
+    const rain = window.__stormRain || 0; // the fry follows the rain, not the lightning rate, so it still happens at 60°F
+    if (rain >= .97 && !window.__tornado) { if (!fryTimer) fryTimer = setTimeout(fry, 1600); } else { clearTimeout(fryTimer); fryTimer = 0; if (rain < .9) unfry(); }
     requestAnimationFrame(loop);
   };
   requestAnimationFrame(loop);
