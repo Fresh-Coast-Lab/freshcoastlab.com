@@ -979,3 +979,10 @@ a.post:hover{border-color:rgba(61,242,176,.4);transform:translateY(-3px)}
 @keyframes zap{0%{opacity:1}6%{opacity:.08}11%{opacity:1}17%{opacity:.25}22%{opacity:.95}27%{opacity:.05}36%{opacity:.05}40%{opacity:1}48%{opacity:.45}52%{opacity:1}64%{opacity:.7}68%{opacity:1}100%{opacity:1}}
 .orbit.zap .neon,.orbit.zap .neon-t{animation:zap .9s steps(1,end) both!important}
 .orbit.zap .neon-bloom{animation:zap .9s steps(1,end) both!important}
+/* Traverse City skyline on the horizon */
+.skyline-layer{position:absolute;inset:0;width:100%;height:100%;z-index:0;pointer-events:none;overflow:visible}
+.skyline-layer .wins rect{fill:#FFD98A;transition:opacity .6s}
+.skyline-layer .beacon{fill:#FF4A3D;filter:drop-shadow(0 0 3px #FF4A3D)}
+.skyline-layer .lamp{fill:#FFF3C4;filter:drop-shadow(0 0 3px #FFE9A8)}
+.skyline-layer .beam polygon{fill:url(#lh-beam)}
+.skyline-layer .refl rect{fill:#FFD98A}
