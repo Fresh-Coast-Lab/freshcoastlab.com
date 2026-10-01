@@ -143,7 +143,9 @@ const SHOTS = {
   drive: { c: [3.6, 15.4, 0.6], r: 7.4, az: 0.78, el: 0.72, name: 'Driveway' },
   porch: { c: [9.5, 13.6, 0.6], r: 5.2, az: 0.45, el: 0.78, name: 'Front door' },
   yard: { c: [9.5, -1.8, 0.9], r: 7.0, az: 2.55, el: 0.62, name: 'Back yard' },
+  game: { c: [10, 7.4, 0.4], r: 13.6, az: BASE_AZ, el: 0.9, name: 'Dollhouse' }, // "Break it": the whole house, every target in view
 };
+const WIDE = (k) => k === 'dollhouse' || k === 'game';
 const ROOM_CHIPS = [['dollhouse', 'Whole house'], ['garage', 'Garage'], ['kitchen', 'Kitchen'], ['laundry', 'Laundry'], ['living', 'Living'], ['office', 'Office'], ['drive', 'Driveway'], ['yard', 'Back yard']];
 
 // light colours (linear) and strength per group
@@ -597,7 +599,7 @@ async function main() {
     b.append(s, l);
     marks.append(b);
     dev[id] = { el: b, lbl: l, name, zone: zoneOf(x, y) };
-    b.addEventListener('click', (e) => { e.stopPropagation(); poke(id); });
+    b.addEventListener('click', (e) => { e.stopPropagation(); if (game.on && TARGET_OF[id] && !game.used[TARGET_OF[id]]) { sabotage(TARGET_OF[id]); return; } poke(id); });
   }
   const cls = (id, c, on = true) => dev[id].el.classList.toggle(c, on);
   const sayTimers = {};
@@ -653,7 +655,7 @@ async function main() {
   const whereEl = $('#where'), backBtn = $('#back');
   function goShot(k, instant = false) {
     if (!SHOTS[k]) return;
-    const inRoom0 = k !== 'dollhouse';
+    const inRoom0 = !WIDE(k);
     whereEl.textContent = SHOTS[k].name; whereEl.classList.toggle('show', inRoom0);
     backBtn.hidden = !(inRoom0 && userRoom);
     roomBtns.forEach(([rk, b]) => b.setAttribute('aria-pressed', rk === userRoom ? 'true' : 'false'));
@@ -669,7 +671,7 @@ async function main() {
     if (camT >= 1) { cam.c.copy(to.c); cam.az = to.az; cam.el = to.el; cam.r = to.r; }
     shotKey = k; wake();
     user.az *= 0.3; user.el = 0; user.zoom = 1;
-    const inRoom = k !== 'dollhouse';
+    const inRoom = !WIDE(k);
     whereEl.textContent = SHOTS[k].name; whereEl.classList.toggle('show', inRoom);
     backBtn.hidden = !(inRoom && userRoom);
     roomBtns.forEach(([rk, b]) => b.setAttribute('aria-pressed', rk === userRoom ? 'true' : 'false'));
@@ -708,6 +710,11 @@ async function main() {
     camera.position.set(cam.c.x + Math.sin(az) * Math.cos(el) * d, cam.c.y + Math.sin(el) * d, cam.c.z + Math.cos(az) * Math.cos(el) * d);
     camera.lookAt(cam.c);
     camera.near = Math.max(0.5, d * 0.3); camera.far = d * 3 + 60;
+    // game mode: shift the picture up so the house sits above the sabotage tray
+    viewShift += (viewShiftGoal - viewShift) * (REDUCE ? 1 : Math.min(1, dt * 5));
+    if (Math.abs(viewShiftGoal - viewShift) < 0.5) viewShift = viewShiftGoal;
+    if (viewShift > 0.5) camera.setViewOffset(markSize.w, markSize.h, 0, viewShift, markSize.w, markSize.h);
+    else if (camera.view && camera.view.enabled) camera.clearViewOffset();
     camera.updateProjectionMatrix();
   }
 
@@ -735,7 +742,7 @@ async function main() {
   const TIERS = { active: ['ROUTINE', 'active'], ts: ['TIME-SENSITIVE', 'ts'], crit: ['CRITICAL · OVERRIDES SILENT', 'crit'] };
   const APP = '<svg viewBox="0 0 24 24" fill="none" stroke="#7CD3E0" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11l9-7 9 7"/><path d="M5 10v10h14V10"/><path d="M10 20v-5h4v5"/></svg>';
   let noteTimer = 0;
-  const notify = (tier, title, body) => {
+  const notify = (tier, title, body, hideMs = 0) => {
     const [label, c] = TIERS[tier];
     for (const old of [...alertsEl.children]) { old.classList.remove('in'); old.classList.add('out'); setTimeout(() => old.remove(), 450); }
     const n = document.createElement('div'); n.className = 'note ' + c;
@@ -745,7 +752,7 @@ async function main() {
     alertsEl.append(n);
     void n.offsetWidth; n.classList.add('in');
     clearTimeout(noteTimer);
-    if (tier !== 'crit') noteTimer = setTimeout(() => { n.classList.remove('in'); n.classList.add('out'); setTimeout(() => n.remove(), 450); }, REDUCE ? 9000 : 5200);
+    if (tier !== 'crit' || hideMs) noteTimer = setTimeout(() => { n.classList.remove('in'); n.classList.add('out'); setTimeout(() => n.remove(), 450); }, REDUCE ? 9000 : hideMs || 5200);
   };
 
   // ---------------------------------------------------------------- effects used by the scenarios
@@ -772,14 +779,14 @@ async function main() {
     }
   };
   const leave = (p) => tweenP(500, (t) => { p.a = 1 - t; p.place(); }).then(() => { scene.remove(p.g); people.splice(people.indexOf(p), 1); });
-  let smokeOn = false;
+  let smokeOn = false, smokeSteady = false;
 
   // ---------------------------------------------------------------- scenarios (same scripts as the 2D version)
   const reset = (s = {}) => {
     timers = []; tweens = []; hold = false; pulses.length = 0;
-    Object.values(dev).forEach((d) => d.el.classList.remove('on', 'alarm', 'stale', 'say'));
+    Object.values(dev).forEach((d) => { d.el.classList.remove('on', 'alarm', 'stale', 'say', 'warn'); d.lbl.textContent = d.name; });
     for (const g of GROUPS) { goal[g] = 0; lvl[g] = 0; tint[g] = null; }
-    smokeOn = false;
+    smokeOn = false; smokeSteady = false;
     tvGoal = 0; tvLvl = 0;
     fridgeFrac = s.fridge ?? 0; drawFridge();
     doorFrac = s.door ?? 1; drawDoor();
@@ -787,7 +794,6 @@ async function main() {
     people.splice(0).forEach((p) => scene.remove(p.g));
     puddleR = 0; puddle.visible = false;
     setLock(s.locked ?? true);
-    dev.m_bench.lbl.textContent = 'workbench motion';
     tickerEl.replaceChildren(); alertsEl.replaceChildren(); fullLog.length = 0;
     clock = s.clock ?? 0; tick();
     setAmbient(s.amb ?? 0);
@@ -894,8 +900,8 @@ async function main() {
     roomBtns.forEach(([rk, b]) => b.setAttribute('aria-pressed', rk === k ? 'true' : 'false'));
   }
   function exitRoom() {
-    userRoom = null; pausedUntil = performance.now() + 6000; pendingZone = null;
-    goShot('dollhouse');
+    userRoom = null; pausedUntil = game.on ? Infinity : performance.now() + 6000; pendingZone = null;
+    goShot(game.on ? 'game' : 'dollhouse');
   }
   backBtn.addEventListener('click', exitRoom);
   const nextBtn = $('#next');
@@ -907,6 +913,7 @@ async function main() {
 
   const liveEls = ['#ticker', '#where', '#alerts'].map((q) => $(q)).filter(Boolean);
   async function play(k, byUser = false) {
+    if (game.on) exitGame(true);
     const id = ++run; busy = true; scenarioActive = true; wake();
     liveEls.forEach((el) => el.setAttribute('aria-live', byUser ? 'polite' : 'off'));
     $('#hint').classList.remove('show');
@@ -940,6 +947,326 @@ async function main() {
     }
     const was = hold; hold = false; log(dev[id].name + ' → reporting in'); hold = was;
   }
+
+  // ---------------------------------------------------------------- game: "Break my house"
+  // The visitor sabotages the house and the watchdog has to catch each failure. Detection runs in
+  // parallel (every failure has its own latency, timed on the sim clock), while the response
+  // (banner, fix, verification) runs through a queue, one at a time, the way a real house would.
+  const swEl = $('#sw'), scoreBtn = $('#gscore'), exitBtn = $('#gexit0'), cellEl = $('#gcell'), swL = swEl.querySelector('.swl'), swV = swEl.querySelector('.swv');
+  const trayEl = $('#gtray'), cardEl = $('#gcard'), srEl = $('#gsr'), brkBtn = $('#brk'), hudEl = stage.querySelector('.hud');
+  const TIER_WORD = { crit: 'critical', ts: 'time-sensitive', active: 'routine' };
+  const rnd = (a, b) => a + Math.random() * (b - a);
+  let viewShift = 0, viewShiftGoal = 0;
+  const game = { on: false, round: 0, used: {}, results: [], queue: [], working: false, pending: 0, done: 0, timing: null, shown: -1, chips: {}, doorOpen: null, puddleP: null };
+  const chk = (rid) => { if (rid !== game.round) throw 0; };
+  const gwait = async (ms, rid) => { await wait(ms); chk(rid); };
+
+  // radar sweeps out from the hub across the floor (a small pool; one shader program shared)
+  const HUB_FLOOR = W(0.4, 4.2, FLOOR + 0.04);
+  const sweepGeo = new THREE.PlaneGeometry(48, 48); sweepGeo.rotateX(-Math.PI / 2);
+  const sweepVS = 'varying vec2 vP; void main(){ vP = position.xz; gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0); }';
+  const sweepFS = 'uniform float uR, uA; uniform vec3 uC; varying vec2 vP; void main(){ float d = length(vP); if (d > uR + 0.08) discard; float edge = smoothstep(uR - 0.22, uR - 0.02, d) * (1.0 - smoothstep(uR - 0.02, uR + 0.06, d)); float wake = smoothstep(uR - 2.6, uR, d) * 0.16; float a = (edge * 1.4 + wake * 1.3) * uA; if (a < 0.003) discard; vec3 c = uC * a; gl_FragColor = vec4(c, a); }';
+  const sweeps = [0, 1, 2, 3].map(() => {
+    const m = new THREE.Mesh(sweepGeo, new THREE.ShaderMaterial({
+      transparent: true, depthWrite: false, blending: THREE.AdditiveBlending, toneMapped: false,
+      uniforms: { uR: { value: 0 }, uA: { value: 0 }, uC: { value: new THREE.Color() } }, vertexShader: sweepVS, fragmentShader: sweepFS,
+    }));
+    m.position.copy(HUB_FLOOR); m.renderOrder = 9; m.frustumCulled = false; m.userData.busy = false;
+    scene.add(m); return m; // visible until the first frame so compileAsync builds the program up front
+  });
+  // a sweep from the hub that reaches device `id` in exactly `ms`, with a pulse riding along the arc
+  const sweep = (id, ms, color) => {
+    if (REDUCE) return Promise.resolve();
+    const s = sweeps.find((m) => !m.userData.busy) || sweeps[0];
+    const u = s.material.uniforms; u.uC.value.set(color); u.uA.value = 1;
+    const to = devPos[id], R = Math.hypot(to.x - HUB_FLOOR.x, to.z - HUB_FLOOR.z) + 0.3;
+    s.userData.busy = true; s.visible = true;
+    const p = { a: devPos.hub, b: to, c: new THREE.Color(color), t: 0 };
+    pulses.push(p);
+    return tweenP(ms, (t) => { const e = 1 - (1 - t) * (1 - t); u.uR.value = 0.4 + (R - 0.4) * e; p.t = e; }).then(() => {
+      const i = pulses.indexOf(p); if (i >= 0) pulses.splice(i, 1);
+      tweenP(450, (t) => { u.uR.value = R + 0.8 * t; u.uA.value = 1 - t; }).then(() => { s.visible = false; s.userData.busy = false; });
+    });
+  };
+
+  // the five sabotages: what the visitor does, how fast the watchdog notices, and what the house does about it
+  const SAB = {
+    garage: {
+      label: 'Open the garage', aria: 'Leave the garage open', what: 'Garage left open', short: 'garage', dev: 'tilt', tier: 'ts', lat: [1.1, 1.5], color: '#FFC061',
+      break() { ring('tilt', '#FF6A3D'); dev.tilt.lbl.textContent = 'garage door: open'; game.doorOpen = setDoor(0); log('you: garage door → open', 'bad'); },
+      caught() { cls('tilt', 'warn'); dev.tilt.lbl.textContent = 'open, nobody home'; say('tilt', 3000); log('watchdog: garage open, nobody coming or going', 'warn'); },
+      async respond(rid) {
+        notify('ts', 'Garage open, nobody home', 'Closing it. The tilt sensor will confirm.', 4200);
+        await game.doorOpen; chk(rid);
+        await pulse('hub', 'tilt', '#FFC061'); chk(rid); log('garage → closing');
+        await setDoor(1); chk(rid);
+        cls('tilt', 'warn', false); cls('tilt', 'on'); dev.tilt.lbl.textContent = 'tilt sensor: closed ✓'; say('tilt', 3000);
+        log('verifying: tilt sensor reports closed ✓', 'ok'); await gwait(500, rid);
+      },
+    },
+    leak: {
+      label: 'Flood the laundry', aria: 'Flood the laundry', what: 'Laundry flooded', short: 'laundry', dev: 'leak', tier: 'crit', lat: [0.6, 0.9], color: '#5FB7FF',
+      break() {
+        ring('leak', '#FF6A3D'); puddle.visible = true; log('you: water under the washer', 'bad');
+        game.puddleP = tweenP(1600, (t) => { puddleR = 0.9 * t; });
+      },
+      caught() { cls('leak', 'alarm'); dev.leak.lbl.textContent = 'water sensor: WET'; say('leak', 3000); ring('leak', '#5FB7FF', 3); log('laundry water sensor → WET', 'bad'); },
+      async respond(rid) {
+        notify('crit', 'Water detected', 'Laundry room. Check it now.', 4200);
+        light('l_laundry', true); log('→ critical alert: full volume, even on silent', 'bad');
+        await game.puddleP; chk(rid);
+        await tweenP(1100, (t) => { puddleR = 0.9 + 0.35 * t; }); chk(rid);
+      },
+    },
+    fridge: {
+      label: 'Prop the fridge', aria: 'Prop the fridge open', what: 'Fridge propped open', short: 'fridge', dev: 'fridge', tier: 'active', lat: [1.4, 1.9], color: '#CFEFFF',
+      break() { ring('fridge', '#FF6A3D'); setFridge(1); log('you: fridge door → propped open', 'bad'); },
+      caught() { cls('fridge', 'warn'); dev.fridge.lbl.textContent = 'fridge: open'; say('fridge', 3000); log('watchdog: fridge open, nobody in the kitchen', 'warn'); },
+      async respond(rid) {
+        notify('active', 'Refrigerator door open', 'Kitchen is empty. Repeats until it closes.', 4200);
+        ring('fridge', '#FFC061'); log('→ routine alert, repeats until it closes', 'ok'); await gwait(1400, rid);
+      },
+    },
+    sensor: {
+      label: 'Kill a sensor', aria: 'Kill a sensor quietly', what: 'Quiet sensor', short: 'sensor', dev: 'm_bench', tier: 'ts', lat: [3.7, 4.4], color: '#FFC061',
+      break() {
+        // the silent failure: nothing changes. It just stops talking and keeps saying "clear".
+        dev.m_bench.lbl.textContent = 'workbench motion: clear'; say('m_bench', 2400);
+        log('you: workbench motion → dead. still says clear', 'bad');
+      },
+      async detect(L, rid) {
+        if (!REDUCE) await gwait(350, rid);
+        log('watchdog: roll call. who checked in lately?');
+        const ROLL = [['m_garage', '2 min'], ['m_laundry', '40 s'], ['thermo', '5 min'], ['m_living', '9 s']];
+        const per = Math.max(0, (L - 0.35 - 1.1) / ROLL.length) * 1000;
+        for (const [id, ago] of ROLL) {
+          await sweep(id, per, '#3DF2B0'); chk(rid);
+          dev[id].lbl.textContent = `${dev[id].name}: ${ago} ago ✓`; say(id, 1300);
+        }
+        await sweep('m_bench', 1100, '#FFC061'); chk(rid);
+      },
+      caught() {
+        cls('m_bench', 'stale'); dev.m_bench.lbl.textContent = 'quiet 26 h, still says clear'; say('m_bench', 9000); ring('m_bench', '#FFC061');
+        log('workbench motion: "clear", but silent 26 h', 'warn');
+      },
+      async respond(rid) {
+        notify('ts', 'Sensor gone quiet', 'Workbench motion: silent 26 h, still says clear.', 4200);
+        log('→ flagged: looks healthy, stopped talking', 'ok'); await gwait(1400, rid);
+      },
+    },
+    smoke: {
+      label: 'Burn the toast', aria: 'Smoke in the kitchen: burn the toast', what: 'Smoke in the kitchen', short: 'kitchen', dev: 'smoke_p', tier: 'crit', lat: [0.4, 0.7], color: '#FF6B61',
+      break() { ring('smoke_p', '#FF6A3D'); smokeOn = true; tint.pantry = [1, 0.12, 0.08]; tint.kitchen = [1, 0.12, 0.08]; log('you: toast → on fire', 'bad'); },
+      caught() { cls('smoke_p', 'alarm'); dev.smoke_p.lbl.textContent = 'smoke / CO: SMOKE'; say('smoke_p', 3000); ring('smoke_p', '#FF6B61', 3); log('kitchen detector → SMOKE', 'bad'); },
+      async respond(rid) {
+        notify('crit', 'Smoke: kitchen', 'One alert per detector, so none can hide another.', 4200);
+        log('→ critical alert, one per detector', 'bad');
+        for (let i = 0; i < 6; i++) { setRoom('pantry', i % 2 === 0); setRoom('kitchen', i % 2 === 0); await gwait(380, rid); }
+        setRoom('pantry', true); setRoom('kitchen', true); smokeOn = false; smokeSteady = true;
+      },
+    },
+  };
+  const GAME_ORDER = ['garage', 'leak', 'fridge', 'sensor', 'smoke'];
+  const TARGET_OF = {};
+  for (const k of GAME_ORDER) TARGET_OF[SAB[k].dev] = k;
+  const GAME_SETUP = { clock: 21 * 3600 + 40 * 60, amb: 0.06 };
+
+  // tray: five sabotage chips, then the stopwatch (which turns into "See score" after three catches)
+  for (const k of GAME_ORDER) {
+    const b = document.createElement('button'); b.type = 'button';
+    const l = document.createElement('span'); l.className = 'gl';
+    const s = document.createElement('span'); s.className = 'gs';
+    b.append(l, s);
+    b.addEventListener('click', () => sabotage(k));
+    trayEl.insertBefore(b, cellEl); game.chips[k] = { b, l, s };
+  }
+  scoreBtn.addEventListener('click', () => showCard());
+  exitBtn.addEventListener('click', () => exitGame());
+  const setChip = (k, state, r) => {
+    const c = game.chips[k], s = SAB[k];
+    c.b.dataset.s = state;
+    if (r) c.b.dataset.t = r.tier; else delete c.b.dataset.t;
+    c.b.setAttribute('aria-disabled', state === 'idle' ? 'false' : 'true');
+    if (state === 'idle') { c.l.textContent = s.label; c.s.textContent = ''; c.b.setAttribute('aria-label', s.aria); return; }
+    if (state === 'scan') { c.l.textContent = 'Scanning…'; c.s.textContent = s.short; c.b.setAttribute('aria-label', `${s.aria}: broken, the watchdog is scanning`); return; }
+    c.l.textContent = (state === 'done' ? '✓ ' : '') + `${r.secs.toFixed(1)} s`;
+    c.s.textContent = state === 'done' ? s.short : state === 'fix' ? 'handling' : 'queued';
+    c.b.setAttribute('aria-label', `${s.aria}: caught in ${r.secs.toFixed(1)} seconds, ${TIER_WORD[r.tier]} alert`);
+  };
+  const updateExit = () => {
+    const ready = game.done >= 3 && !game.working && !game.queue.length && !game.pending;
+    if (ready === !scoreBtn.hidden) return;
+    const refocus = !ready && document.activeElement === scoreBtn;
+    scoreBtn.hidden = !ready; swEl.hidden = ready;
+    if (refocus) trayEl.querySelector('button[aria-disabled="false"]')?.focus({ preventScroll: true });
+  };
+  const setSw = (t, label, value) => { swEl.dataset.t = t; swL.textContent = label; swV.textContent = value; };
+  const announce = (text) => { srEl.textContent = ''; setTimeout(() => { srEl.textContent = text; }, 30); };
+
+  function sabotage(k) {
+    if (!game.on || game.used[k] || !cardEl.hidden) return;
+    const rid = game.round, s = SAB[k];
+    game.used[k] = true; game.pending++;
+    cls(s.dev, 'tgt', false); dev[s.dev].el.setAttribute('aria-label', dev[s.dev].name);
+    const tm = { k, t0: T, done: false };
+    game.timing = tm; game.shown = -1; setSw('scan', 'SCANNING', '0.0 s');
+    setChip(k, 'scan'); updateExit();
+    wake();
+    (async () => {
+      s.break();
+      const L = rnd(s.lat[0], s.lat[1]);
+      if (s.detect) await s.detect(L, rid); else await sweep(s.dev, L * 1000, s.color);
+      chk(rid);
+      const secs = REDUCE ? L : Math.max(0.1, T - tm.t0);
+      const r = { k, secs, tier: s.tier };
+      game.results.push(r); game.pending--;
+      s.caught();
+      tm.done = true;
+      if (game.timing === tm) setSw(s.tier, 'CAUGHT IN', `${secs.toFixed(1)} s`);
+      announce(`${s.what}: caught in ${secs.toFixed(1)} seconds. ${TIER_WORD[s.tier]} alert.`);
+      game.queue.push(k); setChip(k, 'caught', r);
+      if (game.working) log(`queued: ${s.what.toLowerCase()}, ${game.queue.length} waiting`);
+      drain(rid);
+    })().catch((e) => { if (e !== 0) console.error(e); });
+  }
+  async function drain(rid) {
+    if (game.working) return;
+    game.working = true;
+    try {
+      while (game.queue.length) {
+        const k = game.queue.shift();
+        setChip(k, 'fix', game.results.find((r) => r.k === k));
+        await SAB[k].respond(rid); chk(rid);
+        setChip(k, 'done', game.results.find((r) => r.k === k));
+        game.done++;
+      }
+      if (game.done >= GAME_ORDER.length && !game.pending) { await gwait(900, rid); game.working = false; showCard(); return; }
+      game.working = false; updateExit();
+      if (!game.pending) log(game.done >= 3 ? 'all caught. break more, or see the score' : 'all caught. what else have you got?', 'ok');
+    } catch (e) { if (e !== 0) console.error(e); }
+  }
+  function tapBreak(cx, cy) {
+    // generous hit test on phones: the nearest unbroken target marker within 52 px of the tap
+    const r = canvas.getBoundingClientRect();
+    let best = null, bd = 52;
+    for (const k of GAME_ORDER) {
+      if (game.used[k]) continue;
+      tmp.copy(devPos[SAB[k].dev]).project(camera);
+      const d = Math.hypot(r.left + (tmp.x * 0.5 + 0.5) * r.width - cx, r.top + (-tmp.y * 0.5 + 0.5) * r.height - cy);
+      if (d < bd) { bd = d; best = k; }
+    }
+    if (best) sabotage(best);
+  }
+  function gameFrame() {
+    const tm = game.timing;
+    if (!game.on || !tm || tm.done) return;
+    const v = Math.floor((T - tm.t0) * 10);
+    if (v === game.shown) return;
+    game.shown = v; swV.textContent = (v / 10).toFixed(1) + ' s';
+  }
+  function measureShift() {
+    viewShiftGoal = game.on ? Math.round(Math.max(0, hudEl.offsetHeight - 40) * 0.5) : 0;
+  }
+
+  function newRound() {
+    game.round++; game.used = {}; game.results = []; game.queue = []; game.working = false; game.pending = 0; game.done = 0; game.timing = null;
+    reset(GAME_SETUP);
+    setRoom('living', true); setRoom('yard', true);
+    sweeps.forEach((m) => { m.visible = false; m.userData.busy = false; });
+    for (const k of GAME_ORDER) {
+      setChip(k, 'idle');
+      const id = SAB[k].dev; cls(id, 'tgt'); dev[id].el.setAttribute('aria-label', `Break it: ${SAB[k].aria.toLowerCase()} (${dev[id].name})`);
+    }
+    updateExit();
+    setSw('idle', 'WATCHDOG', 'listening');
+    cardEl.hidden = true; trayEl.hidden = false; exitBtn.hidden = false;
+    log('Your turn. Break something.', 'warn'); log('The watchdog is listening.', 'ok');
+    announce('Your turn. Break something. The watchdog is listening. Five things to break, below the house.');
+    wake();
+  }
+  function enterGame(fromKey) {
+    if (game.on) { newRound(); return; }
+    run++; busy = false; scenarioActive = false; hold = false;
+    pausedUntil = Infinity; userRoom = null; pendingZone = null;
+    game.on = true;
+    stage.classList.add('gaming');
+    trayEl.hidden = false; exitBtn.hidden = false;
+    order.forEach((o) => btn[o].setAttribute('aria-pressed', 'false'));
+    brkChip.setAttribute('aria-pressed', 'true');
+    liveEls.forEach((el) => el.setAttribute('aria-live', 'off'));
+    $('#hint').classList.remove('show');
+    newRound();
+    goShot('game');
+    measureShift();
+    if (fromKey) game.chips.garage.b.focus({ preventScroll: true });
+  }
+  function exitGame(toScenario = false) {
+    if (!game.on) return;
+    const hadFocus = stage.contains(document.activeElement);
+    game.on = false; game.round++; game.timing = null;
+    stage.classList.remove('gaming');
+    trayEl.hidden = true; cardEl.hidden = true; exitBtn.hidden = true;
+    brkChip.setAttribute('aria-pressed', 'false');
+    for (const k of GAME_ORDER) { const id = SAB[k].dev; cls(id, 'tgt', false); dev[id].el.setAttribute('aria-label', dev[id].name); }
+    sweeps.forEach((m) => { m.visible = false; m.userData.busy = false; });
+    measureShift();
+    if (toScenario) return; // play() resets the house itself
+    reset(SC.dusk.setup);
+    if (REDUCE) { for (const g of ['office', 'kitchen', 'living', 'garage', 'porch', 'drive', 'yard', 'laundry']) { goal[g] = 1; lvl[g] = 1; } nextBtn.textContent = 'Start'; }
+    log('back to normal. the house runs itself again.', 'ok');
+    userRoom = null; goShot('dollhouse');
+    pausedUntil = performance.now() + 2500; lastEnd = performance.now();
+    announce('Game over. The house is back to normal.');
+    if (hadFocus) brkBtn.focus({ preventScroll: true });
+    wake();
+  }
+
+  // score card
+  const shareText = () => {
+    const n = game.results.length, avg = game.results.reduce((a, r) => a + r.secs, 0) / (n || 1);
+    return `I tried to break a smart house. The watchdog caught ${n} of ${n}, average ${avg.toFixed(1)} s.`;
+  };
+  function showCard() {
+    if (!game.on || game.done < 1) return;
+    const n = game.results.length, avg = game.results.reduce((a, r) => a + r.secs, 0) / n;
+    $('#gch').textContent = `${n} of ${n} caught.`;
+    $('#gcsub').textContent = `Average ${avg.toFixed(1)} s. Nothing got past the watchdog.`;
+    const ol = $('#gcl'); ol.replaceChildren();
+    for (const r of game.results) {
+      const li = document.createElement('li');
+      const a = document.createElement('span'); a.textContent = SAB[r.k].what;
+      const b = document.createElement('span'); b.className = 'tr ' + r.tier; b.textContent = TIER_WORD[r.tier];
+      const c = document.createElement('span'); c.className = 'tm'; c.textContent = r.secs.toFixed(1) + ' s';
+      li.append(a, b, c); ol.append(li);
+    }
+    const quiet = game.results.some((r) => r.k === 'sensor');
+    const left = GAME_ORDER.length - n;
+    $('#gcw').textContent = quiet
+      ? 'The quiet sensor took longest. It never said anything was wrong.'
+      : left ? `${left} left unbroken. The quiet one is the hard one.` : '';
+    $('#gcf').textContent = quiet ? 'Demo clock. For real, a quiet sensor is flagged once it misses its usual check-in.' : '';
+    $('#gshare').textContent = 'Share';
+    trayEl.hidden = true; exitBtn.hidden = true; cardEl.hidden = false;
+    announce(`${n} of ${n} caught. Average ${avg.toFixed(1)} seconds. Nothing got past the watchdog.`);
+    $('#gagain').focus({ preventScroll: true });
+  }
+  $('#gagain').addEventListener('click', () => { newRound(); game.chips.garage.b.focus({ preventScroll: true }); });
+  $('#gexit').addEventListener('click', () => exitGame());
+  $('#gshare').addEventListener('click', async (e) => {
+    const b = e.currentTarget, text = shareText(), url = `${location.origin}/#house`;
+    try { if (navigator.share) { await navigator.share({ text, url }); return; } } catch (err) { if (err && err.name === 'AbortError') return; }
+    try { await navigator.clipboard.writeText(`${text} ${url}`); b.textContent = 'Copied'; announce('Copied to the clipboard.'); }
+    catch { b.textContent = 'Copy failed'; }
+    setTimeout(() => { b.textContent = 'Share'; }, 2200);
+  });
+  // the way in: a chip after the scenarios, and a thumb-zone button on the stage
+  const brkChip = document.createElement('button');
+  brkChip.type = 'button'; brkChip.className = 'brk'; brkChip.setAttribute('aria-pressed', 'false');
+  brkChip.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M13 2L4 14h7l-1 8 9-12h-7z"/></svg>Break it';
+  brkChip.addEventListener('click', (e) => (game.on ? exitGame() : enterGame(e.detail === 0)));
+  scenBar.append(brkChip);
+  brkBtn.addEventListener('click', (e) => enterGame(e.detail === 0));
+  document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && game.on) { e.preventDefault(); exitGame(); } });
 
   // ---------------------------------------------------------------- input: orbit (horizontal drag), pinch, tap a room
   const ptrs = new Map();
@@ -1001,6 +1328,7 @@ async function main() {
     user.lastInput = performance.now(); wake();
   }, { passive: false });
   function tapAt(cx, cy) {
+    if (game.on) { tapBreak(cx, cy); return; } // in the game a tap near a target breaks it, and never flies into a room
     const r = canvas.getBoundingClientRect();
     raycaster.setFromCamera(new THREE.Vector2(((cx - r.left) / r.width) * 2 - 1, -((cy - r.top) / r.height) * 2 + 1), camera);
     const hit = raycaster.intersectObjects(staticMeshes, false)[0];
@@ -1049,7 +1377,7 @@ async function main() {
     P[1].set(...W(14.6, 8.4, FLOOR + 1.3).toArray(), 5.0); PC[1].set(0.45, 0.55, 1.0).multiplyScalar(tvLvl * 0.9);
     if (people[0]) { P[2].set(...W(people[0].x, people[0].y, FLOOR + 0.8).toArray(), 2.4); PC[2].set(0.35, 0.8, 0.9).multiplyScalar(0.9 * people[0].a); } else PC[2].set(0, 0, 0);
     // puddle glow when the laundry light is on, and red smoke pulse light
-    P[3].set(...W(18.5, 1.6, FLOOR + 2.0).toArray(), 5.0); PC[3].set(1, 0.1, 0.05).multiplyScalar(smokeOn ? 0.6 + 0.6 * Math.max(0, Math.sin(T * 9)) : 0);
+    P[3].set(...W(18.5, 1.6, FLOOR + 2.0).toArray(), 5.0); PC[3].set(1, 0.1, 0.05).multiplyScalar(smokeOn ? 0.6 + 0.6 * Math.max(0, Math.sin(T * 9)) : smokeSteady ? 0.75 : 0);
     // headlights
     const hp = W(2.55, 8.0 + carOff, FLOOR + 0.62); shared.uSpP.value.copy(hp);
     shared.uSpD.value.set(0, -0.12, -1).normalize(); shared.uSpC.value.set(1.0, 0.92, 0.75).multiplyScalar(headOn * 3.2 * carOpacity * THREE.MathUtils.clamp((carOff - 1) / 4, 0.15, 1));
@@ -1109,7 +1437,7 @@ async function main() {
     if (yd > 0.02) for (const [x, y, z] of YARD_GLOW) glow(W(x, y, z), 0.32 * yd * nightK, 0.2 * yd * nightK, 0.08 * yd * nightK, 0.7);
     if (fridgeFrac > 0.02) glow(W(16.25, 1.3, FLOOR + 1.1), 0.5 * fridgeFrac, 0.62 * fridgeFrac, 0.75 * fridgeFrac, 2.4);
     if (tvLvl > 0.02) glow(W(14.6, 7.6, FLOOR + 1.3), 0.25 * tvLvl, 0.3 * tvLvl, 0.5 * tvLvl, 4.0);
-    if (smokeOn) { const s = 0.5 + 0.5 * Math.max(0, Math.sin(T * 9)); glow(W(18.5, 1.6, FLOOR + 2.2), 0.9 * s, 0.12 * s, 0.08 * s, 3.0); }
+    if (smokeOn || smokeSteady) { const s = smokeOn ? 0.5 + 0.5 * Math.max(0, Math.sin(T * 9)) : 0.55; glow(tmp2.set(8.5, FLOOR + 2.2, -5.4), 0.9 * s, 0.12 * s, 0.08 * s, 3.0); }
     if (headOn > 0.02 && carOpacity > 0.05) {
       const h = headOn * carOpacity;
       for (const bx of [1.83, 3.28]) glow(W(bx, 8.02 + carOff, FLOOR + 0.62 + (carOff > 3.6 ? -0.07 : 0)), 1.0 * h, 0.95 * h, 0.8 * h, 1.1);
@@ -1145,13 +1473,16 @@ async function main() {
       const el = dev[id].el;
       let off = tmp.z > 1 || tmp.x < -1.1 || tmp.x > 1.1 || tmp.y < -1.1 || tmp.y > 1.1;
       const cl = el.classList;
-      const active = cl.contains('on') || cl.contains('alarm') || cl.contains('stale') || cl.contains('peek') || cl.contains('say');
-      const room = shotKey === 'dollhouse' ? null : shotKey;
+      const active = cl.contains('on') || cl.contains('alarm') || cl.contains('stale') || cl.contains('peek') || cl.contains('say') || cl.contains('warn') || cl.contains('tgt');
+      const room = WIDE(shotKey) ? null : shotKey;
       const inRoom = room && (dev[id].zone === room || (room === 'kitchen' && dev[id].zone === 'pantry') || (room === 'pantry' && dev[id].zone === 'kitchen') || (room === 'living' && dev[id].zone === 'porch') || (room === 'drive' && dev[id].zone === 'garage'));
       if (!active && !inRoom && id !== 'hub') off = true;
       if (off !== el._off) { el._off = off; el.classList.toggle('off-screen', off); }
       if (off) continue;
       const x = (tmp.x * 0.5 + 0.5) * w, y = (-tmp.y * 0.5 + 0.5) * h;
+      // a label near the stage edge hangs inward instead of being clipped
+      const edge = x < 96 ? 1 : x > w - 96 ? 2 : 0;
+      if (edge !== el._edge) { el._edge = edge; cl.toggle('edge-l', edge === 1); cl.toggle('edge-r', edge === 2); }
       el.style.transform = `translate3d(${x.toFixed(1)}px,${y.toFixed(1)}px,0) scale(${sBase.toFixed(3)})`;
     }
   }
@@ -1174,6 +1505,7 @@ async function main() {
 
   // ---------------------------------------------------------------- sizing
   function resize() {
+    measureShift();
     const r = stage.getBoundingClientRect();
     const w = Math.max(1, Math.round(r.width)), h = Math.max(1, Math.round(r.height));
     if (w === markSize.w && h === markSize.h && renderer.getPixelRatio() === dpr && !ctxLost) { wake(); return; }
@@ -1197,6 +1529,7 @@ async function main() {
   function isAnimating() {
     if ((busy && !hold) || camT < 1 || ptrs.size || pulses.length || tweens.length || people.length || (smokeOn && busy)) return true;
     if (autoplayOn()) return true;
+    if ((game.on && (game.pending || game.working)) || viewShift !== viewShiftGoal) return true;
     for (const g of GROUPS) if (Math.abs(goal[g] - lvl[g]) > 0.002) return true;
     return Math.abs(headGoal - headOn) > 0.002 || Math.abs(tailGoal - tailOn) > 0.002 || Math.abs(tvGoal - tvLvl) > 0.002;
   }
@@ -1226,6 +1559,7 @@ async function main() {
     buildGlows();
     renderer.render(scene, camera);
     placeMarks();
+    gameFrame();
     frames++;
   }
   function loop(now) {
@@ -1324,6 +1658,7 @@ async function main() {
   // compile every shader off the critical path (parallel compile where the driver supports it)
   try { if (renderer.compileAsync) await renderer.compileAsync(scene, camera); } catch { /* fall through to a normal first frame */ }
   frame(0, performance.now());
+  sweeps.forEach((m) => { m.visible = false; });
   stage.classList.add('ready');
   toParent({ type: 'h3d-ready' });
   const hint = $('#hint');
@@ -1352,6 +1687,13 @@ async function main() {
       log: () => fullLog.join('\n'),
       snapshot: (type = 'image/webp', q = 0.8) => canvas.toDataURL(type, q),
       set: (k, v) => { if (k === 'amb') amb = v; else { goal[k] = v; lvl[k] = v; } frame(0, performance.now()); },
+      game: {
+        enter: () => { enterGame(false); return 'on'; },
+        brk: (k) => { sabotage(k); return k; },
+        exit: () => { exitGame(); return 'off'; },
+        card: () => { showCard(); return !cardEl.hidden; },
+        state: () => ({ on: game.on, done: game.done, pending: game.pending, working: game.working, queue: [...game.queue], results: game.results.map((r) => `${r.k} ${r.tier} ${r.secs.toFixed(2)}`), loopActive, shift: viewShift }),
+      },
     };
   }
 }
