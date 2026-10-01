@@ -70,8 +70,8 @@
     const wx = window.__wx || { day: 0, sun: 0, cloud: 0 };
     const dark = Math.max(0, Math.min(1, 1 - wx.day * 1.15 + (wx.cloud || 0) * .15)); // 0 = full day, 1 = night
     // the masses: soft blue-grey in daylight, near-black against the night
-    mass.style.fill = `rgb(${mix([126, 150, 170], [10, 15, 24], Math.min(1, dark * 1.2)).join(',')})`;
-    mass.style.opacity = (0.55 + 0.45 * dark).toFixed(2);
+    mass.style.fill = `rgb(${mix([46, 62, 80], [10, 15, 24], Math.min(1, dark * 1.2)).join(',')})`; // slate by day, ink at night
+    mass.style.opacity = (0.88 + 0.12 * dark).toFixed(2);
     // windows switch on as it gets dark; a few blink now and then
     const t = (now - t0) / 1000;
     if (Math.abs(dark - lastDark) > .01 || !reduce) {

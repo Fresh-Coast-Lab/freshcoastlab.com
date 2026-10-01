@@ -441,7 +441,7 @@ in vec2 p; void main(){ gl_Position = vec4(p, 0., 1.); }`;
 precision highp float;
 uniform vec2 uR; uniform float uT; uniform vec2 uM; out vec4 o;
 uniform float uSun; uniform float uDay; uniform float uCloud; uniform float uWind; uniform float uWave;
-uniform float uRain; uniform float uSnow; uniform float uFog; uniform float uFlash; uniform float uSunX;
+uniform float uRain; uniform float uSnow; uniform float uFog; uniform float uFlash; uniform float uSunX; uniform float uIce;
 float h(vec2 p){ p = fract(p * vec2(123.34, 456.21)); p += dot(p, p + 45.32); return fract(p.x * p.y); }
 float n(vec2 p){ vec2 i = floor(p), f = fract(p); f = f * f * (3. - 2. * f);
   return mix(mix(h(i), h(i + vec2(1., 0.)), f.x), mix(h(i + vec2(0., 1.)), h(i + vec2(1., 1.)), f.x), f.y); }
@@ -500,6 +500,30 @@ void main(){
     c += stCol * streak * .3 * (1. - dp) * smoothstep(-.06, .02, uSun) * (1. - .8 * uCloud) * (1. + uDay);
     float glint = smoothstep(.93, 1., n(vec2(uv.x * 90., uv.y * 400. / (dp + .2) - t * 2.)));
     c += vec3(.4, .9, .8) * glint * .08 * (1. - dp);
+    // whitecaps: wind-driven crests break into foam, more and bigger the harder it blows, foreshortened toward the horizon
+    float wnd = smoothstep(.25, 1., uWind) * (1. - uIce);
+    if (wnd > 0.) {
+      vec2 cp = vec2(uv.x * 26. / (dp + .25) + t * (.15 + uWind * .5), (HZ - uv.y) * 70. / (dp + .12) - t * (.6 + uWind * 1.4));
+      float crest = fbm(cp * vec2(1., .55));
+      float foam = smoothstep(.72 - wnd * .2, .9 - wnd * .14, crest) * smoothstep(.1, .55, sin(cp.y * .9 + crest * 4.) * .5 + .5);
+      vec3 foamCol = mix(vec3(.55, .65, .72), vec3(.96, .98, 1.), uDay);
+      c = mix(c, foamCol, foam * wnd * (.55 + .4 * (1. - dp)) * (1. - .5 * dp));
+      c = mix(c, c * .75, wnd * .25); // rough water reads darker between the caps
+    }
+    // ice: the lake freezes over: pale, still, cracked, with snow drifts
+    if (uIce > 0.) {
+      vec2 ip = vec2(uv.x * uR.x / uR.y * 6. / (dp + .35), (HZ - uv.y) * 22. / (dp + .2));
+      vec2 ic = floor(ip); vec2 f2 = fract(ip); float md = 1.;
+      for (int yy = -1; yy <= 1; yy++) for (int xx = -1; xx <= 1; xx++) { vec2 o = vec2(float(xx), float(yy)); vec2 pnt = vec2(h(ic + o), h(ic + o + 7.3));
+        md = min(md, length(o + pnt - f2)); }
+      float crack = smoothstep(.06, .0, abs(md - .45)) * .5;
+      float drift = smoothstep(.45, .8, fbm(vec2(uv.x * 4., (HZ - uv.y) * 14.)));
+      vec3 iceCol = mix(vec3(.16, .22, .3), vec3(.74, .84, .9), uDay);
+      vec3 snowCol = mix(vec3(.3, .34, .4), vec3(.94, .96, .98), uDay);
+      vec3 frozen = mix(iceCol, snowCol, drift * .8) - crack * mix(.05, .18, uDay);
+      frozen += sky(ruv, t) * .12 * (1. - dp); // a faint sheen of the sky
+      c = mix(c, frozen, uIce);
+    }
   }
   // fog swallows the horizon
   float hzd = abs(uv.y - HZ);
@@ -541,9 +565,9 @@ void main(){
   const loc = gl.getAttribLocation(pr, 'p'); gl.enableVertexAttribArray(loc); gl.vertexAttribPointer(loc, 2, gl.FLOAT, false, 0, 0);
   const uR = gl.getUniformLocation(pr, 'uR'), uT = gl.getUniformLocation(pr, 'uT'), uM = gl.getUniformLocation(pr, 'uM');
   let visible = true, raf = 0; // declared early: the weather fetch can land before the render loop starts
-  const U = ['uSun', 'uDay', 'uCloud', 'uWind', 'uWave', 'uRain', 'uSnow', 'uFog', 'uFlash', 'uSunX'].reduce((o, k) => (o[k] = gl.getUniformLocation(pr, k), o), {});
+  const U = ['uSun', 'uDay', 'uCloud', 'uWind', 'uWave', 'uRain', 'uSnow', 'uFog', 'uFlash', 'uSunX', 'uIce'].reduce((o, k) => (o[k] = gl.getUniformLocation(pr, k), o), {});
   // the sky follows Traverse City: real sun height, cloud, wind and Lake Michigan waves (default: tonight's sunset)
-  const wx = { sun: 0, day: 0, cloud: 0, wind: .3, wave: .3, rain: 0, snow: 0, fog: 0, sx: .5 }, wxT = { ...wx };
+  const wx = { sun: 0, day: 0, cloud: 0, wind: .3, wave: .3, rain: 0, snow: 0, fog: 0, sx: .5, ice: 0 }, wxT = { ...wx };
   window.__wx = wx; // the skyline reads the sky (sun height, daylight, cloud) from here
   let storm = false, flash = 0;
   const precip = (code) => ({ rain: (code >= 51 && code <= 67) || (code >= 80 && code <= 82) || code >= 95 ? (code >= 63 && code <= 67) || code >= 81 ? 1 : .6 : 0, snow: (code >= 71 && code <= 77) || code === 85 || code === 86 ? 1 : 0, fog: code === 45 || code === 48 ? 1 : 0 });
@@ -613,6 +637,7 @@ void main(){
     const p = v.p / 100, cold = v.t <= 32;
     setWx([sun, M.dayOf(sun), Math.min(1, .08 + p * 1.1), Math.min(1, v.w / 25), Math.min(1, v.w / 30), cold ? 0 : p, cold ? p : 0, 0]);
     wxT.sx = M.sunXAt(t); storm = false;
+    wxT.ice = Math.min(1, Math.max(0, (15 - v.t) / 20)); // fully frozen at -5°F and below
     if (instant) Object.assign(wx, wxT);
     const el = document.getElementById('wx');
     if (el) { const sky = p < .05 ? (v.w > 25 ? 'BLUSTERY' : 'CLEAR') : cold ? (p > .6 ? 'BLIZZARD' : 'SNOW') : (p > .6 ? 'DOWNPOUR' : 'RAIN');
@@ -623,7 +648,7 @@ void main(){
     const v = readSky(); if (v) { applyCustom(v); return; }
     if (!model || !model.d) return;
     const { sunAt, dayOf, sunXAt, d, real } = model, now = Date.now(), pr = precip(d.code);
-    setWx([sunAt(now), dayOf(sunAt(now)), d.cloud / 100, ...real, pr.rain, pr.snow, pr.fog]); wxT.sx = sunXAt(now); storm = d.code >= 95 && !reduce;
+    setWx([sunAt(now), dayOf(sunAt(now)), d.cloud / 100, ...real, pr.rain, pr.snow, pr.fog]); wxT.sx = sunXAt(now); wxT.ice = Math.min(1, Math.max(0, (10 - d.temp_f) / 25)); storm = d.code >= 95 && !reduce;
     showWx(d);
   }
   // the panel
@@ -678,8 +703,8 @@ void main(){
   };
   const t0 = performance.now();
   function draw(t){ lastT = t; if (performance.now() - lastPointer > 4000) { tx = .5 + Math.sin(t * .15) * .35; } mx += (tx - mx) * .04; my += (ty - my) * .04;
-    for (const k of ['sun', 'day', 'cloud', 'wind', 'wave', 'rain', 'snow', 'fog', 'sx']) wx[k] += (wxT[k] - wx[k]) * .03; // ease into the real sky
-    gl.uniform1f(U.uSunX, wx.sx);
+    for (const k of ['sun', 'day', 'cloud', 'wind', 'wave', 'rain', 'snow', 'fog', 'sx', 'ice']) wx[k] += (wxT[k] - wx[k]) * .03; // ease into the real sky
+    gl.uniform1f(U.uSunX, wx.sx); gl.uniform1f(U.uIce, wx.ice);
     if (storm && Math.random() < .004) flash = 1; flash *= .86;
     gl.uniform1f(U.uRain, wx.rain); gl.uniform1f(U.uSnow, wx.snow); gl.uniform1f(U.uFog, wx.fog); gl.uniform1f(U.uFlash, flash > .02 ? flash * (Math.random() < .5 ? 1 : .4) : 0);
     gl.uniform1f(U.uSun, wx.sun); gl.uniform1f(U.uDay, wx.day); gl.uniform1f(U.uCloud, wx.cloud); gl.uniform1f(U.uWind, wx.wind); gl.uniform1f(U.uWave, wx.wave);

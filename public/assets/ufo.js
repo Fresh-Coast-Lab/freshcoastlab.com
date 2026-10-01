@@ -182,8 +182,8 @@
 
   // things that live behind the ship and the comet: the Triangle, its fog and flare, and a little lake monster
   const behind = document.createElementNS(NS, 'g');
-  const DG = '#62B98C', DGL = '#9ADBB2', DGD = '#1D4A37';
-  const HAT = `<rect x="-3.2" y="-7.5" width="6.4" height="7.5" rx=".5" fill="#17131C" stroke="#8C8498" stroke-width=".45"/><rect x="-3.2" y="-2.6" width="6.4" height="1.5" fill="#D8433A"/><rect x="-5.4" y="-.7" width="10.8" height="1.5" rx=".75" fill="#17131C" stroke="#8C8498" stroke-width=".45"/>`;
+  const DG = '#05070B', DGL = '#05070B', DGD = '#05070B'; // silhouette, like everyone else on the shore
+  const HAT = `<rect x="-3.2" y="-7.5" width="6.4" height="7.5" rx=".5" fill="#05070B"/><rect x="-5.4" y="-.7" width="10.8" height="1.5" rx=".75" fill="#05070B"/>`;
   behind.innerHTML = `
     <defs>
       <radialGradient id="tri-flare"><stop offset="0" stop-color="#CFFFEF" stop-opacity=".7"/><stop offset=".25" stop-color="#3DF2B0" stop-opacity=".35"/><stop offset="1" stop-color="#3DF2B0" stop-opacity="0"/></radialGradient>
@@ -201,7 +201,7 @@
       </g>
     </g>
     <g class="fog" clip-path="url(#tri-clip)" opacity="0"><g filter="url(#fog-blur)" fill="#D8F2EA">${[0, 1, 2, 3, 4].map(() => '<ellipse rx="1" ry="1" opacity=".22"/>').join('')}</g></g>
-    <g clip-path="url(#sea-clip)"><g class="dino" opacity="0">
+    <g clip-path="url(#sea-clip)"><g class="dino" style="filter:drop-shadow(0 0 .9px rgba(160,200,222,.75))" opacity="0">
       <path d="M-34,3 Q-27,-10 -20,3 Z" fill="${DG}" stroke="${DGD}" stroke-width=".8"/>
       <path d="M-46,3 Q-43,-4 -38,-4 Q-41,-1 -40,3 Z" fill="${DG}" stroke="${DGD}" stroke-width=".8"/>
       <path d="M-2,4 C-3,-12 -1,-25 7,-33" fill="none" stroke="${DGD}" stroke-width="8.6" stroke-linecap="round"/>
@@ -216,9 +216,8 @@
         <ellipse cx="11.5" cy="-35" rx="6.4" ry="4.4" fill="${DG}"/>
         <ellipse cx="17.5" cy="-33.4" rx="3.2" ry="2.4" fill="${DG}"/>
         <circle cx="20" cy="-34.6" r=".55" fill="${DGD}"/>
-        <path d="M14.2,-31.6 q2.6,1.9 5.2,0" stroke="${DGD}" stroke-width=".7" fill="none" stroke-linecap="round"/>
-        <ellipse cx="13.6" cy="-32.4" rx="1.7" ry="1" fill="#FF8FA3" opacity=".75"/>
-        <g class="deye"><circle cx="11" cy="-37" r="2.3" fill="#FFF" stroke="${DGD}" stroke-width=".5"/><circle cx="11.8" cy="-37" r="1.15" fill="#111"/><circle cx="12.2" cy="-37.5" r=".4" fill="#FFF"/></g>
+        
+        <g class="deye"><circle cx="11.6" cy="-36.8" r="1.1" fill="#FFB347" style="filter:drop-shadow(0 0 2px #FFB347)"/></g>
         <g class="dhat" transform="translate(9.5,-39.6) rotate(-12)">${HAT}</g>
       </g>
     </g></g>`;
@@ -309,7 +308,7 @@
       if (talk) {
         if (chirpTxt.textContent !== talk) { chirpTxt.textContent = talk; const w = talk.length > 1 ? 30 : 12; chirpBox.setAttribute('width', w); chirpTxt.setAttribute('x', w / 2); }
         const pop = talk === '!' ? seeK : k - 2100, s = ss * (pop < 160 ? 0.6 + 0.4 * pop / 160 : 1);
-        chirp.setAttribute('opacity', 1);
+        chirp.setAttribute('opacity', 0);
         chirp.setAttribute('transform', `translate(${(hx + (dir > 0 ? 4 : -4 - (talk.length > 1 ? 30 : 12)) * ss).toFixed(1)},${(hy - 7 * ds).toFixed(1)}) scale(${s.toFixed(3)})`);
         chirp.firstElementChild.setAttribute('transform', dir > 0 ? '' : `translate(${talk.length > 1 ? 30 : 12},0) scale(-1,1)`);
       } else chirp.setAttribute('opacity', 0);
@@ -346,7 +345,7 @@
       }
       // 5. the bulletin
       const ck = k - cardStart;
-      if (ck > 0) {
+      if (false && ck > 0) {
         dcard.setAttribute('opacity', (ck < 200 ? ck / 200 : ck > T.card ? Math.max(0, 1 - (ck - T.card) / 500) : 1).toFixed(2));
         dcard.setAttribute('transform', `translate(${cardX.toFixed(1)},${cardY.toFixed(1)}) rotate(-4) scale(${(cs * (ck < 220 ? 1.4 - 0.4 * ck / 220 : 1)).toFixed(3)})`);
       }
@@ -673,7 +672,7 @@
       dogman.setAttribute('transform', `translate(${x.toFixed(1)},${(horizon - 1).toFixed(1)}) scale(${(dir * ds).toFixed(3)},${ds.toFixed(3)})`);
       // 8. and somewhere, a Traverse City radio station plays the song
       const rk = k - rStart;
-      radio.setAttribute('opacity', (rk < 0 ? 0 : rk < 400 ? rk / 400 : k > rEnd ? Math.max(0, 1 - (k - rEnd) / 400) : 1).toFixed(2));
+      radio.setAttribute('opacity', 0 && (rk < 0 ? 0 : rk < 400 ? rk / 400 : k > rEnd ? Math.max(0, 1 - (k - rEnd) / 400) : 1).toFixed(2));
       needle.setAttribute('x1', (20 + 40 * Math.min(1, Math.max(0, rk / 1200))).toFixed(1)); needle.setAttribute('x2', needle.getAttribute('x1'));
       if (k < end) requestAnimationFrame(step);
       else { [dogman, dside, dfront, radio, dmdim, eyesonly].forEach((el) => el.setAttribute('opacity', 0)); qeyes.style.filter = ''; done(); }
