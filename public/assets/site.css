@@ -1037,3 +1037,22 @@ a.post:hover{border-color:rgba(61,242,176,.4);transform:translateY(-3px)}
 .skyline-layer.wiped .mass > :nth-child(3n){animation-delay:.15s}.skyline-layer.wiped .mass > :nth-child(3n+1){animation-delay:.35s}
 @keyframes sucked{to{transform:translate(-60px,-220px) rotate(-260deg) scale(.3)}}
 @media (prefers-reduced-motion:reduce){.hero .orbit.torn,.hero .orbit.returning{animation:none}}
+/* desktop: the Alter environment panel opens below the sign, over the gap above the intro, so the sky stays clear */
+@media (min-width:761px){
+  .hero > .skybox{position:static}
+  .hero > .skybox .sk-panel{position:absolute;top:auto;bottom:6px;left:50%;transform:translateX(-50%);z-index:20}
+}
+@media (min-width:761px){
+  .hero > .skybox details{position:static}
+  .hero > .skybox .sk-panel{bottom:-8px}
+}
+@media (min-width:761px){.hero > .skybox,.hero > .skybox details,.hero > .skybox details[open]{position:static!important}}
+@media (min-width:761px){.hero > .skybox .sk-panel{top:auto!important;bottom:-8px!important}}
+
+/* desktop: docked between the sign and the intro */
+.sk-panel.sk-dock{position:relative;z-index:5;width:min(680px,calc(100% - 32px));margin:-6px auto 18px;background:rgba(10,18,32,.94);border:1px solid var(--line);border-radius:18px;padding-top:10px;box-shadow:0 20px 50px -20px rgba(0,0,0,.8);animation:fadeUp .3s ease both}
+.sk-panel.sk-dock[hidden]{display:none}
+.sk-dock .sk-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px 22px;padding:6px 18px 4px}
+.sk-dock .sk-grid label{display:grid;grid-template-columns:1fr auto;align-items:center;gap:4px 10px}
+.sk-dock .sk-k{order:1}.sk-dock .sk-grid output{order:2}.sk-dock .sk-grid input[type=range]{order:3}
+.sk-dock .sk-foot{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:8px 18px 14px}

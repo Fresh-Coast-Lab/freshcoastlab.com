@@ -657,7 +657,7 @@ void main(){
     setWx([sun, M.dayOf(sun), Math.min(1, .08 + p * 1.1), Math.min(1, v.w / 25), Math.min(1, v.w / 30), cold ? 0 : p, cold ? p : 0, 0]);
     wxT.sx = M.sunXAt(t); storm = false;
     window.__storm = p > .75 && !cold ? (p - .75) / .25 : 0; // lightning from 75% precipitation (rain, not snow), more and more toward 100%
-    window.__tornado = v.w >= 45 && v.p >= 100 && v.t >= 95;
+    window.__tornado = v.w >= 42 && v.p >= 95 && v.t >= 90; // 'maxed' with a little slack: thumbs rarely land on the exact end of a slider
     wxT.ice = Math.min(1, Math.max(0, (15 - v.t) / 20)); // fully frozen at -5°F and below
     window.__tempF = v.t;
     if (instant) Object.assign(wx, wxT);
@@ -696,11 +696,13 @@ void main(){
     const det = skyBox.querySelector('details'), panel = skyBox.querySelector('.sk-panel');
     // phones: the sheet lives directly under <body>, so nothing in the hero can ever draw over it
     const portal = matchMedia('(max-width: 760px)');
-    const place = () => { if (portal.matches) { if (panel.parentNode !== document.body) document.body.append(panel); panel.classList.add('sk-sheet'); panel.hidden = !det.open; }
-      else { if (panel.parentNode !== det) det.append(panel); panel.classList.remove('sk-sheet'); panel.hidden = false; } };
+    // desktop: the panel sits in the gap under the sign, above the intro, so the sky stays in view
+    const intro = document.querySelector('.intro');
+    const place = () => { if (portal.matches) { if (panel.parentNode !== document.body) document.body.append(panel); panel.classList.add('sk-sheet'); panel.classList.remove('sk-dock'); panel.hidden = !det.open; }
+      else { if (panel.parentNode !== intro.parentNode) intro.before(panel); panel.classList.remove('sk-sheet'); panel.classList.add('sk-dock'); panel.hidden = !det.open; } };
     det.addEventListener('toggle', place); portal.addEventListener('change', place); place();
     panel.addEventListener('input', () => { if (portal.matches) skyBox.dispatchEvent(new Event('input')); });
-    const closeSky = () => { det.open = false; };
+    const closeSky = () => { det.open = false; panel.hidden = true; };
     document.getElementById('sk-done').addEventListener('click', closeSky);
     document.addEventListener('pointerdown', (e) => { if (det.open && !skyBox.contains(e.target) && !panel.contains(e.target)) closeSky(); });
     addEventListener('keydown', (e) => { if (e.key === 'Escape' && det.open) closeSky(); });
