@@ -674,12 +674,12 @@ void main(){
   // the panel
   const skyBox = document.getElementById('skybox');
   if (skyBox && !PRESET[skyQ]) {
-    const rng = { h: skyBox.querySelector('#sk-h'), t: skyBox.querySelector('#sk-t'), p: skyBox.querySelector('#sk-p'), w: skyBox.querySelector('#sk-w') };
-    const out = { h: skyBox.querySelector('#sk-h-o'), t: skyBox.querySelector('#sk-t-o'), p: skyBox.querySelector('#sk-p-o'), w: skyBox.querySelector('#sk-w-o') };
+    const rng = { h: document.getElementById('sk-h'), t: document.getElementById('sk-t'), p: document.getElementById('sk-p'), w: document.getElementById('sk-w') };
+    const out = { h: document.getElementById('sk-h-o'), t: document.getElementById('sk-t-o'), p: document.getElementById('sk-p-o'), w: document.getElementById('sk-w-o') };
     const nowH = () => { const off = tzOffMs(), l = new Date(Date.now() + off); return l.getUTCHours() + l.getUTCMinutes() / 60; };
     const fill = (v) => { rng.h.value = v.h; rng.t.value = v.t; rng.p.value = v.p; rng.w.value = v.w; label(); };
     const label = () => { out.h.textContent = fmtH(+rng.h.value); out.t.textContent = `${rng.t.value}°F`; out.p.textContent = `${rng.p.value}%`; out.w.textContent = `${rng.w.value} mph`;
-      skyBox.querySelectorAll('input[type=range]').forEach((r) => r.style.setProperty('--v', ((r.value - r.min) / (r.max - r.min) * 100).toFixed(1) + '%')); };
+      document.querySelectorAll('#sk-h,#sk-t,#sk-p,#sk-w').forEach((r) => r.style.setProperty('--v', ((r.value - r.min) / (r.max - r.min) * 100).toFixed(1) + '%')); };
     const saved = readSky();
     const liveDefaults = () => ({ h: +nowH().toFixed(2), t: 60, p: 0, w: 8 });
     fill(saved || liveDefaults());
@@ -690,12 +690,18 @@ void main(){
       label(); applyCustom(v); skyBox.classList.add('custom');
       clearTimeout(tmr); tmr = setTimeout(() => writeSky(v), 250);
     });
-    const det = skyBox.querySelector('details');
+    const det = skyBox.querySelector('details'), panel = skyBox.querySelector('.sk-panel');
+    // phones: the sheet lives directly under <body>, so nothing in the hero can ever draw over it
+    const portal = matchMedia('(max-width: 760px)');
+    const place = () => { if (portal.matches) { if (panel.parentNode !== document.body) document.body.append(panel); panel.classList.add('sk-sheet'); panel.hidden = !det.open; }
+      else { if (panel.parentNode !== det) det.append(panel); panel.classList.remove('sk-sheet'); panel.hidden = false; } };
+    det.addEventListener('toggle', place); portal.addEventListener('change', place); place();
+    panel.addEventListener('input', () => { if (portal.matches) skyBox.dispatchEvent(new Event('input')); });
     const closeSky = () => { det.open = false; };
-    skyBox.querySelector('#sk-done').addEventListener('click', closeSky);
-    document.addEventListener('pointerdown', (e) => { if (det.open && !skyBox.contains(e.target)) closeSky(); });
+    document.getElementById('sk-done').addEventListener('click', closeSky);
+    document.addEventListener('pointerdown', (e) => { if (det.open && !skyBox.contains(e.target) && !panel.contains(e.target)) closeSky(); });
     addEventListener('keydown', (e) => { if (e.key === 'Escape' && det.open) closeSky(); });
-    skyBox.querySelector('#sk-live').addEventListener('click', () => {
+    document.getElementById('sk-live').addEventListener('click', () => {
       clearSky(); skyBox.classList.remove('custom');
       if (model && model.d) { const d = model.d; fill({ h: +nowH().toFixed(2), t: d.temp_f, p: precip(d.code).rain || precip(d.code).snow ? 60 : 0, w: d.wind_mph }); }
       settle(); if (!model || !model.d) applyCustom(liveDefaults());
