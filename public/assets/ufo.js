@@ -1,5 +1,5 @@
-// Easter eggs in the hero, in 1950s B-movie style: a saucer beams up a walker (on load), a lake monster knocks the
-// sign over (once, later), Bigfoot strolls the shore. Tap the sign to cycle through them.
+// Easter eggs in the hero, in 1950s B-movie style: a saucer beams up a walker (on load), a comet sinks a cruise ship
+// (once, later; a lifeboat rows away), Bigfoot strolls the shore. Tap the sign to cycle through them.
 (() => {
   const hero = document.querySelector('.hero');
   if (!hero || matchMedia('(prefers-reduced-motion: reduce)').matches) return;
@@ -106,57 +106,87 @@
     };
     requestAnimationFrame(step);
   };
-  // ---------------------------------------------------------------- the lake monster (an original, not anyone's trademark)
-  const mon = document.createElementNS(NS, 'g');
-  mon.innerHTML = `
-    <clipPath id="above-water"><rect class="waterclip" x="-2000" y="-4000" width="8000" height="4000"/></clipPath>
-    <g clip-path="url(#above-water)"><g class="monster" opacity="0">
-      <g class="mbody" fill="#071319" stroke="rgba(124,211,224,.4)" stroke-width="1.2" stroke-linejoin="round">
-        <polygon points="36,-30 52,-40 40,-48"/><polygon points="41,-62 58,-74 44,-80"/><polygon points="38,-94 56,-110 40,-112"/><polygon points="28,-122 44,-142 26,-140"/><polygon points="12,-146 22,-168 6,-160"/>
-        <path d="M40,0 C46,-50 44,-95 30,-120 C22,-135 14,-150 0,-160 C-14,-170 -34,-172 -50,-166 L-62,-160 C-60,-154 -52,-151 -40,-150 C-30,-149 -22,-146 -18,-140 C-26,-110 -34,-60 -38,0 Z"/>
-        <g class="jaw"><path d="M-18,-142 C-30,-140 -46,-142 -58,-146 L-56,-139 C-44,-133 -28,-131 -16,-134 Z"/></g>
-        <g class="marm"><path d="M-26,-98 C-44,-96 -58,-90 -66,-80 L-74,-74 L-66,-75 L-70,-66 L-62,-73 L-60,-64 L-56,-77 C-48,-85 -38,-89 -24,-89 Z"/></g>
-      </g>
-      <circle class="meye" cx="-31" cy="-159" r="2.8" fill="#FFB060"/>
-    </g></g>
-    <g class="ripples" fill="none" stroke="rgba(207,230,242,.55)" stroke-width="1.2"><ellipse rx="0" ry="0"/><ellipse rx="0" ry="0"/></g>`;
-  svg.append(mon);
-  const monster = mon.querySelector('.monster'), jaw = mon.querySelector('.jaw'), marm = mon.querySelector('.marm'), meye = mon.querySelector('.meye');
-  const ripples = [...mon.querySelectorAll('.ripples ellipse')], waterclip = mon.querySelector('.waterclip');
   const stack = document.querySelector('.hero-stack');
-  const playMonster = (done) => {
-    size(); waterclip.setAttribute('height', String(4000 + horizon + 1));
-    const o = orbitEl.getBoundingClientRect(), h = hero.getBoundingClientRect();
-    const signTop = o.top - h.top + o.height * 0.22, cx = o.left - h.left + o.width / 2;
-    const ms = Math.max(0.6, (horizon - signTop) * (W < 700 ? 1.5 : 1.35) / 170);
-    const mx = cx + o.width * (W < 700 ? 0.24 : 0.34);
-    const T = { rise: 2200, roar: 1000, lean: 700, sink: 1600 };
-    const t0 = performance.now(); let knocked = false;
-    monster.setAttribute('opacity', 1);
+  // ---------------------------------------------------------------- a cruise ship, a comet, and a lifeboat (everyone's fine)
+  const sea = document.createElementNS(NS, 'g');
+  const portholes = (y, x0, x1, step) => { let o = ''; for (let x = x0; x <= x1; x += step) o += `<rect class="pw" x="${x}" y="${y}" width="2.2" height="1.6" rx=".5"/>`; return o; };
+  sea.innerHTML = `
+    <defs>
+      <linearGradient id="comet-tail" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#9FE8FF" stop-opacity="0"/><stop offset=".85" stop-color="#E8FBFF" stop-opacity=".75"/><stop offset="1" stop-color="#FFFFFF"/></linearGradient>
+      <radialGradient id="flash"><stop offset="0" stop-color="#FFF6E0"/><stop offset=".4" stop-color="#FFC27A" stop-opacity=".55"/><stop offset="1" stop-color="#FF8A3D" stop-opacity="0"/></radialGradient>
+    </defs>
+    <clipPath id="sea-clip"><rect class="seaclip" x="-2000" y="-4000" width="8000" height="4000"/></clipPath>
+    <g class="liner-refl" opacity="0"></g>
+    <g clip-path="url(#sea-clip)"><g class="liner" opacity="0">
+      <path fill="#05080D" d="M-60,-2 L-52,8 L52,8 L64,-6 L58,-6 L-60,-6 Z"/>
+      <path fill="#0A1018" d="M-48,-6 L-48,-14 L40,-14 L46,-6 Z M-38,-14 L-38,-21 L28,-21 L32,-14 Z M-26,-21 L-26,-27 L14,-27 L16,-21 Z"/>
+      <path fill="#0A1018" d="M-6,-27 L-4,-37 L6,-37 L8,-27 Z"/><rect x="-6" y="-37" width="12" height="2.5" fill="#B4745A"/>
+      <path stroke="#0A1018" stroke-width="1" d="M30,-21 L30,-34"/><circle class="mast" cx="30" cy="-35" r="1.4" fill="#FFF3C4"/>
+      <g fill="#FFD27A">${portholes(-1.5, -50, 52, 5)}${portholes(-11, -44, 38, 4.5)}${portholes(-18, -34, 26, 4.5)}${portholes(-25, -22, 12, 4.5)}</g>
+    </g></g>
+    <g class="splash" opacity="0" fill="none" stroke="#E8F6FF" stroke-width="1.6" stroke-linecap="round"><path d="M-14,0 Q-18,-26 -26,-34"/><path d="M-4,0 Q-4,-34 -6,-46"/><path d="M8,0 Q12,-30 20,-38"/><path d="M16,0 Q26,-18 34,-20"/></g>
+    <circle class="flash" r="60" fill="url(#flash)" opacity="0"/>
+    <g class="comet" opacity="0"><rect x="-150" y="-1.6" width="150" height="3.2" rx="1.6" fill="url(#comet-tail)"/><circle r="4.2" fill="#FFFFFF"/><circle r="9" fill="#BFF4FF" opacity=".35"/></g>
+    <g class="lifeboat" opacity="0"><ellipse cx="0" cy="-5" rx="5" ry="4" fill="#FFD27A" opacity=".25"/><path d="M-8,0 L8,0 L6,3 L-6,3 Z" fill="#E0703F"/><path d="M-8,0 L8,0" stroke="#FFF3E0" stroke-width=".6"/><circle cx="-2" cy="-2.2" r="1.3" fill="#AFC3CF"/><circle cx="2.5" cy="-2.2" r="1.3" fill="#AFC3CF"/><path class="oar" stroke="#AFC3CF" stroke-width=".9" d="M0,-1 L-9,3"/><circle cx="0" cy="-5" r="1.1" fill="#FFE9A8"/><rect x="-1" y="3.5" width="2" height="5" rx="1" fill="#FFD27A" opacity=".3"/></g>
+    <g class="sripples" fill="none" stroke="rgba(207,230,242,.55)" stroke-width="1.1"><ellipse rx="0" ry="0"/><ellipse rx="0" ry="0"/><ellipse rx="0" ry="0"/></g>`;
+  svg.append(sea);
+  const liner = sea.querySelector('.liner'), comet = sea.querySelector('.comet'), flash = sea.querySelector('.flash'), splash = sea.querySelector('.splash');
+  const lifeboat = sea.querySelector('.lifeboat'), oar = sea.querySelector('.oar'), seaclip = sea.querySelector('.seaclip'), refl = sea.querySelector('.liner-refl');
+  const pws = [...sea.querySelectorAll('.pw')], mast = sea.querySelector('.mast'), sripples = [...sea.querySelectorAll('.sripples ellipse')];
+  // reflections of the lit decks, as short streaks on the water
+  refl.innerHTML = '<linearGradient id="refl-g" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#FFD27A" stop-opacity=".45"/><stop offset="1" stop-color="#FFD27A" stop-opacity="0"/></linearGradient>' + [-44, -30, -16, -2, 12, 26, 40].map((x, i) => `<rect x="${x}" y="${3 + (i % 2)}" width="5" height="${5 + (i % 3) * 2}" rx="1" fill="url(#refl-g)"/>`).join('');
+  const playComet = (done) => {
+    size(); seaclip.setAttribute('height', String(4000 + horizon + 1));
+    const phone = W < 700, dir = phone ? -1 : 1; // phones: the sign tilts up to the right, so the clear water is on the right
+    const ss = Math.max(0.8, Math.min(1.8, W / 700)), hitX = W * (phone ? 0.8 : 0.28);
+    const T = { sail: 5200, fall: 900, dark: 900, sink: 2200, row: 4200 };
+    const fallStart = T.sail - T.fall, hit = T.sail, sinkStart = hit + T.dark, rowStart = hit + 1400;
+    const t0 = performance.now(); let boomed = false;
+    liner.setAttribute('opacity', 1); refl.setAttribute('opacity', 1);
+    const cx0 = phone ? W * 0.02 : W * 0.98, cy0 = horizon - 260 * ss;
     const step = (now) => {
       const k = now - t0;
-      const rise = Math.min(1, k / T.rise), sinkK = k - (T.rise + T.roar + T.lean + 600), sink = sinkK > 0 ? Math.min(1, sinkK / T.sink) : 0;
-      const y = horizon + 170 * ms * (1 - ease(rise)) + 175 * ms * ease(sink);
-      let lean = 0, jawA = 0, arm = 0;
-      const roarK = k - T.rise;
-      if (roarK > 0 && roarK < T.roar) { jawA = Math.sin(Math.min(1, roarK / 250) * Math.PI / 2) * 22; if (!stack.classList.contains('quake')) stack.classList.add('quake'); }
-      if (roarK >= T.roar) { stack.classList.remove('quake'); jawA = Math.max(0, 22 - (roarK - T.roar) / 20); }
-      const leanK = k - T.rise - T.roar;
-      if (leanK > 0) { const l = Math.min(1, leanK / T.lean); lean = -14 * ease(l) * (1 - ease(sink)); arm = -70 * ease(l); if (l > 0.55 && !knocked) { knocked = true; topple(); } }
-      monster.setAttribute('transform', `translate(${mx.toFixed(1)},${y.toFixed(1)}) scale(${ms.toFixed(3)}) rotate(${lean.toFixed(1)})`);
-      jaw.setAttribute('transform', `rotate(${(-jawA).toFixed(1)} -16 -140)`);
-      marm.setAttribute('transform', `rotate(${arm.toFixed(1)} -26 -94)`);
-      meye.setAttribute('opacity', (0.6 + 0.4 * Math.sin(k / 90)).toFixed(2));
-      meye.style.filter = 'drop-shadow(0 0 4px #FF8A3D)';
-      // rings on the water while it moves
-      ripples.forEach((r, i) => { const ph = ((k / 900) + i * 0.5) % 1, on = (rise < 1 || sink > 0) ? 1 : 0.3;
-        r.setAttribute('cx', mx); r.setAttribute('cy', horizon + 2); r.setAttribute('rx', (40 + 90 * ph) * ms); r.setAttribute('ry', (4 + 8 * ph) * ms); r.setAttribute('opacity', ((1 - ph) * on).toFixed(2)); });
-      if (sink < 1) requestAnimationFrame(step); else { monster.setAttribute('opacity', 0); ripples.forEach((r) => r.setAttribute('opacity', 0)); setTimeout(restore, 900); setTimeout(done, 2600); }
+      // the liner glides in from the left and is hit just as it reaches the clear water left of the sign
+      const sailT = Math.min(1, k / T.sail), x = lerp(phone ? W + 90 * ss : -90 * ss, hitX, 1 - Math.pow(1 - sailT, 1.6));
+      let y = horizon - 1, tilt = 0;
+      if (k > sinkStart) { const g = Math.min(1, (k - sinkStart) / T.sink), e = g * g; tilt = -22 * Math.min(1, g * 2.2); y = horizon + 48 * e; }
+      liner.setAttribute('transform', `translate(${x.toFixed(1)},${y.toFixed(1)}) scale(${(ss * dir).toFixed(3)},${ss.toFixed(3)}) rotate(${tilt.toFixed(1)} 40 6)`);
+      refl.setAttribute('transform', `translate(${x.toFixed(1)},${horizon.toFixed(1)}) scale(${ss.toFixed(3)})`);
+      // lights: steady, then they sputter and die after the hit
+      const lit = k < hit ? 1 : k < sinkStart ? (Math.random() > (k - hit) / T.dark ? 1 : 0.15) : 0.08;
+      pws.forEach((p, i) => p.setAttribute('opacity', (lit * (k < hit ? (0.75 + 0.25 * ((i * 7) % 3 === 0 ? Math.sin(k / 400 + i) : 1)) : 1)).toFixed(2)));
+      mast.setAttribute('opacity', lit > 0.5 ? (0.5 + 0.5 * Math.sin(k / 160) > 0 ? 1 : 0.3) : 0.1);
+      refl.setAttribute('opacity', (k < hit ? 1 : Math.max(0, 1 - (k - hit) / T.dark)).toFixed(2));
+      // the comet
+      if (k > fallStart && k < hit + 60) {
+        const f = Math.min(1, (k - fallStart) / T.fall), e = f * f;
+        const hx = lerp(cx0, x, e), hy = lerp(cy0, horizon - 8 * ss, e), ang = Math.atan2(horizon - cy0, x - cx0) * 180 / Math.PI;
+        comet.setAttribute('opacity', 1);
+        comet.setAttribute('transform', `translate(${hx.toFixed(1)},${hy.toFixed(1)}) rotate(${ang.toFixed(1)}) scale(${(ss * (0.6 + 0.6 * e)).toFixed(3)})`);
+      } else comet.setAttribute('opacity', 0);
+      // impact
+      if (k >= hit && !boomed) { boomed = true; disturb(); stack.classList.add('quake'); setTimeout(() => stack.classList.remove('quake'), 380); }
+      if (k > hit && k < hit + 900) {
+        const b = (k - hit) / 900;
+        flash.setAttribute('opacity', (1 - b).toFixed(2)); flash.setAttribute('transform', `translate(${x.toFixed(1)},${(horizon - 6).toFixed(1)}) scale(${(ss * (0.5 + b * 1.4)).toFixed(3)})`);
+        splash.setAttribute('opacity', (1 - b).toFixed(2)); splash.setAttribute('transform', `translate(${x.toFixed(1)},${horizon.toFixed(1)}) scale(${(ss * (0.6 + b * 0.8)).toFixed(3)})`);
+      } else { flash.setAttribute('opacity', 0); splash.setAttribute('opacity', 0); }
+      // rings where it went down
+      sripples.forEach((r, i) => { if (k <= hit) { r.setAttribute('opacity', 0); return; } const on = 1, ph = ((k - hit) / 1300 + i * 0.33) % 1;
+        r.setAttribute('cx', x); r.setAttribute('cy', horizon + 2); r.setAttribute('rx', ((30 + 80 * ph) * ss).toFixed(1)); r.setAttribute('ry', ((3 + 7 * ph) * ss).toFixed(1));
+        r.setAttribute('opacity', (on * (1 - ph) * Math.max(0, 1 - (k - sinkStart - T.sink) / 2500)).toFixed(2)); });
+      // and a lifeboat rows away, lantern lit
+      if (k > rowStart) {
+        const r = Math.min(1, (k - rowStart) / T.row);
+        lifeboat.setAttribute('opacity', (r < 0.1 ? r * 10 : r > 0.85 ? (1 - r) / 0.15 : 1).toFixed(2));
+        lifeboat.setAttribute('transform', `translate(${lerp(x + 20 * ss * dir, x + 120 * ss * dir * -1 * (phone ? -1 : 1), r).toFixed(1)},${(horizon + 3).toFixed(1)}) scale(${(ss * 1.2 * dir).toFixed(3)},${(ss * 1.2).toFixed(3)})`);
+        oar.setAttribute('transform', `rotate(${(Math.sin(k / 260) * 22).toFixed(1)})`);
+      }
+      if (k < rowStart + T.row) requestAnimationFrame(step);
+      else { liner.setAttribute('opacity', 0); refl.setAttribute('opacity', 0); lifeboat.setAttribute('opacity', 0); done(); }
     };
     requestAnimationFrame(step);
   };
-  const topple = () => { if (!orbitEl) return; orbitEl.classList.add('toppled'); };
-  const restore = () => { if (!orbitEl) return; orbitEl.classList.remove('toppled'); disturb(); };
 
   // ---------------------------------------------------------------- Bigfoot, the 1967 stroll
   const bf = document.createElementNS(NS, 'g');
@@ -205,15 +235,15 @@
   let busy = false;
   const run = (fn) => { if (busy) return; busy = true; fn(() => { busy = false; }); };
   const ufoAct = (done) => { play(); const wait = () => (playing ? setTimeout(wait, 300) : done()); setTimeout(wait, 300); };
-  const ACTS = [playMonster, playBigfoot, ufoAct];
+  const ACTS = [playComet, playBigfoot, ufoAct];
   let next = 0;
   const session = (k) => { try { if (sessionStorage.getItem(k) === '1') return false; sessionStorage.setItem(k, '1'); } catch (e) {} return true; };
   const heroVisible = () => hero.getBoundingClientRect().bottom > innerHeight * 0.4 && !document.hidden;
   const when = (ms, fn) => setTimeout(function go() { if (!heroVisible() || busy) { setTimeout(go, 2000); return; } fn(); }, ms);
   if (session('ufo')) when(600, () => run(ufoAct));
-  if (session('monster')) when(25000, () => { next = 1; run(playMonster); });
+  if (session('comet')) when(25000, () => { next = 1; run(playComet); });
   const sign = document.getElementById('neon');
   const orbit = sign && sign.closest('.orbit');
   if (orbit) { orbit.style.pointerEvents = 'auto'; orbit.style.cursor = 'pointer'; orbit.addEventListener('click', () => { if (busy) return; const act = ACTS[next]; next = (next + 1) % ACTS.length; run(act); }); }
-  window.__acts = { ufo: () => run(ufoAct), monster: () => run(playMonster), bigfoot: () => run(playBigfoot) };
+  window.__acts = { ufo: () => run(ufoAct), comet: () => run(playComet), ship: () => run(playComet), bigfoot: () => run(playBigfoot) };
 })();

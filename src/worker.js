@@ -64,6 +64,36 @@ export default {
       return json({ error: 'method not allowed' }, 405);
     }
 
+    if (url.pathname === '/api/weather') return weather(request);
+
     return env.ASSETS.fetch(request);
   },
 };
+
+// GET /api/weather -> Traverse City conditions and Lake Michigan waves for the hero sky.
+// Public data (Open-Meteo, no key), cached at the edge for 10 minutes. Any failure answers 204 and the
+// page keeps its default sunset sky.
+async function weather(request) {
+  const cache = caches.default;
+  const key = new Request('https://freshcoastlab.com/api/weather', { method: 'GET' });
+  const hit = await cache.match(key);
+  if (hit) return hit;
+  try {
+    const W = 'https://api.open-meteo.com/v1/forecast?latitude=44.76&longitude=-85.62&current=temperature_2m,wind_speed_10m,wind_direction_10m,cloud_cover,is_day,weather_code&daily=sunrise,sunset&timezone=America%2FDetroit&wind_speed_unit=mph&temperature_unit=fahrenheit&forecast_days=1';
+    const M = 'https://marine-api.open-meteo.com/v1/marine?latitude=44.95&longitude=-85.95&current=wave_height&timezone=America%2FDetroit';
+    const [w, m] = await Promise.all([fetch(W).then((r) => r.json()), fetch(M).then((r) => r.json()).catch(() => null)]);
+    const c = w.current, d = w.daily;
+    const body = {
+      temp_f: Math.round(c.temperature_2m), wind_mph: Math.round(c.wind_speed_10m), wind_dir: c.wind_direction_10m,
+      cloud: c.cloud_cover, code: c.weather_code, is_day: c.is_day,
+      sunrise: d.sunrise[0], sunset: d.sunset[0], utc_offset_s: w.utc_offset_seconds,
+      wave_ft: m && m.current && m.current.wave_height != null ? Math.round(m.current.wave_height * 3.281 * 10) / 10 : null,
+      observed: c.time,
+    };
+    const res = new Response(JSON.stringify(body), { headers: { 'content-type': 'application/json', 'cache-control': 'public, max-age=600' } });
+    await cache.put(key, res.clone());
+    return res;
+  } catch {
+    return new Response(null, { status: 204 });
+  }
+}
