@@ -444,6 +444,7 @@ precision highp float;
 uniform vec2 uR; uniform float uT; uniform vec2 uM; out vec4 o;
 uniform float uSun; uniform float uDay; uniform float uCloud; uniform float uWind; uniform float uWave;
 uniform float uRain; uniform float uSnow; uniform float uFog; uniform float uFlash; uniform float uSunX; uniform float uIce; uniform vec3 uMoon; // x, height, phase (0 new, .5 full)
+uniform float uGreen; // the sickly green light of a tornadic storm
 float h(vec2 p){ p = fract(p * vec2(123.34, 456.21)); p += dot(p, p + 45.32); return fract(p.x * p.y); }
 float n(vec2 p){ vec2 i = floor(p), f = fract(p); f = f * f * (3. - 2. * f);
   return mix(mix(h(i), h(i + vec2(1., 0.)), f.x), mix(h(i + vec2(0., 1.)), h(i + vec2(1., 1.)), f.x), f.y); }
@@ -587,6 +588,10 @@ void main(){
       c += vec3(.92, .95, 1.) * step(.9 - uSnow * .1, sh2) * smoothstep(.2 + fl * .05, .0, length(fract(sp2) - jit)) * min(1., uSnow * 1.2) * (.7 + fl * .15); } }
   // lightning lights the whole sky for an instant
   c += vec3(.75, .8, 1.) * uFlash * (.35 + .65 * step(HZ, uv.y));
+  // tornado light: the sky and the lake turn a sickly, eerie green, strongest low in the sky
+  if (uGreen > 0.) { float lum = dot(c, vec3(.3, .55, .15));
+    vec3 g = mix(vec3(.05, .09, .06), vec3(.42, .55, .38), clamp(uDay + .15, 0., 1.)) * (.6 + lum * 1.4);
+    c = mix(c, g, uGreen * (.55 + .3 * (1. - abs(uv.y - HZ) * 1.6))); }
   vec2 q = uv - .5; c *= 1. - dot(q, q) * .55;
   o = vec4(pow(c, vec3(.92)), 1.);
 }`;
@@ -602,9 +607,10 @@ void main(){
   const loc = gl.getAttribLocation(pr, 'p'); gl.enableVertexAttribArray(loc); gl.vertexAttribPointer(loc, 2, gl.FLOAT, false, 0, 0);
   const uR = gl.getUniformLocation(pr, 'uR'), uT = gl.getUniformLocation(pr, 'uT'), uM = gl.getUniformLocation(pr, 'uM');
   let visible = true, raf = 0; // declared early: the weather fetch can land before the render loop starts
-  const U = ['uSun', 'uDay', 'uCloud', 'uWind', 'uWave', 'uRain', 'uSnow', 'uFog', 'uFlash', 'uSunX', 'uIce', 'uMoon'].reduce((o, k) => (o[k] = gl.getUniformLocation(pr, k), o), {});
+  const U = ['uSun', 'uDay', 'uCloud', 'uWind', 'uWave', 'uRain', 'uSnow', 'uFog', 'uFlash', 'uSunX', 'uIce', 'uMoon', 'uGreen'].reduce((o, k) => (o[k] = gl.getUniformLocation(pr, k), o), {});
   // the sky follows Traverse City: real sun height, cloud, wind and Lake Michigan waves (default: tonight's sunset)
   const wx = { sun: 0, day: 0, cloud: 0, wind: .3, wave: .3, rain: 0, snow: 0, fog: 0, sx: .5, ice: 0 }, wxT = { ...wx };
+  let greenK = 0;
   window.__wx = wx; // the skyline reads the sky (sun height, daylight, cloud) from here
   // tonight's moon phase: days since a known new moon (2000-01-06 18:14 UTC), over the synodic month
   const MOON_PHASE = (((Date.now() - Date.UTC(2000, 0, 6, 18, 14)) / 864e5) % 29.530588853 + 29.530588853) % 29.530588853 / 29.530588853;
@@ -766,6 +772,7 @@ void main(){
   function draw(t){ lastT = t; if (performance.now() - lastPointer > 4000) { tx = .5 + Math.sin(t * .15) * .35; } mx += (tx - mx) * .04; my += (ty - my) * .04;
     for (const k of ['sun', 'day', 'cloud', 'wind', 'wave', 'rain', 'snow', 'fog', 'sx', 'ice']) wx[k] += (wxT[k] - wx[k]) * .03; // ease into the real sky
     gl.uniform1f(U.uSunX, wx.sx); gl.uniform1f(U.uIce, wx.ice);
+    greenK += ((window.__tornado ? 1 : 0) - greenK) * .02; gl.uniform1f(U.uGreen, greenK);
     // the moon rides opposite the sun, up when it's down; phase from the synodic month
     gl.uniform3f(U.uMoon, 1. - wx.sx * .8 - .1, Math.max(-.05, Math.min(.42, -wx.sun * 1.5 + .12)), MOON_PHASE);
     if (window.__flashReq) { flash = window.__flashReq; window.__flashReq = 0; } else if (storm && Math.random() < .004) flash = 1; flash *= .86;
