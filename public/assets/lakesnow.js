@@ -19,7 +19,12 @@
   size(); new ResizeObserver(size).observe(hero);
   const noise = (x) => Math.sin(x * .013) * .5 + Math.sin(x * .031 + 1.7) * .3 + Math.sin(x * .071 + 4.2) * .2;
 
-  let cover = 0, bank = 0, streams = [], last = performance.now(), T = 0;
+  let cover = 0, bank = 0, streams = [], last = performance.now(), T = 0, backDirty = true, frontDirty = true;
+  // one wisp, drawn once and stretched per streamer (a gradient per streamer per frame was the expensive part)
+  const wisp = document.createElement('canvas'); wisp.width = 128; wisp.height = 8;
+  { const w = wisp.getContext('2d'), g = w.createLinearGradient(0, 0, 128, 0);
+    g.addColorStop(0, 'rgba(245,250,255,0)'); g.addColorStop(.7, 'rgba(245,250,255,1)'); g.addColorStop(1, 'rgba(245,250,255,0)');
+    w.fillStyle = g; w.beginPath(); w.ellipse(64, 4, 64, 3, 0, 0, 7); w.fill(); }
   // a streamer: a long, low, fast wisp of snow skating over the ice
   const spawn = (wind, fromEdge) => {
     const y = horizon + 4 + Math.pow(Math.random(), 1.6) * (H - horizon) * .9;
@@ -48,7 +53,8 @@
     if (ice < .3) cover = Math.max(0, cover - .2 * dt); // open water swallows it
 
     // back layer: snow lying on the ice, combed into wind lines
-    bx.clearRect(0, 0, W, H);
+    if (cover > .005 || backDirty) bx.clearRect(0, 0, W, H);
+    backDirty = cover > .005;
     if (cover > .005) {
       const g = bx.createLinearGradient(0, horizon, 0, H);
       g.addColorStop(0, `rgba(220,232,244,${(.35 * cover).toFixed(3)})`); g.addColorStop(1, `rgba(236,244,252,${(.7 * cover).toFixed(3)})`);
@@ -59,21 +65,19 @@
     }
 
     // front layer: blowing snow, then the bank
-    fx.clearRect(0, 0, W, H);
+    if (frontDirty) fx.clearRect(0, 0, W, H);
     const blowing = !reduce && ice > .55 && wind > .05 ? wind * Math.min(1, ice * 1.4) * (.4 + .6 * Math.max(cover, snow)) : 0;
     const want = Math.round(blowing * (W < 700 ? 45 : 90));
     while (streams.length < want) spawn(wind, streams.length > want * .5);
     if (streams.length > want) streams.length = Math.max(0, streams.length - 2); // die back gently
-    fx.lineCap = 'round';
     for (const s of streams) {
       s.x += s.v * dt;
-      if (s.x - s.len > W) { Object.assign(s, { x: -s.len - Math.random() * 100 }); }
-      const yy = s.y + Math.sin(T * 2 + s.wob + s.x * .01) * 2 * s.depth;
-      const g = fx.createLinearGradient(s.x - s.len, 0, s.x, 0);
-      g.addColorStop(0, 'rgba(245,250,255,0)'); g.addColorStop(.7, `rgba(245,250,255,${(s.a * blowing).toFixed(3)})`); g.addColorStop(1, 'rgba(245,250,255,0)');
-      fx.strokeStyle = g; fx.lineWidth = 1 + 4 * s.depth;
-      fx.beginPath(); fx.moveTo(s.x - s.len, yy + 1); fx.quadraticCurveTo(s.x - s.len * .5, yy - 2 * s.depth, s.x, yy); fx.stroke();
+      if (s.x - s.len > W) s.x = -s.len - Math.random() * 100;
+      const yy = s.y + Math.sin(T * 2 + s.wob + s.x * .01) * 2 * s.depth, th = 1.5 + 5 * s.depth;
+      fx.globalAlpha = s.a * blowing;
+      fx.drawImage(wisp, s.x - s.len, yy - th / 2, s.len, th);
     }
+    fx.globalAlpha = 1;
     if (bank > .002) {
       // a wind-sculpted drift line, rising from the bottom of the view; at 1 it reaches the top
       const top = H - bank * (H + 40);
@@ -95,6 +99,7 @@
         fx.fillStyle = `rgba(250,252,255,${(Math.random() * .6).toFixed(2)})`; fx.fillRect(x, y, 1.5 + wind * 6, 1.2);
       }
     }
+    frontDirty = streams.length > 0 || bank > .002;
   };
   requestAnimationFrame(frame);
   window.__lakesnow = { set(c, b) { cover = c; bank = b; }, get bank() { return bank; }, get cover() { return cover; } };
