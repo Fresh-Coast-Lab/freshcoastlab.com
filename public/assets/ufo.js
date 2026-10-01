@@ -71,7 +71,7 @@
     const T = { walk: 5200, arrive: 1800, beam: 700, lift: 2200, off: 400, leave: 1100 };
     const legPx = 23.4 * hs * scale, cycles = Math.max(2, (stopX - startX) / (4 * legPx * Math.sin(0.42)));
     const t0 = performance.now(); let hit = false; const sX = orbitEl ? signX() : -1e9;
-    let hatT = null, hx = 0, hy = 0;
+    let hatT = null, hx = 0, hy = 0, snapped = false;
     man.style.opacity = 1; ship.style.opacity = 1; mhat.setAttribute('opacity', 1); fhat.setAttribute('opacity', 0);
     const step = (now) => {
       const t = now - t0; let k = t;
@@ -96,6 +96,7 @@
         const len = (horizon - shipY - 6 * scale) / 100;
         beam.setAttribute('transform', `translate(${sx.toFixed(1)},${(shipY + 6 * scale).toFixed(1)}) scale(${(scale * 1.1).toFixed(3)},${len.toFixed(3)})`);
         if (k < liftStart) { const u = on; pose('a1', -70 * u, -20 * u); pose('a2', -55 * u, -25 * u); }
+        if (!snapped && k > beamStart + 450) { snapped = true; snap([man, beam], stopX, horizon + 4, manH * 1.3 / 70, 'WEATHER BALLOON?'); }
       } else beam.setAttribute('opacity', 0);
       // 4. he floats up, flailing and kicking, shrinking into the ship; his hat doesn't come along
       if (k > liftStart) {
@@ -291,7 +292,7 @@
     const cx0 = phone ? W + 30 : W * 0.93, cy0 = phone ? 40 : Math.max(70, horizon * 0.22);
     const hatX = hx + 26 * ss * dir;
     const cs = phone ? 0.95 : 1.15, cardX = clamp(x + 10 * ss * dir, 88 * cs + 12, W - 88 * cs - 12), cardY = phone ? 118 : Math.max(110, hy - 30 * ss - 50 * cs);
-    const t0 = performance.now(); let boomed = false;
+    const t0 = performance.now(); let boomed = false, snapped = false;
     dino.setAttribute('opacity', 1); dhat.setAttribute('opacity', 1);
     const step = (now) => {
       const k = now - t0;
@@ -312,6 +313,7 @@
         chirp.setAttribute('transform', `translate(${(hx + (dir > 0 ? 4 : -4 - (talk.length > 1 ? 30 : 12)) * ss).toFixed(1)},${(hy - 7 * ds).toFixed(1)}) scale(${s.toFixed(3)})`);
         chirp.firstElementChild.setAttribute('transform', dir > 0 ? '' : `translate(${talk.length > 1 ? 30 : 12},0) scale(-1,1)`);
       } else chirp.setAttribute('opacity', 0);
+      if (!snapped && k > T.hit - 1450) { snapped = true; snap([dino], x + 6 * ds * dir, horizon + 4, 50 * ds / 70, "NESSIE'S COUSIN?"); }
       // 3. the comet
       if (k > fallStart && k < T.hit + 60) {
         const f = Math.min(1, (k - fallStart) / T.fall), fe = f * f;
@@ -376,7 +378,7 @@
     const x0 = phone ? W + 90 * ss : -90 * ss;
     const cs = phone ? 0.86 : 1.1, cw = 240 * cs, cardX = phone ? (W - cw) / 2 : clamp(tx - cw * 0.75, 16, W - cw - 16), cardY = phone ? 84 : 100;
     const ccx = phone ? 34 : 64, ccy = phone ? horizon + 112 : horizon + 200, ccs = phone ? 0.8 : 1.15;
-    const t0 = performance.now(); let ang = 0, settle = null, stamped = false, winked = false;
+    const t0 = performance.now(); let ang = 0, settle = null, stamped = false, winked = false, snappedT = false;
     liner.setAttribute('opacity', 1); refl.setAttribute('opacity', 1); tri.setAttribute('opacity', 1);
     compassEl.setAttribute('transform', `translate(${ccx},${ccy.toFixed(1)}) scale(${ccs})`);
     const step = (now) => {
@@ -404,6 +406,7 @@
       staticPat.setAttribute('patternTransform', `translate(0,${(Math.random() * 3).toFixed(1)})`);
       // 4. her lights stutter; the picture tears into slices with color ghosts; she stretches thin, shrinks to a point, and winks out
       const glitching = k > T.glitch && k < T.wink;
+      if (glitching && !snappedT && k > T.glitch + 350) { snappedT = true; snap([lglitch], lx, horizon + 6, Math.max(60 * ss, 1) / 70 * 1.25, 'DID YOU SEE THAT?'); }
       const stut = k > T.stutter && k < T.wink ? Math.min(1, (k - T.stutter) / 1000) : 0;
       pws.forEach((p, i) => p.setAttribute('opacity', (stut && Math.random() < stut * 0.5 ? 0.1 : 0.75 + 0.25 * ((i * 7) % 3 === 0 ? Math.sin(k / 400 + i) : 1)).toFixed(2)));
       mast.setAttribute('opacity', stut && Math.random() < stut * 0.5 ? 0.15 : Math.sin(k / 160) > 0 ? 1 : 0.3);
@@ -436,11 +439,11 @@
       // 6. the paperwork, and the stamp
       const fk = k - T.card;
       if (fk > 0) { const s = ease(Math.min(1, fk / 550));
-        casefile.setAttribute('opacity', out.toFixed(2));
+        casefile.setAttribute('opacity', 0);
         casefile.setAttribute('transform', `translate(${lerp(-cw - 30, cardX, s).toFixed(1)},${cardY}) rotate(${lerp(-9, -2, s).toFixed(1)}) scale(${cs})`); }
       const sk = k - T.stamp;
       if (sk > 0) { if (!stamped) { stamped = true; quake(200); }
-        stamp.setAttribute('opacity', (Math.min(0.92, sk / 90) * out).toFixed(2));
+        stamp.setAttribute('opacity', 0);
         stamp.setAttribute('transform', `translate(180,66) scale(${sk < 160 ? 1.9 - 0.9 * sk / 160 : 1}) translate(-180,-66)`); }
       // 7. and one deck chair, drifting across the empty water
       const ck = (k - T.chair) / (T.end - T.chair);
@@ -496,6 +499,23 @@
   const big = bf.querySelector('.bigfoot'), side = bf.querySelector('.side'), front = bf.querySelector('.front');
   const bl = { b1: bf.querySelector('.b1'), b2: bf.querySelector('.b2'), r1: bf.querySelector('.r1') };
   const prints = bf.querySelector('.bfprints'), bfflash = bf.querySelector('.bfflash'), polaroid = bf.querySelector('.polaroid');
+  const polCap = polaroid.querySelector('text');
+  svg.append(bf.querySelector('.bfflash'), polaroid); // on top of every act, not just Bigfoot's
+  // every act ends the same way: somebody snaps a picture, and it comes out blurry
+  const snap = (subjects, x, baseY, s, caption) => {
+    svg.append(bfflash, polaroid); // always on top of whatever is in the shot
+    polCap.textContent = caption;
+    polCap.setAttribute('font-size', Math.min(9, 82 / (caption.length * 0.98)).toFixed(2)); // long captions shrink to fit the frame
+    x = Math.max(50 * s + 8, Math.min(W - 50 * s - 8, x)); // keep the whole print on screen
+    polaroid.setAttribute('transform', `translate(${x.toFixed(1)},${baseY.toFixed(1)}) scale(${s.toFixed(3)}) rotate(-6)`);
+    subjects.forEach((el) => el && el.setAttribute('filter', 'url(#bf-blur)'));
+    setTimeout(() => subjects.forEach((el) => el && el.removeAttribute('filter')), 1900);
+    const t0 = performance.now();
+    (function shot(t2) { const f = (t2 - t0) / 1900;
+      bfflash.setAttribute('opacity', Math.max(0, 0.7 - f * 6).toFixed(2));
+      polaroid.setAttribute('opacity', (f < 0.1 ? f * 10 : f > 0.75 ? Math.max(0, (1 - f) / 0.25) : 1).toFixed(2));
+      if (f < 1) requestAnimationFrame(shot); else polaroid.setAttribute('opacity', 0); })(t0);
+  };
   const playBigfoot = (done) => {
     size();
     const stopX = W * (W < 700 ? 0.17 : 0.22), bs = W < 700 ? 1.05 : 1.25;
@@ -520,14 +540,7 @@
         fp.setAttribute('rx', (3.2 * sc).toFixed(1)); fp.setAttribute('ry', (0.9 * sc).toFixed(1)); fp.setAttribute('fill', 'rgba(0,0,0,.45)'); prints.append(fp);
         const born = now; (function fade(t2) { const a = 1 - (t2 - born) / 3200; if (a <= 0) { fp.remove(); return; } fp.setAttribute('opacity', a.toFixed(2)); requestAnimationFrame(fade); })(now); }
       // he turns, the flash goes off, and the evidence develops
-      if (looking && !snapped && lookK > 700) { snapped = true;
-        polaroid.setAttribute('transform', `translate(${x.toFixed(1)},${(horizon - 4).toFixed(1)}) scale(${(sc * 0.95).toFixed(3)}) rotate(-6)`);
-        big.setAttribute('filter', 'url(#bf-blur)'); // nobody ever gets a clear picture
-        setTimeout(() => big.removeAttribute('filter'), 1900);
-        (function shot(t2) { const f = (t2 - now) / 1900;
-          bfflash.setAttribute('opacity', Math.max(0, 0.7 - f * 6).toFixed(2));
-          polaroid.setAttribute('opacity', (f < 0.1 ? f * 10 : f > 0.75 ? Math.max(0, (1 - f) / 0.25) : 1).toFixed(2));
-          if (f < 1) requestAnimationFrame(shot); else polaroid.setAttribute('opacity', 0); })(now); }
+      if (looking && !snapped && lookK > 700) { snapped = true; snap([big], x, horizon - 4, sc * 0.95, 'IS THAT HIM?'); }
       if (k < T.walk1 + T.look + T.walk2) requestAnimationFrame(step); else { big.setAttribute('opacity', 0); done(); }
     };
     requestAnimationFrame(step);
@@ -615,7 +628,7 @@
     const t1 = T.eyes, t2 = t1 + T.walk, t3 = t2 + T.look, t4 = t3 + T.hold, t5 = t4 + T.turn, t6 = t5 + T.eyesOn, t7 = t6 + T.howl, t8 = t7 + T.back, t9 = t8 + T.lope;
     const rStart = t6 + 200, rEnd = t9, end = t9 + 400;
     const cycles = Math.max(2.5, Math.abs(x0 - xs) / (26 * ds)); // stride length sets the step rate, so the paws don't skate
-    const t0 = performance.now(); let quaked = false;
+    const t0 = performance.now(); let quaked = false, snapped = false;
     dogman.setAttribute('opacity', 1); dside.setAttribute('opacity', 0); dfront.setAttribute('opacity', 0); sface.setAttribute('opacity', 0); sprof.setAttribute('opacity', 1);
     radio.setAttribute('transform', `translate(${phone ? 12 : 24},${phone ? Math.round(horizon + 70) : 84}) scale(${phone ? 0.95 : 1.1})`);
     const step = (now) => {
@@ -627,6 +640,7 @@
       // 2. he walks in like a dog: diagonal pairs, knees lifting, head and body bobbing, tail swaying
       if (k < t2) { const c = Math.max(0, (k - t1) / T.walk); x = lerp(xs, x0, c); ph = c * cycles * Math.PI * 2; amp = c > 0 && c < 1 ? 20 : 0; lift = 38;
         dside.setAttribute('opacity', Math.min(1, Math.max(0, (k - t1 + 250) / 500)).toFixed(2)); }
+      if (!snapped && k > t5 + 450) { snapped = true; snap([dogman], x0, horizon + 4, 56 * ds / 70, 'JUST A BIG DOG?'); }
       // 3. he stops and his head turns to you
       const lk = (k - t2) / T.look, lookP = lk <= 0 ? 0 : Math.min(1, lk);
       sprof.setAttribute('transform', `translate(18 0) scale(${k > t8 ? 1 : Math.max(0.05, 1 - lookP * 2).toFixed(3)},1) translate(-18 0)`);

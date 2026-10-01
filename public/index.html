@@ -59,6 +59,20 @@
       <button class="menu-btn" type="button" aria-controls="menu" aria-expanded="false" aria-label="Open menu"><span></span><span></span></button>
     </div>
   </nav>
+  <section class="skybox" id="skybox" aria-label="Alter environment">
+    <details>
+      <summary class="mono"><span class="sk-dot"></span><span class="sk-closed">Alter environment</span><span class="sk-open">Alter environment</span><span class="sk-tag">SAVED ON THIS DEVICE</span></summary>
+      <div class="sk-panel">
+      <div class="sk-grid">
+        <label><span class="sk-k mono">TIME OF DAY</span><input type="range" id="sk-h" min="0" max="23.99" step="0.25"><output id="sk-h-o" class="mono"></output></label>
+        <label><span class="sk-k mono">TEMPERATURE</span><input type="range" id="sk-t" min="-10" max="95" step="1"><output id="sk-t-o" class="mono"></output></label>
+        <label><span class="sk-k mono">PRECIPITATION</span><input type="range" id="sk-p" min="0" max="100" step="1"><output id="sk-p-o" class="mono"></output></label>
+        <label><span class="sk-k mono">WIND</span><input type="range" id="sk-w" min="0" max="45" step="1"><output id="sk-w-o" class="mono"></output></label>
+      </div>
+      <div class="sk-foot"><span class="mono">Below freezing, rain turns to snow. Saved in a small cookie on this device; nothing is tracked.</span><button type="button" id="sk-live" class="mono">BACK TO LIVE</button></div>
+      </div>
+    </details>
+  </section>
 
   <div class="wrap hero-stack" id="main">
     <h1 id="headline"><span class="vh">Jason Myers, Fresh Coast Lab</span>
@@ -92,18 +106,6 @@
     </aside>
   </div>
 
-  <section class="skybox" id="skybox" aria-label="Change the sky">
-    <details>
-      <summary class="mono"><span class="sk-dot"></span><span class="sk-closed">Tinker with the sky</span><span class="sk-open">Your sky</span><span class="sk-tag">SAVED ON THIS DEVICE</span></summary>
-      <div class="sk-grid">
-        <label><span class="sk-k mono">TIME OF DAY</span><input type="range" id="sk-h" min="0" max="23.99" step="0.25"><output id="sk-h-o" class="mono"></output></label>
-        <label><span class="sk-k mono">TEMPERATURE</span><input type="range" id="sk-t" min="-10" max="95" step="1"><output id="sk-t-o" class="mono"></output></label>
-        <label><span class="sk-k mono">PRECIPITATION</span><input type="range" id="sk-p" min="0" max="100" step="1"><output id="sk-p-o" class="mono"></output></label>
-        <label><span class="sk-k mono">WIND</span><input type="range" id="sk-w" min="0" max="45" step="1"><output id="sk-w-o" class="mono"></output></label>
-      </div>
-      <div class="sk-foot"><span class="mono">Below freezing, rain turns to snow. Saved in a small cookie on this device; nothing is tracked.</span><button type="button" id="sk-live" class="mono">BACK TO LIVE</button></div>
-    </details>
-  </section>
   <section class="wrap intro" aria-label="Who I am">
     <p class="lede"><strong>I run AI at home before I talk about it on stage.</strong> Strategist, builder and two-time founder in Traverse City, Michigan, on Lake Michigan&rsquo;s fresh coast, with over twenty-five years of turning technology into things people actually use.</p>
   </section>
@@ -441,7 +443,7 @@ in vec2 p; void main(){ gl_Position = vec4(p, 0., 1.); }`;
 precision highp float;
 uniform vec2 uR; uniform float uT; uniform vec2 uM; out vec4 o;
 uniform float uSun; uniform float uDay; uniform float uCloud; uniform float uWind; uniform float uWave;
-uniform float uRain; uniform float uSnow; uniform float uFog; uniform float uFlash; uniform float uSunX; uniform float uIce;
+uniform float uRain; uniform float uSnow; uniform float uFog; uniform float uFlash; uniform float uSunX; uniform float uIce; uniform vec3 uMoon; // x, height, phase (0 new, .5 full)
 float h(vec2 p){ p = fract(p * vec2(123.34, 456.21)); p += dot(p, p + 45.32); return fract(p.x * p.y); }
 float n(vec2 p){ vec2 i = floor(p), f = fract(p); f = f * f * (3. - 2. * f);
   return mix(mix(h(i), h(i + vec2(1., 0.)), f.x), mix(h(i + vec2(0., 1.)), h(i + vec2(1., 1.)), f.x), f.y); }
@@ -470,6 +472,19 @@ vec3 sky(vec2 uv, float t){
   vec3 cloudCol = mix(vec3(.06, .08, .11), vec3(.86, .88, .9), uDay) + vec3(.5, .22, .1) * golden * .6;
   c = mix(c, cloudCol, cl * uCloud * .75 * smoothstep(0., .25, y));
   c = mix(c, mix(vec3(.05, .06, .08), vec3(.66, .7, .74), uDay), uCloud * uCloud * .45);
+  // the moon, in tonight's real phase, with a little earthshine on the dark side
+  { vec2 mp = (uv - vec2(uMoon.x, HZ + uMoon.y)) * vec2(uR.x / uR.y, 1.); float mr = .028, md = length(mp);
+    float vis = (1. - uDay) * (1. - .75 * uCloud) * smoothstep(-.02, .04, uMoon.y);
+    if (md < mr * 6. && vis > 0.) {
+      vec2 q = mp / mr; float inside = smoothstep(1., .96, length(q));
+      float ph = uMoon.z, xt = cos(6.2831853 * ph) * sqrt(max(0., 1. - q.y * q.y));
+      float lit = ph < .5 ? smoothstep(xt - .06, xt + .06, q.x) : smoothstep(-xt + .06, -xt - .06, q.x);
+      float maria = .82 + .18 * fbm(q * 2.2 + 3.);
+      vec3 moonCol = vec3(1., .97, .9) * maria;
+      c = mix(c, c + vec3(.07, .08, .1), inside * vis); // earthshine
+      c = mix(c, moonCol, inside * lit * vis);
+      float illum = .5 - .5 * cos(6.2831853 * ph);
+      c += vec3(.75, .8, .9) * exp(-md / mr * 1.6) * .18 * illum * vis * (1. - inside); } }
   vec2 g = uv * vec2(uR.x / uR.y, 1.) * 150.;
   vec2 id = floor(g); float s = h(id);
   if (s > .984){ vec2 f = fract(g) - .5; float tw = .55 + .45 * sin(t * 1.7 + s * 60.);
@@ -544,11 +559,12 @@ void main(){
   }
   // snow: soft drifting flakes
   if (uSnow > 0.) {
-    for (int L = 0; L < 2; L++) { float fl = float(L);
+    for (int L = 0; L < 3; L++) { float fl = float(L); if (L == 2 && uSnow < .55) break;
       float gust = uWind * (6. + 4. * sin(t * .4 + fl));
       vec2 sp2 = vec2(uv.x * uR.x / uR.y * (40. + fl * 30.) + sin(t * .6 + uv.y * 6. + fl) * .8 * (1. - uWind * .5) - t * gust * (1. + fl * .5), uv.y * (40. + fl * 30.) + t * (1.2 + fl * .6) * (1. + uWind * .8));
       vec2 is2 = floor(sp2); float sh2 = h(is2 + fl * 7.);
-      c += vec3(.92, .95, 1.) * step(.88, sh2) * smoothstep(.22, .0, length(fract(sp2) - .5)) * uSnow * .7; } }
+      vec2 jit = vec2(h(is2 + 3.1 + fl), h(is2 + 9.7 + fl)) * .7 + .15; // each flake sits somewhere random in its cell, so no grid
+      c += vec3(.92, .95, 1.) * step(.9 - uSnow * .1, sh2) * smoothstep(.2 + fl * .05, .0, length(fract(sp2) - jit)) * min(1., uSnow * 1.2) * (.7 + fl * .15); } }
   // lightning lights the whole sky for an instant
   c += vec3(.75, .8, 1.) * uFlash * (.35 + .65 * step(HZ, uv.y));
   vec2 q = uv - .5; c *= 1. - dot(q, q) * .55;
@@ -566,10 +582,12 @@ void main(){
   const loc = gl.getAttribLocation(pr, 'p'); gl.enableVertexAttribArray(loc); gl.vertexAttribPointer(loc, 2, gl.FLOAT, false, 0, 0);
   const uR = gl.getUniformLocation(pr, 'uR'), uT = gl.getUniformLocation(pr, 'uT'), uM = gl.getUniformLocation(pr, 'uM');
   let visible = true, raf = 0; // declared early: the weather fetch can land before the render loop starts
-  const U = ['uSun', 'uDay', 'uCloud', 'uWind', 'uWave', 'uRain', 'uSnow', 'uFog', 'uFlash', 'uSunX', 'uIce'].reduce((o, k) => (o[k] = gl.getUniformLocation(pr, k), o), {});
+  const U = ['uSun', 'uDay', 'uCloud', 'uWind', 'uWave', 'uRain', 'uSnow', 'uFog', 'uFlash', 'uSunX', 'uIce', 'uMoon'].reduce((o, k) => (o[k] = gl.getUniformLocation(pr, k), o), {});
   // the sky follows Traverse City: real sun height, cloud, wind and Lake Michigan waves (default: tonight's sunset)
   const wx = { sun: 0, day: 0, cloud: 0, wind: .3, wave: .3, rain: 0, snow: 0, fog: 0, sx: .5, ice: 0 }, wxT = { ...wx };
   window.__wx = wx; // the skyline reads the sky (sun height, daylight, cloud) from here
+  // tonight's moon phase: days since a known new moon (2000-01-06 18:14 UTC), over the synodic month
+  const MOON_PHASE = (((Date.now() - Date.UTC(2000, 0, 6, 18, 14)) / 864e5) % 29.530588853 + 29.530588853) % 29.530588853 / 29.530588853;
   let storm = false, flash = 0;
   const precip = (code) => ({ rain: (code >= 51 && code <= 67) || (code >= 80 && code <= 82) || code >= 95 ? (code >= 63 && code <= 67) || code >= 81 ? 1 : .6 : 0, snow: (code >= 71 && code <= 77) || code === 85 || code === 86 ? 1 : 0, fog: code === 45 || code === 48 ? 1 : 0 });
   const PRESET = { dusk: [0, 0, .1, .3, .3], night: [-.3, 0, 0, .2, .2], day: [.45, 1, .25, .4, .35], dawn: [.02, .1, .2, .2, .2], storm: [.2, .55, 1, 1, 1, 1, 0, 0], rain: [.3, .8, .9, .5, .5, .7, 0, 0], snow: [.25, .8, .85, .2, .2, 0, 1, 0], fog: [.2, .7, .6, .1, .1, 0, 0, 1], nightrain: [-.3, 0, .9, .5, .5, .8, 0, 0] };
@@ -639,6 +657,7 @@ void main(){
     setWx([sun, M.dayOf(sun), Math.min(1, .08 + p * 1.1), Math.min(1, v.w / 25), Math.min(1, v.w / 30), cold ? 0 : p, cold ? p : 0, 0]);
     wxT.sx = M.sunXAt(t); storm = false;
     wxT.ice = Math.min(1, Math.max(0, (15 - v.t) / 20)); // fully frozen at -5°F and below
+    window.__tempF = v.t;
     if (instant) Object.assign(wx, wxT);
     const el = document.getElementById('wx');
     if (el) { const sky = p < .05 ? (v.w > 25 ? 'BLUSTERY' : 'CLEAR') : cold ? (p > .6 ? 'BLIZZARD' : 'SNOW') : (p > .6 ? 'DOWNPOUR' : 'RAIN');
@@ -649,7 +668,7 @@ void main(){
     const v = readSky(); if (v) { applyCustom(v); return; }
     if (!model || !model.d) return;
     const { sunAt, dayOf, sunXAt, d, real } = model, now = Date.now(), pr = precip(d.code);
-    setWx([sunAt(now), dayOf(sunAt(now)), d.cloud / 100, ...real, pr.rain, pr.snow, pr.fog]); wxT.sx = sunXAt(now); wxT.ice = Math.min(1, Math.max(0, (10 - d.temp_f) / 25)); storm = d.code >= 95 && !reduce;
+    setWx([sunAt(now), dayOf(sunAt(now)), d.cloud / 100, ...real, pr.rain, pr.snow, pr.fog]); wxT.sx = sunXAt(now); wxT.ice = Math.min(1, Math.max(0, (10 - d.temp_f) / 25)); window.__tempF = d.temp_f; storm = d.code >= 95 && !reduce;
     showWx(d);
   }
   // the panel
@@ -706,6 +725,8 @@ void main(){
   function draw(t){ lastT = t; if (performance.now() - lastPointer > 4000) { tx = .5 + Math.sin(t * .15) * .35; } mx += (tx - mx) * .04; my += (ty - my) * .04;
     for (const k of ['sun', 'day', 'cloud', 'wind', 'wave', 'rain', 'snow', 'fog', 'sx', 'ice']) wx[k] += (wxT[k] - wx[k]) * .03; // ease into the real sky
     gl.uniform1f(U.uSunX, wx.sx); gl.uniform1f(U.uIce, wx.ice);
+    // the moon rides opposite the sun, up when it's down; phase from the synodic month
+    gl.uniform3f(U.uMoon, 1. - wx.sx * .8 - .1, Math.max(-.05, Math.min(.42, -wx.sun * 1.5 + .12)), MOON_PHASE);
     if (storm && Math.random() < .004) flash = 1; flash *= .86;
     gl.uniform1f(U.uRain, wx.rain); gl.uniform1f(U.uSnow, wx.snow); gl.uniform1f(U.uFog, wx.fog); gl.uniform1f(U.uFlash, flash > .02 ? flash * (Math.random() < .5 ? 1 : .4) : 0);
     gl.uniform1f(U.uSun, wx.sun); gl.uniform1f(U.uDay, wx.day); gl.uniform1f(U.uCloud, wx.cloud); gl.uniform1f(U.uWind, wx.wind); gl.uniform1f(U.uWave, wx.wave);
@@ -724,6 +745,7 @@ void main(){
 <script src="/assets/ufo.js" defer></script>
 <script src="/assets/haptics.js" defer></script>
 <script src="/assets/skyline.js" defer></script>
+<script src="/assets/snowpile.js" defer></script>
 <script src="/assets/terms.js" defer></script>
 <script src="/assets/house.js" defer></script>
 <script src="/assets/house-switch.js" defer></script>

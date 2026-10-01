@@ -986,3 +986,11 @@ a.post:hover{border-color:rgba(61,242,176,.4);transform:translateY(-3px)}
 .skyline-layer .lamp{fill:#FFF3C4;filter:drop-shadow(0 0 3px #FFE9A8)}
 .skyline-layer .beam polygon{fill:url(#lh-beam)}
 .skyline-layer .refl rect{fill:#FFD98A}
+/* snow piled on the sign: same box as the sign image, so it lines up pixel for pixel */
+.orbit .snowpile{position:absolute;left:50%;top:50%;width:66%;aspect-ratio:440/411;height:auto;transform:translate(-50%,-52%);z-index:4;pointer-events:none}
+.orbit.toppled .snowpile{opacity:0}
+/* Alter environment: a small tab under the header; the panel drops down over the sky, so the page never shifts */
+.hero > .skybox{position:relative;z-index:6;max-width:none;padding:0;display:flex;justify-content:center;margin-top:-10px}
+.hero > .skybox details{position:relative;border-radius:999px;background:rgba(10,18,32,.6)}
+.hero > .skybox summary{padding:7px 16px;min-height:36px;font-size:10.5px}
+.hero > .skybox .sk-panel{position:absolute;top:calc(100% + 8px);left:50%;transform:translateX(-50%);width:min(680px,calc(100vw - 32px));background:rgba(10,18,32,.94);border:1px solid var(--line);border-radius:18px;backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);box-shadow:0 20px 50px -20px rgba(0,0,0,.8);padding-top:10px}
